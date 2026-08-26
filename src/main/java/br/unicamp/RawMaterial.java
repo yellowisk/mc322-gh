@@ -4,11 +4,20 @@ import java.util.UUID;
 
 public class RawMaterial {
     // Mandatory attributes
-    private UUID id;
-    private String name;
+    private final UUID id;
+    private final String name;
+    private final String unit;
+    private final int minQuantity;
     private int quantity;
-    private String unity;
-    private int minQuantity;
+
+    // My methods
+    public RawMaterial(String name, int initialQuantity, String unit, int minQuantity) {
+        this.id = UUID.randomUUID();
+        this.name = name;
+        this.unit = unit;
+        this.minQuantity = minQuantity;
+        this.quantity = initialQuantity;
+    }
 
     // Mandatory methods
     public void consume(int quantity) {
