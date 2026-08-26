@@ -5,10 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>br.unicamp</groupId>
-    <artifactId>mc322-gh</artifactId>
+    <artifactId>ideal</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
+        <java.version>26</java.version>
         <maven.compiler.source>26</maven.compiler.source>
         <maven.compiler.target>26</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
