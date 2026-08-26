@@ -1,4 +1,4 @@
-package br.unicamp;
+package br.unicamp.ideal.domain.entities;
 
 import java.util.UUID;
 
