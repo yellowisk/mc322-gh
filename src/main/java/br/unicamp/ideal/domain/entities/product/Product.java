@@ -16,8 +16,8 @@ public class Product {
     private int rawMaterialNeeded;
 
     public void process() {
-        // TODO Check how to insert Exception here
-        if (!status.equals(ProductStatus.READY))
-            setStatus(ProductStatus.READY);
+        if (status == ProductStatus.READY)
+            throw new IllegalStateException("The product is already processed.");
+        setStatus(ProductStatus.READY);
     }
 }
