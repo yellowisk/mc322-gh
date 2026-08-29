@@ -1,4 +1,6 @@
-# Lembretes
-- Colocar verificação de segurança em todos os lugares
+# Reminders
+- Add security verification everywhere
+- When merging from issue branch into dev: use rebase
+- When merging from dev branch into main: use merge
 
-última atualização do LucidChart: 2026-08-25
+Last LucidChart update: 2026-08-25
