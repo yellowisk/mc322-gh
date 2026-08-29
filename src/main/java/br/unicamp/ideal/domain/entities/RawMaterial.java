@@ -1,10 +1,7 @@
 package br.unicamp.ideal.domain.entities;
 
-import lombok.Getter;
-
 import java.util.UUID;
 
-@Getter
 public class RawMaterial {
     // Mandatory attributes
     private final UUID id;
@@ -46,5 +43,40 @@ public class RawMaterial {
 
     public boolean isAvailable(int demand) {
         return demand > 0 && this.quantity >= demand;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public int getMinQuantity() {
+        return minQuantity;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    @Override
+    public String toString() {
+        return "RawMaterial{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", unit='" + unit + '\'' +
+                ", minQuantity=" + minQuantity +
+                ", quantity=" + quantity +
+                '}';
     }
 }
