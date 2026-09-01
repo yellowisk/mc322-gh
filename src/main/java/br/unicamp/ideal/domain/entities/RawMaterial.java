@@ -42,7 +42,7 @@ public class RawMaterial {
     }
 
     public boolean isAvailable(int demand) {
-        return demand > 0 && this.quantity >= demand;
+        return demand > 0 && this.quantity >= demand && (this.quantity - demand) >= minQuantity;
     }
 
     public UUID getId() {
