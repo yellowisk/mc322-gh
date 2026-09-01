@@ -128,7 +128,7 @@ public class Main {
                         continue;
                     }
 
-                    if (!esteiraIdealDeProcessamento.getIsOn()) {
+                    if (!esteiraIdealDeProcessamento.isOn()) {
                         System.out.printf("[NÃO FOI DESSA VEZ...] Conveyor %s ain't on!%n", esteiraIdealDeProcessamento.getName());
                         continue;
                     } else
