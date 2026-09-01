@@ -16,9 +16,9 @@ public class Product {
     }
 
     public void process() {
-        if (status == ProductStatus.READY)
+        if (status == ProductStatus.PROCESSED)
             throw new IllegalStateException("The product is already processed.");
-        setStatus(ProductStatus.READY);
+        setStatus(ProductStatus.PROCESSED);
     }
 
     public UUID getId() {
