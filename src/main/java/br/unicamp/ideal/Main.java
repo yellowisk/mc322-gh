@@ -9,7 +9,7 @@ import java.util.UUID;
 public class Main {
     static void main() {
         RawMaterial rawMaterial = new RawMaterial("Vidro", 10, "g", 5);
-        Product product = new Product(UUID.randomUUID(), "Copo", ProductStatus.READY, 6);
+        Product product = new Product(UUID.randomUUID(), "Copo", ProductStatus.UNPROCESSED, 6);
         System.out.println(product);
         System.out.println(rawMaterial);
     }
