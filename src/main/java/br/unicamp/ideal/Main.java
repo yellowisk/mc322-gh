@@ -16,7 +16,7 @@ public class Main {
         Product tacaDeVidro = new Product(2, "Taça de Vidro", ProductStatus.UNPROCESSED, 2);
         Product copoJoaozinho = new Product(3, "Copo de Vidro do Joãozinho", ProductStatus.UNPROCESSED, 6);
         Conveyor esteiraIdealDeProcessamento = new Conveyor("Esteira Ideal de Processamento", 8);
-        Machine maquinaIdeal = new Machine("Máquina Ideal", true, 8);
+        Machine maquinaIdeal = new Machine("Máquina Ideal", 8);
 
         // Turning the conveyor on...
         esteiraIdealDeProcessamento.turnOn();
@@ -134,7 +134,7 @@ public class Main {
                     } else
                         System.out.printf("[EITCHA!] The conveyor %s is on!%n", esteiraIdealDeProcessamento.getName());
 
-                    if (!maquinaIdeal.getIsOn()) {
+                    if (!maquinaIdeal.isOn()) {
                         System.out.printf("[NÃO FOI DESSA VEZ...] Machine %s ain't on!%n", maquinaIdeal.getName());
                         continue;
                     } else
