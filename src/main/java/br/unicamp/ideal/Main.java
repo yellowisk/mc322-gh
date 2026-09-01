@@ -1,6 +1,6 @@
 package br.unicamp.ideal;
 
-import br.unicamp.ideal.domain.entities.RawMaterial;
+import br.unicamp.ideal.domain.entities.rawmaterial.RawMaterial;
 import br.unicamp.ideal.domain.entities.machines.conveyor.Conveyor;
 import br.unicamp.ideal.domain.entities.machines.machine.Machine;
 import br.unicamp.ideal.domain.entities.product.Product;

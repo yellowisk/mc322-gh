@@ -1,6 +1,6 @@
 package br.unicamp.ideal.domain.entities.machines.machine;
 
-import br.unicamp.ideal.domain.entities.RawMaterial;
+import br.unicamp.ideal.domain.entities.rawmaterial.RawMaterial;
 import br.unicamp.ideal.domain.entities.product.Product;
 
 public class Machine {
