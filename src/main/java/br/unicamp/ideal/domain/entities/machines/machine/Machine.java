@@ -14,24 +14,20 @@ public class Machine {
         this.maxCapacity = maxCapacity;
     }
 
-    void turnOff() {
+    public void turnOff() {
         setIsOn(false);
     }
 
-    void turnOn() {
+    public void turnOn() {
         setIsOn(true);
     }
 
-    boolean isOn() {
-        return getIsOn();
-    }
-
-    private void process(RawMaterial material, int demand, Product product) {
+    public void process(RawMaterial material, int demand, Product product) {
         if (!getIsOn())
             throw new IllegalStateException("Eitcha, João! The machine can't proccess anything, since it ain't on!");
 
         if (!material.isAvailable(demand))
-            throw new IllegalStateException("E não foi 150 reais! There is not enough raw material to proccess the product! Que pena!");
+            throw new IllegalStateException("E não foi 150 reais! There is not enough raw material to process the product! Que pena!");
 
         product.process();
         material.consume(demand);
