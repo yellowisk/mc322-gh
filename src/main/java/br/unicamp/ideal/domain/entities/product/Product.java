@@ -1,14 +1,12 @@
 package br.unicamp.ideal.domain.entities.product;
 
-import java.util.UUID;
-
 public class Product {
-    private UUID id;
+    private int id;
     private String name;
     private ProductStatus status;
     private int rawMaterialAmountNeeded;
 
-    public Product(UUID id, String name, ProductStatus status, int rawMaterialNeeded) {
+    public Product(int id, String name, ProductStatus status, int rawMaterialNeeded) {
         this.id = id;
         this.name = name;
         this.status = status;
@@ -21,11 +19,11 @@ public class Product {
         setStatus(ProductStatus.PROCESSED);
     }
 
-    public UUID getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(int id) {
         this.id = id;
     }
 
