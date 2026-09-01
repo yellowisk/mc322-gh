@@ -1,5 +1,6 @@
 package br.unicamp.ideal;
 
+import br.unicamp.ideal.domain.entities.machines.inspectionStation.InspectionStation;
 import br.unicamp.ideal.domain.entities.rawmaterial.RawMaterial;
 import br.unicamp.ideal.domain.entities.machines.conveyor.Conveyor;
 import br.unicamp.ideal.domain.entities.machines.machine.Machine;
@@ -11,16 +12,21 @@ import java.util.Scanner;
 public class Main {
 
     static void main() {
-        RawMaterial vidro = new RawMaterial("Vidro", 10, "kg", 5);
+        // >>> INSTANCES
+        // Raw Materials
+        RawMaterial vidro = new RawMaterial("Vidro", 50, "kg", 5);
+
+        // Products
         Product copoDeVidro = new Product("Copo de Vidro", 3);
         Product tacaDeVidro = new Product( "Taça de Vidro", 2);
         Product copoJoaozinho = new Product( "Copo de Vidro do Joãozinho", 6);
-        Conveyor esteiraIdealDeProcessamento = new Conveyor("Esteira Ideal de Processamento", 8);
+
+        // Other
+        Conveyor esteiraIdeal = new Conveyor("Esteira Ideal", 8);
         Machine maquinaIdeal = new Machine("Máquina Ideal", 8);
+        InspectionStation estacaoDeInspecaoIdeal = new InspectionStation();
 
-        // Turning the conveyor on...
-        esteiraIdealDeProcessamento.turnOn();
-
+        // >>> MENU
         System.out.printf("""
                 ========================================
                 INDUSTRIAL PLANT
@@ -46,6 +52,7 @@ public class Main {
 
         mainLoop:
         while(true) {
+            // >>>> MENU CHOICES
             System.out.println("""
                     ========================================
                     MAIN MENU
@@ -53,11 +60,12 @@ public class Main {
                     1 - Start production
                     2 - Look up stock
                     3 - Exit
-                    Choose one: 
-                    """);
+                    Choose one:""");
 
-            if(!scanner.hasNextInt()) {
-                if(!scanner.hasNext()) break mainLoop;
+            if (!scanner.hasNextInt()) {
+                if(!scanner.hasNext()) {
+                    break mainLoop;
+                }
                 System.out.printf("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
                 continue;
             }
@@ -65,15 +73,20 @@ public class Main {
             int choice = scanner.nextInt();
 
             switch (choice) {
-                case 1:
-                    System.out.println("Select a product (1-3): \n");
-                    if(!scanner.hasNextInt()) {
-                        if(!scanner.hasNext()) break mainLoop;
+                case 1: // Start production
+
+                    // validate input
+                    System.out.println("Select a product (1-3):");
+                    if (!scanner.hasNextInt()) {
+                        if (!scanner.hasNext()) {
+                            break mainLoop;
+                        }
                         System.out.printf("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
                         continue;
                     }
                     int pInput = scanner.nextInt();
 
+                    // validate option
                     Product productChosen;
                     switch (pInput) {
                         case 1:
@@ -95,6 +108,7 @@ public class Main {
                         continue;
                     }
 
+                    // check demand
                     System.out.printf("Please, type the raw material demand (%s): %n", vidro.getUnit());
                     if(!scanner.hasNextInt()) {
                         if(!scanner.hasNext()) break mainLoop;
@@ -109,6 +123,7 @@ public class Main {
                         continue;
                     }
 
+                    // check availability
                     System.out.printf("Verifying the %s availability...%n", vidro.getName());
 
                     if (vidro.isAvailable(demandChosen)) {
@@ -128,39 +143,44 @@ public class Main {
                         continue;
                     }
 
-                    if (!esteiraIdealDeProcessamento.isOn()) {
-                        System.out.printf("[NÃO FOI DESSA VEZ...] Conveyor %s ain't on!%n", esteiraIdealDeProcessamento.getName());
-                        continue;
-                    } else
-                        System.out.printf("[EITCHA!] The conveyor %s is on!%n", esteiraIdealDeProcessamento.getName());
+                    // >>> TURN ON EQUIPMENT
+                    esteiraIdeal.turnOn();
+                    System.out.printf("[EITCHA!] The %s is on!%n", esteiraIdeal.getName());
+                    maquinaIdeal.turnOn();
+                    System.out.printf("[EITCHA!] The %s is on!%n", maquinaIdeal.getName());
+                    estacaoDeInspecaoIdeal.turnOn();
+                    System.out.printf("[EITCHA!] The Inspection Station is on!%n");
 
-                    if (!maquinaIdeal.isOn()) {
-                        System.out.printf("[NÃO FOI DESSA VEZ...] Machine %s ain't on!%n", maquinaIdeal.getName());
-                        continue;
-                    } else
-                        System.out.printf("[EITCHA!] The machine %s is on!%n", maquinaIdeal.getName());
-
+                    // >>> PROCESSING
                     try {
-                        esteiraIdealDeProcessamento.addRawMaterial(productChosen.getRawMaterialAmountNeeded());
-                        System.out.printf("[EITCHA!] Raw Material %s added to the conveyor.%n", vidro.getName());
-                        System.out.printf("[EITCHA!] %s was sent to the machine %s%n", vidro.getName(), maquinaIdeal.getName());
+                        // 1. put the raw material on the conveyor
+                        esteiraIdeal.addRawMaterial(demandChosen);
+                        System.out.printf("[EITCHA!] Raw material %s added to the conveyor.\n", vidro.getName());
 
-                        System.out.printf("[EITCHA!] %s is processing %d %s of %s...%n", maquinaIdeal.getName(), demandChosen, vidro.getUnit(), vidro.getName());
-                        maquinaIdeal.process(vidro, demandChosen, productChosen);
-                        System.out.printf("[EITCHA!] Product %d - %s created successfully.%n", productChosen.getId(), productChosen.getName());
+                        // 2. carry the raw material to the machine and process it
+                        System.out.println("[EITCHA!] Raw material carried to the machine.");
+                        System.out.printf("[EITCHA!] Processing %d %s of %s...\n", demandChosen, vidro.getUnit(), vidro.getName());
+                        maquinaIdeal.process(vidro, esteiraIdeal.removeRawMaterial(), productChosen);
+                        System.out.printf("[EITCHA!] Product %s %d created.\n", productChosen.getName(), productChosen.getId());
 
-                        esteiraIdealDeProcessamento.removeRawMaterial();
-                        esteiraIdealDeProcessamento.addProduct(productChosen);
-                        System.out.printf("[EITCHA!] Product %s taken to inspéction.%n", productChosen.getName());
-                        esteiraIdealDeProcessamento.removeProduct();
+                        // 3. put the product on the conveyor
+                        esteiraIdeal.addProduct(productChosen);
+                        System.out.printf("[EITCHA!] Product %s %d added to the conveyor.\n", productChosen.getName(), productChosen.getId());
+
+                        // 4. carry the raw material to the machine and process it
+                        System.out.printf("[EITCHA!] Product %s %d carried to the inspection station.\n", productChosen.getName(), productChosen.getId());
+                        System.out.printf("[EITCHA!] Inspecting product %s %d...\n", productChosen.getName(), productChosen.getId());
+                        estacaoDeInspecaoIdeal.inspect(esteiraIdeal.removeProduct());
+                        System.out.printf("[EITCHA!] Product %s %d approved on the inspection.\n", productChosen.getName(), productChosen.getId());
+
                     } catch (IllegalArgumentException | IllegalStateException e) {
                         System.out.printf("[NÃO FOI DESSA VEZ...] %s%n", e.getMessage());
 
                         // Here we be freeing the conveyor, so a failed run doesn't block the next one.
-                        if (esteiraIdealDeProcessamento.getRawMaterial() > 0)
-                            esteiraIdealDeProcessamento.removeRawMaterial();
-                        if (esteiraIdealDeProcessamento.getProduct() != null)
-                            esteiraIdealDeProcessamento.removeProduct();
+                        if (esteiraIdeal.getRawMaterial() > 0)
+                            esteiraIdeal.removeRawMaterial();
+                        if (esteiraIdeal.getProduct() != null)
+                            esteiraIdeal.removeProduct();
                         continue;
                     }
 
@@ -191,7 +211,7 @@ public class Main {
                     break;
                 case 3:
                     System.out.println("[COMO TEM FORÇA!] Acabou ligeiro...");
-                    esteiraIdealDeProcessamento.turnOff();
+                    esteiraIdeal.turnOff();
                     break mainLoop;
                 default:
                     System.out.printf("[eitcha...] %d ain't an option on the menu :b%n", choice);
