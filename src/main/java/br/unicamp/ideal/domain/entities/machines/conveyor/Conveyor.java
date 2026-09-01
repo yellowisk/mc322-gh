@@ -1,40 +1,100 @@
 package br.unicamp.ideal.domain.entities.machines.conveyor;
 
-import br.unicamp.ideal.domain.entities.machines.MachinesStatus;
-
+import br.unicamp.ideal.domain.entities.product.Product;
 
 public class Conveyor {
     // Mandatory attributes
-    private Object item;
-    private boolean inMovement;
-    private int maxCapacity;
+    private Product product;
+    private int rawMaterial;
+    private boolean isOn; // emMovimento
+    private final int maxCapacity;
 
-    // My attributes
-    private MachinesStatus status;
+    public Conveyor(int maxCapacity) {
+        if (maxCapacity <= 0) {
+            throw new IllegalArgumentException("Uma máquina não pode ter capacidade zero ou negativa.");
+        }
+        this.maxCapacity = maxCapacity;
+    }
 
     // Mandatory methods
-    private void turnOn() { setStatus(MachinesStatus.ON); }
+    private void turnOn() { this.isOn = true; }
 
-    private void turnOff() { setStatus(MachinesStatus.OFF); }
+    private void turnOff() { this.isOn = false; }
 
-    private void addItem(Object item) { setItem(item); }
-
-    private void removeItem() { setItem(null); }
-
-    // TODO: Implementar método canCarry
-    private boolean canCarry(Object item) {
-        return false;
+    private boolean canCarry(int quantity) {
+        if (!verifyCapacity(quantity)) {
+            throw new IllegalArgumentException("A demanda supera a capacidade da máquina.");
+        } else if (this.rawMaterial > 0 || this.product != null) {
+            throw new IllegalArgumentException("A esteira está ocupada.");
+        } else if (!getIsOn()) {
+            throw new IllegalArgumentException("A esteira está desligada.");
+        }
+        return true;
     }
 
-    public void setStatus(MachinesStatus status) {
-        this.status = status;
+    // >>>>> RECURSO
+    private void addRawMaterial(int quantity) {
+        try {
+            boolean itCanCarry = canCarry(quantity);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        setRawMaterial(quantity);
     }
 
-    public void setInMovement(boolean inMovement) {
-        this.inMovement = inMovement;
+    private int removeRawMaterial() {
+        if (this.rawMaterial == 0) {
+            throw new IllegalArgumentException("Não há nenhuma matéria prima na esteira."); // TODO: Descobrir o erro certo.
+        } else if (!getIsOn()) {
+            throw new IllegalArgumentException("A esteira está desligada.");
+        }
+
+        int n = this.rawMaterial;
+        setRawMaterial(0);
+        return n;
     }
 
-    public void setItem(Object item) {
-        this.item = item;
+    // >>>>> PRODUTO
+    private void addProduct(Product product) {
+        try {
+            boolean itCanCarry = canCarry(product.getRawMaterialNeeded());
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        setProduct(product);
+    }
+
+    private Product removeProduct() {
+        if (this.product == null) {
+            throw new IllegalArgumentException("Não há nenhum produto na esteira."); // TODO: Descobrir o erro certo.
+        } else if (!getIsOn()) {
+            throw new IllegalArgumentException("A esteira está desligada.");
+        }
+
+        Product p = this.product;
+        setProduct(null);
+        return p;
+    }
+
+    private boolean verifyCapacity(int weight) {
+        return (weight <= this.maxCapacity);
+    }
+
+    public void setRawMaterial(int quantity) {
+        this.rawMaterial = quantity;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public boolean getIsOn() {
+        return isOn;
+    }
+
+    public void setIsOn(boolean on) {
+        isOn = on;
     }
 }
