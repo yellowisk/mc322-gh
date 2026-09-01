@@ -7,27 +7,29 @@ public class InspectionStation {
     private boolean isOn; // ativa
     private int inspectedProducts;
 
-    public void turnOn() { setIsOn(true); }
+    public void turnOff() {
+        this.isOn = false;
+    }
 
-    public void turnOff() { setIsOn(false); }
+    public void turnOn() {
+        this.isOn = true;
+    }
 
     public void inspect(Product product) {
+        if (!isOn()) {
+            throw new IllegalStateException("[NÃO FOI DESSA VEZ...] The station's off.");
+        }
+
         if (product == null) {
-            throw new IllegalArgumentException("Nenhum produto passado.");
-        } else if (!getIsOn()) {
-            throw new IllegalArgumentException("A máquina está desligada.");
+            throw new IllegalArgumentException("[NÃO FOI DESSA VEZ...] There's no product to inspect.");
         }
 
         product.setStatus(ProductStatus.INSPECTED);
         this.inspectedProducts += 1;
     }
 
-    public boolean getIsOn() {
+    public boolean isOn() {
         return isOn;
-    }
-
-    public void setIsOn(boolean on) {
-        isOn = on;
     }
 
     public int getInspectedProducts() {
