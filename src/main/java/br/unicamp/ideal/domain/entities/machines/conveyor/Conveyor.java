@@ -4,7 +4,7 @@ import br.unicamp.ideal.domain.entities.product.Product;
 
 public class Conveyor {
     // Mandatory attributes
-    private String name;
+    private final String name;
     private Product product;
     private int rawMaterial;
     private boolean isOn; // emMovimento
@@ -12,62 +12,80 @@ public class Conveyor {
 
     public Conveyor(String name, int maxCapacity) {
         if (maxCapacity <= 0) {
-            throw new IllegalArgumentException("Uma máquina não pode ter capacidade zero ou negativa.");
+            throw new IllegalArgumentException("[NÃO FOI DESSA VEZ...] A conveyor can't have a negative capacity.");
         }
         this.name = name;
         this.maxCapacity = maxCapacity;
     }
 
     // Mandatory methods
-    public void turnOn() { this.isOn = true; }
+    public void turnOff() {
+        this.isOn = false;
+    }
 
-    public void turnOff() { this.isOn = false; }
+    public void turnOn() {
+        this.isOn = true;
+    }
 
-    private boolean canCarry(int quantity) {
-        if (!verifyCapacity(quantity)) {
-            throw new IllegalArgumentException("A demanda supera a capacidade da máquina.");
-        } else if (this.rawMaterial > 0 || this.product != null) {
-            throw new IllegalArgumentException("A esteira está ocupada.");
-        } else if (!getIsOn()) {
-            throw new IllegalArgumentException("A esteira está desligada.");
+    private void checkCanCarry(int quantity) {
+        if (!this.isOn) {
+            throw new IllegalStateException("[NÃO FOI DESSA VEZ...] The conveyor is off.");
         }
-        return true;
+        if (this.rawMaterial > 0 || this.product != null) {
+            throw new IllegalStateException("[NÃO FOI DESSA VEZ...] The conveyor is already occupied.");
+        }
+        if (!verifyCapacity(quantity)) {
+            throw new IllegalArgumentException("[NÃO FOI DESSA VEZ...] The conveyor can't take this weight.");
+        }
     }
 
     // >>>>> RECURSO
     public void addRawMaterial(int quantity) {
-        canCarry(quantity);
-        setRawMaterial(quantity);
+        checkCanCarry(quantity);
+        this.rawMaterial = quantity;
     }
 
     public int removeRawMaterial() {
+        if (!isOn()) {
+            throw new IllegalStateException("[NÃO FOI DESSA VEZ...] The conveyor is off.");
+        }
+
         if (this.rawMaterial == 0) {
-            throw new IllegalArgumentException("Não há nenhuma matéria prima na esteira."); // TODO: Descobrir o erro certo.
-        } else if (!getIsOn()) {
-            throw new IllegalArgumentException("A esteira está desligada.");
+            throw new IllegalStateException("[NÃO FOI DESSA VEZ...] There's no product on the conveyor.");
         }
 
         int n = this.rawMaterial;
-        setRawMaterial(0);
+        this.rawMaterial = 0;
         return n;
     }
 
     // >>>>> PRODUTO
     public void addProduct(Product product) {
-        canCarry(product.getRawMaterialAmountNeeded());
-        setProduct(product);
+        checkCanCarry(product.getRawMaterialAmountNeeded());
+        this.product = product;
     }
 
     public Product removeProduct() {
-        if (this.product == null) {
-            throw new IllegalArgumentException("Não há nenhum produto na esteira."); // TODO: Descobrir o erro certo.
-        } else if (!getIsOn()) {
+        if (!isOn()) {
             throw new IllegalArgumentException("A esteira está desligada.");
         }
 
+        if (this.product == null) {
+            throw new IllegalArgumentException("Não há nenhum produto na esteira.");
+        }
+
+
         Product p = this.product;
-        setProduct(null);
+        this.product = null;
         return p;
+    }
+
+    private boolean verifyCapacity(int weight) {
+        if (weight < 0) {
+            throw new IllegalArgumentException("[NÃO FOI DESSA VEZ...] The weight can't be negative");
+        }
+
+        return (weight <= this.maxCapacity);
     }
 
     public int getRawMaterial() {
@@ -82,27 +100,7 @@ public class Conveyor {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    private boolean verifyCapacity(int weight) {
-        return (weight <= this.maxCapacity);
-    }
-
-    public void setRawMaterial(int quantity) {
-        this.rawMaterial = quantity;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public boolean getIsOn() {
+    public boolean isOn() {
         return isOn;
-    }
-
-    public void setIsOn(boolean on) {
-        isOn = on;
     }
 }
