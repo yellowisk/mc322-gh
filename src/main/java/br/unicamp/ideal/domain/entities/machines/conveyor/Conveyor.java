@@ -4,22 +4,24 @@ import br.unicamp.ideal.domain.entities.product.Product;
 
 public class Conveyor {
     // Mandatory attributes
+    private String name;
     private Product product;
     private int rawMaterial;
     private boolean isOn; // emMovimento
     private final int maxCapacity;
 
-    public Conveyor(int maxCapacity) {
+    public Conveyor(String name, int maxCapacity) {
         if (maxCapacity <= 0) {
             throw new IllegalArgumentException("Uma máquina não pode ter capacidade zero ou negativa.");
         }
+        this.name = name;
         this.maxCapacity = maxCapacity;
     }
 
     // Mandatory methods
-    private void turnOn() { this.isOn = true; }
+    public void turnOn() { this.isOn = true; }
 
-    private void turnOff() { this.isOn = false; }
+    public void turnOff() { this.isOn = false; }
 
     private boolean canCarry(int quantity) {
         if (!verifyCapacity(quantity)) {
@@ -33,17 +35,12 @@ public class Conveyor {
     }
 
     // >>>>> RECURSO
-    private void addRawMaterial(int quantity) {
-        try {
-            boolean itCanCarry = canCarry(quantity);
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
+    public void addRawMaterial(int quantity) {
+        canCarry(quantity);
         setRawMaterial(quantity);
     }
 
-    private int removeRawMaterial() {
+    public int removeRawMaterial() {
         if (this.rawMaterial == 0) {
             throw new IllegalArgumentException("Não há nenhuma matéria prima na esteira."); // TODO: Descobrir o erro certo.
         } else if (!getIsOn()) {
@@ -56,17 +53,12 @@ public class Conveyor {
     }
 
     // >>>>> PRODUTO
-    private void addProduct(Product product) {
-        try {
-            boolean itCanCarry = canCarry(product.getRawMaterialAmountNeeded());
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
+    public void addProduct(Product product) {
+        canCarry(product.getRawMaterialAmountNeeded());
         setProduct(product);
     }
 
-    private Product removeProduct() {
+    public Product removeProduct() {
         if (this.product == null) {
             throw new IllegalArgumentException("Não há nenhum produto na esteira."); // TODO: Descobrir o erro certo.
         } else if (!getIsOn()) {
@@ -76,6 +68,22 @@ public class Conveyor {
         Product p = this.product;
         setProduct(null);
         return p;
+    }
+
+    public int getRawMaterial() {
+        return rawMaterial;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     private boolean verifyCapacity(int weight) {
