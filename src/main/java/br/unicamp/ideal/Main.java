@@ -12,9 +12,9 @@ public class Main {
 
     static void main() {
         RawMaterial vidro = new RawMaterial("Vidro", 10, "kg", 5);
-        Product copoDeVidro = new Product(1, "Copo de Vidro", ProductStatus.UNPROCESSED, 3);
-        Product tacaDeVidro = new Product(2, "Taça de Vidro", ProductStatus.UNPROCESSED, 2);
-        Product copoJoaozinho = new Product(3, "Copo de Vidro do Joãozinho", ProductStatus.UNPROCESSED, 6);
+        Product copoDeVidro = new Product("Copo de Vidro", 3);
+        Product tacaDeVidro = new Product( "Taça de Vidro", 2);
+        Product copoJoaozinho = new Product( "Copo de Vidro do Joãozinho", 6);
         Conveyor esteiraIdealDeProcessamento = new Conveyor("Esteira Ideal de Processamento", 8);
         Machine maquinaIdeal = new Machine("Máquina Ideal", 8);
 
