@@ -58,7 +58,7 @@ public class Conveyor {
     // >>>>> PRODUTO
     private void addProduct(Product product) {
         try {
-            boolean itCanCarry = canCarry(product.getRawMaterialNeeded());
+            boolean itCanCarry = canCarry(product.getRawMaterialAmountNeeded());
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
             return;
