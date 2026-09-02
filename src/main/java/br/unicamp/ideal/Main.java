@@ -157,7 +157,7 @@ public class Main {
                         System.out.println("[EITCHA!] Raw material carried to the machine.");
                         System.out.printf("[EITCHA!] Processing %d %s of %s...\n", demandChosen, vidro.getUnit(), vidro.getName());
                         maquinaIdeal.process(vidro, esteiraIdeal.removeRawMaterial(), productChosen);
-                        System.out.printf("[EITCHA!] Product %s %d created.\n", productChosen.getName(), productChosen.getId());
+                        System.out.printf("[EITCHA!] Product %s-%d created.\n", productChosen.getName(), productChosen.getId());
 
                         // 3. put the product on the conveyor
                         esteiraIdeal.addProduct(productChosen);
