@@ -167,7 +167,7 @@ public class Main {
                         System.out.printf("[EITCHA!] Product %s %d carried to the inspection station.\n", productChosen.getName(), productChosen.getId());
                         System.out.printf("[EITCHA!] Inspecting product %s-%d...\n", productChosen.getName(), productChosen.getId());
                         estacaoDeInspecaoIdeal.inspect(esteiraIdeal.removeProduct());
-                        System.out.printf("[EITCHA!] Product %s %d approved on the inspection.\n", productChosen.getName(), productChosen.getId());
+                        System.out.printf("[EITCHA!] Product %s-%d approved on the inspection.\n", productChosen.getName(), productChosen.getId());
 
                     } catch (IllegalArgumentException | IllegalStateException e) {
                         System.out.printf("[NÃO FOI DESSA VEZ...] %s%n", e.getMessage());
