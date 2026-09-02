@@ -63,9 +63,7 @@ public class Main {
                     Choose one:""");
 
             if (!scanner.hasNextInt()) {
-                if(!scanner.hasNext()) {
-                    break mainLoop;
-                }
+                if(!scanner.hasNext()) break mainLoop;
                 System.out.printf("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
                 continue;
             }
