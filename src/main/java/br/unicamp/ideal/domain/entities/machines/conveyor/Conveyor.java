@@ -71,7 +71,7 @@ public class Conveyor {
         }
 
         if (this.product == null) {
-            throw new IllegalArgumentException(""[NÃO FOI DESSA VEZ...] There's no product on the conveyor.");
+            throw new IllegalArgumentException("[NÃO FOI DESSA VEZ...] There's no product on the conveyor.");
         }
 
 
