@@ -94,7 +94,7 @@ public class Main {
                 case 1: // Start production
 
                     // validate input
-                    card("Select a product (1-3): %n");
+                    System.out.printf("Select a product (1-3): %n");
                     if (!scanner.hasNextInt()) {
                         if (!scanner.hasNext()) break mainLoop;
                         fail("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
@@ -125,7 +125,7 @@ public class Main {
                     }
 
                     // check demand
-                    card("Please, type the raw material demand (%s): %n", vidro.getUnit());
+                    System.out.printf("Please, type the raw material demand (%s): %n", vidro.getUnit());
                     if(!scanner.hasNextInt()) {
                         if(!scanner.hasNext()) break mainLoop;
                         fail("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
@@ -140,7 +140,7 @@ public class Main {
                     }
 
                     // check availability
-                    card("Verifying the %s availability...%n", vidro.getName());
+                    System.out.printf("Verifying the %s availability...%n", vidro.getName());
 
                     if (vidro.isAvailable(demandChosen)) {
                         ok("[EITCHA!] The demand of %d %s can be addressed!%n", demandChosen, vidro.getUnit());
@@ -237,7 +237,7 @@ public class Main {
                             Current stock of %s: %d %s (minimum: %d %s)%n
                             """, vidro.getName(), vidro.getQuantity(), vidro.getUnit(), vidro.getMinQuantity(), vidro.getUnit());
 
-                    card("Please, type the amount of %s to add (%s): %n", vidro.getName(), vidro.getUnit());
+                    System.out.printf("Please, type the amount of %s to add (%s): %n", vidro.getName(), vidro.getUnit());
                     if(!scanner.hasNextInt()) {
                         if(!scanner.hasNext()) break mainLoop;
                         fail("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
@@ -254,7 +254,7 @@ public class Main {
                         continue;
                     }
 
-                    card("Current stock of %s: %d %s%n%n", vidro.getName(), vidro.getQuantity(), vidro.getUnit());
+                    System.out.printf("Current stock of %s: %d %s%n%n", vidro.getName(), vidro.getQuantity(), vidro.getUnit());
                     break;
                 case 4:
                     card("%n[ACABOU LIGEIRO...] Shutting down the industry plant.%n");
