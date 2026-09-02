@@ -59,7 +59,8 @@ public class Main {
                     ========================================
                     1 - Start production
                     2 - Look up stock
-                    3 - Exit
+                    3 - Update stock
+                    4 - Exit
                     Choose one:""");
 
             if (!scanner.hasNextInt()) {
@@ -206,11 +207,40 @@ public class Main {
                     copoJoaozinho.getId(), copoJoaozinho.getName(), copoJoaozinho.getStatus());
                     break;
                 case 3:
-                    System.out.println("[COMO TEM FORÇA!] Acabou ligeiro...");
+                    System.out.printf("""
+                            ========================================
+                            UPDATE STOCK
+                            ========================================
+                            
+                            Current stock of %s: %d %s (minimum: %d %s)
+                            
+                            %n""", vidro.getName(), vidro.getQuantity(), vidro.getUnit(), vidro.getMinQuantity(), vidro.getUnit());
+
+                    System.out.printf("Please, type the amount of %s to add (%s): %n", vidro.getName(), vidro.getUnit());
+                    if(!scanner.hasNextInt()) {
+                        if(!scanner.hasNext()) break mainLoop;
+                        System.out.printf("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
+                        continue;
+                    }
+                    int amountChosen = scanner.nextInt();
+
+                    try {
+                        vidro.addStock(amountChosen);
+                        System.out.printf("[EITCHA!] %d %s of %s added to the stock.%n",
+                                amountChosen, vidro.getUnit(), vidro.getName());
+                    } catch (IllegalArgumentException e) {
+                        System.out.printf("[NÃO FOI DESSA VEZ...] %s%n", e.getMessage());
+                        continue;
+                    }
+
+                    System.out.printf("Current stock of %s: %d %s%n%n", vidro.getName(), vidro.getQuantity(), vidro.getUnit());
+                    break;
+                case 4:
+                    System.out.println("[ACABOU LIGEIRO...] Shutting down the industry plant.");
                     esteiraIdeal.turnOff();
                     break mainLoop;
                 default:
-                    System.out.printf("[eitcha...] %d ain't an option on the menu :b%n", choice);
+                    System.out.printf("[NÃO FOI DESSA VEZ...] %d ain't an option on the menu :b%n", choice);
             }
         }
 
