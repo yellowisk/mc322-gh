@@ -1,4 +1,4 @@
-package br.unicamp.ideal.domain.entities.rawmaterial;
+package domain.entities.rawmaterial;
 
 import java.util.UUID;
 

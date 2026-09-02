@@ -1,7 +1,7 @@
-package br.unicamp.ideal.domain.entities.machines.machine;
+package domain.entities.machines.machine;
 
-import br.unicamp.ideal.domain.entities.rawmaterial.RawMaterial;
-import br.unicamp.ideal.domain.entities.product.Product;
+import domain.entities.rawmaterial.RawMaterial;
+import domain.entities.product.Product;
 
 public class Machine {
     private final String name;

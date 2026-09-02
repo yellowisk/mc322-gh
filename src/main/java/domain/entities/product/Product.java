@@ -1,4 +1,4 @@
-package br.unicamp.ideal.domain.entities.product;
+package domain.entities.product;
 
 public class Product {
     private static int globalUniqueId = 1;

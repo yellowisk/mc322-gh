@@ -1,7 +1,7 @@
-package br.unicamp.ideal.domain.entities.machines.inspectionStation;
+package domain.entities.machines.inspectionStation;
 
-import br.unicamp.ideal.domain.entities.product.Product;
-import br.unicamp.ideal.domain.entities.product.ProductStatus;
+import domain.entities.product.Product;
+import domain.entities.product.ProductStatus;
 
 public class InspectionStation {
     private boolean isOn; // ativa

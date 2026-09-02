@@ -1,6 +1,6 @@
-package br.unicamp.ideal.domain.entities.machines.conveyor;
+package domain.entities.machines.conveyor;
 
-import br.unicamp.ideal.domain.entities.product.Product;
+import domain.entities.product.Product;
 
 public class Conveyor {
     // Mandatory attributes

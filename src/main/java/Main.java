@@ -1,17 +1,15 @@
-package br.unicamp.ideal;
-
-import br.unicamp.ideal.domain.entities.machines.inspectionStation.InspectionStation;
-import br.unicamp.ideal.domain.entities.rawmaterial.RawMaterial;
-import br.unicamp.ideal.domain.entities.machines.conveyor.Conveyor;
-import br.unicamp.ideal.domain.entities.machines.machine.Machine;
-import br.unicamp.ideal.domain.entities.product.Product;
-import br.unicamp.ideal.domain.entities.product.ProductStatus;
+import domain.entities.machines.inspectionStation.InspectionStation;
+import domain.entities.rawmaterial.RawMaterial;
+import domain.entities.machines.conveyor.Conveyor;
+import domain.entities.machines.machine.Machine;
+import domain.entities.product.Product;
+import domain.entities.product.ProductStatus;
 
 import java.util.Scanner;
 
 public class Main {
 
-    static void main() {
+    public static void main(String[] args) {
         // >>> INSTANCES
         // Raw Materials
         RawMaterial vidro = new RawMaterial("Vidro", 50, "kg", 5);
@@ -171,7 +169,7 @@ public class Main {
                         System.out.printf("[EITCHA!] Product %s-%d approved on the inspection.\n", productChosen.getName(), productChosen.getId());
 
                     } catch (IllegalArgumentException | IllegalStateException e) {
-                        System.out.printf("[NÃO FOI DESSA VEZ...] %s%n", e.getMessage());
+                        System.out.printf("%s%n", e.getMessage());
 
                         // Here we be freeing the conveyor, so a failed run doesn't block the next one.
                         if (esteiraIdeal.getRawMaterial() > 0)
@@ -229,7 +227,7 @@ public class Main {
                         System.out.printf("[EITCHA!] %d %s of %s added to the stock.%n",
                                 amountChosen, vidro.getUnit(), vidro.getName());
                     } catch (IllegalArgumentException e) {
-                        System.out.printf("[NÃO FOI DESSA VEZ...] %s%n", e.getMessage());
+                        System.out.printf("%s%n", e.getMessage());
                         continue;
                     }
 
