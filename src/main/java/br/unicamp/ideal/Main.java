@@ -165,7 +165,7 @@ public class Main {
 
                         // 4. carry the raw material to the inspection station and inspect it
                         System.out.printf("[EITCHA!] Product %s %d carried to the inspection station.\n", productChosen.getName(), productChosen.getId());
-                        System.out.printf("[EITCHA!] Inspecting product %s %d...\n", productChosen.getName(), productChosen.getId());
+                        System.out.printf("[EITCHA!] Inspecting product %s-%d...\n", productChosen.getName(), productChosen.getId());
                         estacaoDeInspecaoIdeal.inspect(esteiraIdeal.removeProduct());
                         System.out.printf("[EITCHA!] Product %s %d approved on the inspection.\n", productChosen.getName(), productChosen.getId());
 
