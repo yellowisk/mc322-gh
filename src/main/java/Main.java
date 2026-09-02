@@ -24,25 +24,41 @@ public class Main {
         Machine maquinaIdeal = new Machine("Máquina Ideal", 8);
         InspectionStation estacaoDeInspecaoIdeal = new InspectionStation();
 
+        // >>> PRESENTATION
+        System.out.printf("""
+                ========================================
+                FÁBRICA IDEAL
+                "E, sim, cliente ganhou um balão de presente! :D"
+                ========================================
+                
+                Bem-vindos à Fábrica Ideal! Aqui cliente não pediu
+                150 kg de vidro e, sim, ganha produtos ótimos de presente!
+                Os balões de presente ficam no @merc.adinhoideall, nosso
+                fiel cliente!
+                
+                Desenvolvido por: Glayson Oliveira e Heitor Almeida
+                ========================================
+                """);
+
         // >>> MENU
         System.out.printf("""
+                
                 ========================================
                 INDUSTRIAL PLANT
                 ========================================
                 
-                Raw Material: %s - %s
+                Raw Material: %s
                 Quantity: %d
                 Unity: %s
-                
-                """, vidro.getId().toString(), vidro.getName(), vidro.getQuantity(), vidro.getUnit());
+                """, vidro.getName(), vidro.getQuantity(), vidro.getUnit());
 
         System.out.printf("""
+                        
                         Available Products:
                         1 - %s (demand: %d %s)
                         2 - %s (demand: %d %s)
                         3 - %s (demand: %d %s)
-                        
-                        %n""", copoDeVidro.getName(), copoDeVidro.getRawMaterialAmountNeeded(), vidro.getUnit(),
+                        %n%n""", copoDeVidro.getName(), copoDeVidro.getRawMaterialAmountNeeded(), vidro.getUnit(),
         tacaDeVidro.getName(), tacaDeVidro.getRawMaterialAmountNeeded(), vidro.getUnit(),
         copoJoaozinho.getName(), copoJoaozinho.getRawMaterialAmountNeeded(), vidro.getUnit());
 
@@ -51,7 +67,8 @@ public class Main {
         mainLoop:
         while(true) {
             // >>>> MENU CHOICES
-            System.out.println("""
+            System.out.printf("""
+                    
                     ========================================
                     MAIN MENU
                     ========================================
@@ -59,7 +76,7 @@ public class Main {
                     2 - Look up stock
                     3 - Update stock
                     4 - Exit
-                    Choose one:""");
+                    Choose one: %n""");
 
             if (!scanner.hasNextInt()) {
                 if(!scanner.hasNext()) break mainLoop;
@@ -73,7 +90,7 @@ public class Main {
                 case 1: // Start production
 
                     // validate input
-                    System.out.println("Select a product (1-3):");
+                    System.out.printf("Select a product (1-3): %n");
                     if (!scanner.hasNextInt()) {
                         if (!scanner.hasNext()) break mainLoop;
                         System.out.printf("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
@@ -180,6 +197,7 @@ public class Main {
                     }
 
                     System.out.printf("""
+                            
                             ========================================
                             PRODUCTION SUCCESFULLY FINISHED
                             ========================================
@@ -189,6 +207,7 @@ public class Main {
                     break;
                 case 2:
                     System.out.printf("""
+                            
                             ========================================
                             STOCK
                             ========================================
@@ -196,23 +215,23 @@ public class Main {
                             %s: %d %s (minimum: %d %s)
                             
                             Products:
-                            %d - %s: %s
-                            %d - %s: %s
-                            %d - %s: %s
+                            %d - %s: %s%s demand
+                            %d - %s: %s%s demand
+                            %d - %s: %s%s demand
                             %n""", vidro.getName(), vidro.getQuantity(), vidro.getUnit(), vidro.getMinQuantity(), vidro.getUnit(),
-                    copoDeVidro.getId(), copoDeVidro.getName(), copoDeVidro.getStatus(),
-                    tacaDeVidro.getId(), tacaDeVidro.getName(), tacaDeVidro.getStatus(),
-                    copoJoaozinho.getId(), copoJoaozinho.getName(), copoJoaozinho.getStatus());
+                    copoDeVidro.getId(), copoDeVidro.getName(), copoDeVidro.getRawMaterialAmountNeeded(), vidro.getUnit(),
+                    tacaDeVidro.getId(), tacaDeVidro.getName(), tacaDeVidro.getRawMaterialAmountNeeded(), vidro.getUnit(),
+                    copoJoaozinho.getId(), copoJoaozinho.getName(), copoJoaozinho.getRawMaterialAmountNeeded(), vidro.getUnit());
                     break;
                 case 3:
                     System.out.printf("""
+                            
                             ========================================
                             UPDATE STOCK
                             ========================================
                             
-                            Current stock of %s: %d %s (minimum: %d %s)
-                            
-                            %n""", vidro.getName(), vidro.getQuantity(), vidro.getUnit(), vidro.getMinQuantity(), vidro.getUnit());
+                            Current stock of %s: %d %s (minimum: %d %s)%n
+                            """, vidro.getName(), vidro.getQuantity(), vidro.getUnit(), vidro.getMinQuantity(), vidro.getUnit());
 
                     System.out.printf("Please, type the amount of %s to add (%s): %n", vidro.getName(), vidro.getUnit());
                     if(!scanner.hasNextInt()) {
@@ -234,7 +253,7 @@ public class Main {
                     System.out.printf("Current stock of %s: %d %s%n%n", vidro.getName(), vidro.getQuantity(), vidro.getUnit());
                     break;
                 case 4:
-                    System.out.println("[ACABOU LIGEIRO...] Shutting down the industry plant.");
+                    System.out.println("\n[ACABOU LIGEIRO...] Shutting down the industry plant.");
                     esteiraIdeal.turnOff();
                     break mainLoop;
                 default:
