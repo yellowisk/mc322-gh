@@ -1,0 +1,39 @@
+==================
+Fábrica Ideal
+==================
+
+- O que a fábrica faz: Produz produtos para o Mercadinho Ideal.
+
+- Justificativa: Temos um interesse pessoal pela página de um mercadinho (Mercadinho Ideal),
+pois ela é uma página com vídeos engraçados que prendeu bastante a nossa atenção recentemente.
+Além do valor cômico, a página presta caridade para seus clientes, o que achamos muito legal.
+
+- Personalização: Utilizamos slogans dos vídeos da página nos código e os produtos refletem os
+produtos reais do mercadinho.
+
+- Planos de Expansão:
+    - Produtos:
+        - Novos produtos baseados nos produtos presentes no Mercadinho Ideal, como salgadinhos,
+           brinquedos e doces
+        - Kits prontos (kits de copos e o kit mega-feliz, já presentes no Mercadinho Ideal)
+        - Kits personalizados que o próprio usuário poderá montar a partir dos produtos
+        existentes na fábrica
+
+    - Equipamentos:
+        - Máquinas espeifícas por produto
+        - Máquina montadora de kits
+        - Armazém/Estoque
+
+    - Novas etapas:
+        - Empacotamento
+        - Montagem de kits
+
+    - Automação:
+        - Cálculo automático da quantidade de produtos baseado na demanda de kg
+        - CRUD (Create, Read, Update, Delete) de produtos
+
+- Fontes:
+    - https://www.instagram.com/merc.adinhoideall?igsi=MWkyNWV0Y3ExcnV1Nw==
+    - https://www.instagram.com/reel/Dby_qnOtj_u/?igsi=MWNhbXdqdHJiMHFuZQ==
+    - https://www.instagram.com/reel/DcRLxjSR9N4/?igsi=MWNocTk0c2Ezc2Y4MA==
+    - https://www.instagram.com/reel/DaTMCONRHFg/?igsi=MXNjbmI2ZDh0aXYyYQ==
