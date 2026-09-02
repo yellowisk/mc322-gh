@@ -7,6 +7,10 @@ import domain.entities.product.ProductStatus;
 
 import java.util.Scanner;
 
+import static presentation.console.ConsolePrinter.card;
+import static presentation.console.ConsolePrinter.fail;
+import static presentation.console.ConsolePrinter.ok;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -25,7 +29,7 @@ public class Main {
         InspectionStation estacaoDeInspecaoIdeal = new InspectionStation();
 
         // >>> PRESENTATION
-        System.out.printf("""
+        card("""
                 ========================================
                 FÁBRICA IDEAL
                 "E, sim, cliente ganhou um balão de presente! :D"
@@ -41,7 +45,7 @@ public class Main {
                 """);
 
         // >>> MENU
-        System.out.printf("""
+        card("""
                 
                 ========================================
                 INDUSTRIAL PLANT
@@ -52,7 +56,7 @@ public class Main {
                 Unity: %s
                 """, vidro.getName(), vidro.getQuantity(), vidro.getUnit());
 
-        System.out.printf("""
+        card("""
                         
                         Available Products:
                         1 - %s (demand: %d %s)
@@ -67,7 +71,7 @@ public class Main {
         mainLoop:
         while(true) {
             // >>>> MENU CHOICES
-            System.out.printf("""
+            card("""
                     
                     ========================================
                     MAIN MENU
@@ -80,7 +84,7 @@ public class Main {
 
             if (!scanner.hasNextInt()) {
                 if(!scanner.hasNext()) break mainLoop;
-                System.out.printf("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
+                fail("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
                 continue;
             }
 
@@ -90,10 +94,10 @@ public class Main {
                 case 1: // Start production
 
                     // validate input
-                    System.out.printf("Select a product (1-3): %n");
+                    card("Select a product (1-3): %n");
                     if (!scanner.hasNextInt()) {
                         if (!scanner.hasNext()) break mainLoop;
-                        System.out.printf("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
+                        fail("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
                         continue;
                     }
                     int pInput = scanner.nextInt();
@@ -111,45 +115,45 @@ public class Main {
                             productChosen = copoJoaozinho;
                             break;
                         default:
-                            System.out.printf("[NÃO FOI DESSA VEZ...] %d ain't a product on the list :b%n", pInput);
+                            fail("[NÃO FOI DESSA VEZ...] %d ain't a product on the list :b%n", pInput);
                             continue;
                     }
 
                     if (productChosen.getStatus() == ProductStatus.PROCESSED) {
-                        System.out.printf("[NÃO FOI DESSA VEZ...] %s has already been processed%n", productChosen.getName());
+                        fail("[NÃO FOI DESSA VEZ...] %s has already been processed%n", productChosen.getName());
                         continue;
                     }
 
                     // check demand
-                    System.out.printf("Please, type the raw material demand (%s): %n", vidro.getUnit());
+                    card("Please, type the raw material demand (%s): %n", vidro.getUnit());
                     if(!scanner.hasNextInt()) {
                         if(!scanner.hasNext()) break mainLoop;
-                        System.out.printf("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
+                        fail("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
                         continue;
                     }
                     int demandChosen = scanner.nextInt();
 
                     if (demandChosen < productChosen.getRawMaterialAmountNeeded()) {
-                        System.out.printf("[NÃO FOI DESSA VEZ...] The demand of %d %s is below the %d %s needed to make one %s.%n",
+                        fail("[NÃO FOI DESSA VEZ...] The demand of %d %s is below the %d %s needed to make one %s.%n",
                                 demandChosen, vidro.getUnit(), productChosen.getRawMaterialAmountNeeded(), vidro.getUnit(), productChosen.getName());
                         continue;
                     }
 
                     // check availability
-                    System.out.printf("Verifying the %s availability...%n", vidro.getName());
+                    card("Verifying the %s availability...%n", vidro.getName());
 
                     if (vidro.isAvailable(demandChosen)) {
-                        System.out.printf("[EITCHA!] The demand of %d %s can be addressed!%n", demandChosen, vidro.getUnit());
+                        ok("[EITCHA!] The demand of %d %s can be addressed!%n", demandChosen, vidro.getUnit());
                     } else if (demandChosen <= 0) {
-                        System.out.printf("[NÃO FOI DESSA VEZ...] The demand of %d %s ain't a positive amount :b%n",
+                        fail("[NÃO FOI DESSA VEZ...] The demand of %d %s ain't a positive amount :b%n",
                                 demandChosen, vidro.getUnit());
                         continue;
                     } else if (vidro.getQuantity() < demandChosen) {
-                        System.out.printf("[NÃO FOI DESSA VEZ...] There's only %d %s of %s in stock, and the demand is %d %s.%n",
+                        fail("[NÃO FOI DESSA VEZ...] There's only %d %s of %s in stock, and the demand is %d %s.%n",
                                 vidro.getQuantity(), vidro.getUnit(), vidro.getName(), demandChosen, vidro.getUnit());
                         continue;
                     } else {
-                        System.out.printf("[NÃO FOI DESSA VEZ...] Consuming %d %s would leave only %d %s of %s in stock, below the %d %s minimum.%n",
+                        fail("[NÃO FOI DESSA VEZ...] Consuming %d %s would leave only %d %s of %s in stock, below the %d %s minimum.%n",
                                 demandChosen, vidro.getUnit(), vidro.getQuantity() - demandChosen, vidro.getUnit(),
                                 vidro.getName(), vidro.getMinQuantity(), vidro.getUnit());
                         continue;
@@ -157,36 +161,36 @@ public class Main {
 
                     // >>> TURN ON EQUIPMENT
                     esteiraIdeal.turnOn();
-                    System.out.printf("[EITCHA!] The %s is on!%n", esteiraIdeal.getName());
+                    ok("[EITCHA!] The %s is on!%n", esteiraIdeal.getName());
                     maquinaIdeal.turnOn();
-                    System.out.printf("[EITCHA!] The %s is on!%n", maquinaIdeal.getName());
+                    ok("[EITCHA!] The %s is on!%n", maquinaIdeal.getName());
                     estacaoDeInspecaoIdeal.turnOn();
-                    System.out.printf("[EITCHA!] The Inspection Station is on!%n");
+                    ok("[EITCHA!] The Inspection Station is on!%n");
 
                     // >>> PROCESSING
                     try {
                         // 1. put the raw material on the conveyor
                         esteiraIdeal.addRawMaterial(demandChosen);
-                        System.out.printf("[EITCHA!] Raw material %s added to the conveyor.\n", vidro.getName());
+                        ok("[EITCHA!] Raw material %s added to the conveyor.%n", vidro.getName());
 
                         // 2. carry the raw material to the machine and process it
-                        System.out.println("[EITCHA!] Raw material carried to the machine.");
-                        System.out.printf("[EITCHA!] Processing %d %s of %s...\n", demandChosen, vidro.getUnit(), vidro.getName());
+                        ok("[EITCHA!] Raw material carried to the machine.%n");
+                        ok("[EITCHA!] Processing %d %s of %s...%n", demandChosen, vidro.getUnit(), vidro.getName());
                         maquinaIdeal.process(vidro, esteiraIdeal.removeRawMaterial(), productChosen);
-                        System.out.printf("[EITCHA!] Product %s-%d created.\n", productChosen.getName(), productChosen.getId());
+                        ok("[EITCHA!] Product %s-%d created.%n", productChosen.getName(), productChosen.getId());
 
                         // 3. put the product on the conveyor
                         esteiraIdeal.addProduct(productChosen);
-                        System.out.printf("[EITCHA!] Product %s %d added to the conveyor.\n", productChosen.getName(), productChosen.getId());
+                        ok("[EITCHA!] Product %s %d added to the conveyor.%n", productChosen.getName(), productChosen.getId());
 
                         // 4. carry the raw material to the inspection station and inspect it
-                        System.out.printf("[EITCHA!] Product %s %d carried to the inspection station.\n", productChosen.getName(), productChosen.getId());
-                        System.out.printf("[EITCHA!] Inspecting product %s-%d...\n", productChosen.getName(), productChosen.getId());
+                        ok("[EITCHA!] Product %s %d carried to the inspection station.%n", productChosen.getName(), productChosen.getId());
+                        ok("[EITCHA!] Inspecting product %s-%d...%n", productChosen.getName(), productChosen.getId());
                         estacaoDeInspecaoIdeal.inspect(esteiraIdeal.removeProduct());
-                        System.out.printf("[EITCHA!] Product %s-%d approved on the inspection.\n", productChosen.getName(), productChosen.getId());
+                        ok("[EITCHA!] Product %s-%d approved on the inspection.%n", productChosen.getName(), productChosen.getId());
 
                     } catch (IllegalArgumentException | IllegalStateException e) {
-                        System.out.printf("%s%n", e.getMessage());
+                        fail("%s%n", e.getMessage());
 
                         // Here we be freeing the conveyor, so a failed run doesn't block the next one.
                         if (esteiraIdeal.getRawMaterial() > 0)
@@ -196,7 +200,7 @@ public class Main {
                         continue;
                     }
 
-                    System.out.printf("""
+                    ok("""
                             
                             ========================================
                             PRODUCTION SUCCESFULLY FINISHED
@@ -206,7 +210,7 @@ public class Main {
                             %n""", vidro.getName(), vidro.getQuantity());
                     break;
                 case 2:
-                    System.out.printf("""
+                    card("""
                             
                             ========================================
                             STOCK
@@ -224,7 +228,7 @@ public class Main {
                     copoJoaozinho.getId(), copoJoaozinho.getName(), copoJoaozinho.getRawMaterialAmountNeeded(), vidro.getUnit());
                     break;
                 case 3:
-                    System.out.printf("""
+                    card("""
                             
                             ========================================
                             UPDATE STOCK
@@ -233,31 +237,31 @@ public class Main {
                             Current stock of %s: %d %s (minimum: %d %s)%n
                             """, vidro.getName(), vidro.getQuantity(), vidro.getUnit(), vidro.getMinQuantity(), vidro.getUnit());
 
-                    System.out.printf("Please, type the amount of %s to add (%s): %n", vidro.getName(), vidro.getUnit());
+                    card("Please, type the amount of %s to add (%s): %n", vidro.getName(), vidro.getUnit());
                     if(!scanner.hasNextInt()) {
                         if(!scanner.hasNext()) break mainLoop;
-                        System.out.printf("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
+                        fail("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
                         continue;
                     }
                     int amountChosen = scanner.nextInt();
 
                     try {
                         vidro.addStock(amountChosen);
-                        System.out.printf("[EITCHA!] %d %s of %s added to the stock.%n",
+                        ok("[EITCHA!] %d %s of %s added to the stock.%n",
                                 amountChosen, vidro.getUnit(), vidro.getName());
                     } catch (IllegalArgumentException e) {
-                        System.out.printf("%s%n", e.getMessage());
+                        fail("%s%n", e.getMessage());
                         continue;
                     }
 
-                    System.out.printf("Current stock of %s: %d %s%n%n", vidro.getName(), vidro.getQuantity(), vidro.getUnit());
+                    card("Current stock of %s: %d %s%n%n", vidro.getName(), vidro.getQuantity(), vidro.getUnit());
                     break;
                 case 4:
-                    System.out.println("\n[ACABOU LIGEIRO...] Shutting down the industry plant.");
+                    card("%n[ACABOU LIGEIRO...] Shutting down the industry plant.%n");
                     esteiraIdeal.turnOff();
                     break mainLoop;
                 default:
-                    System.out.printf("[NÃO FOI DESSA VEZ...] %d ain't an option on the menu :b%n", choice);
+                    fail("[NÃO FOI DESSA VEZ...] %d ain't an option on the menu :b%n", choice);
             }
         }
 
