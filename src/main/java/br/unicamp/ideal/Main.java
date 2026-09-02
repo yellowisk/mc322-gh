@@ -76,9 +76,7 @@ public class Main {
                     // validate input
                     System.out.println("Select a product (1-3):");
                     if (!scanner.hasNextInt()) {
-                        if (!scanner.hasNext()) {
-                            break mainLoop;
-                        }
+                        if (!scanner.hasNext()) break mainLoop;
                         System.out.printf("[NÃO FOI DESSA VEZ...] %s ain't a number :b%n", scanner.next());
                         continue;
                     }
