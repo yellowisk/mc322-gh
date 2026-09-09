@@ -1,4 +1,4 @@
-package presentation.console;
+package view;
 
 public final class ConsolePrinter {
     public static final String RESET = "\033[0m";
