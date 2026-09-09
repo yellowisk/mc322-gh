@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-// 3. Classe do Menu
 public class Menu {
     private final Scanner scanner = new Scanner(System.in);
 
@@ -99,9 +98,5 @@ public class Menu {
 
     private void showStorageSubmenu() {
         boolean running = true;
-    }
-
-    public static void main(String[] args) {
-        new Menu().start();
     }
 }
