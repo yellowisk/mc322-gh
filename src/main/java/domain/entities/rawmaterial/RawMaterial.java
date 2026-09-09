@@ -69,14 +69,4 @@ public class RawMaterial {
         this.quantity = quantity;
     }
 
-    @Override
-    public String toString() {
-        return "RawMaterial{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", unit='" + unit + '\'' +
-                ", minQuantity=" + minQuantity +
-                ", quantity=" + quantity +
-                '}';
-    }
 }
