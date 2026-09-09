@@ -1,54 +1,12 @@
-package domain.entities;
+package view;
 
+import domain.entities.demand.Demand;
 import domain.entities.product.Product;
-import domain.entities.machines.machine.Machine;
+import domain.entities.productionmanager.ProductionManager;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-// 1. Classe de Entidade Demand
-class Demand {
-    private String productName;
-    private int amount;
-    private boolean isDone;
-
-    public Demand(String productName, int amount) {
-        this.productName = productName;
-        this.amount = amount;
-        this.isDone = false;
-    }
-
-    public String getProductName() { return productName; }
-    public int getAmount() { return amount; }
-    public void setAmount(int amount) { this.amount = amount; }
-
-    public boolean isDone() {
-        return isDone;
-    }
-
-    public void setDone(boolean done) {
-        isDone = done;
-    }
-}
-
-// 2. Gerenciador de Produção (Estado da Aplicação)
-class ProductionManager {
-    private List<Demand> demands = new ArrayList<>();
-    private List<Product> fabricatedProducts = new ArrayList<>();
-    private List<Machine> machines = new ArrayList<>();
-    private Product chosenProduct;
-
-    public List<Demand> getDemands() { return demands; }
-
-    public void fabricateDemand(Demand demand) {
-        System.out.println("Produto fabricado com sucesso.");
-    }
-
-    public void registerDemand(Product produto, int quantity) {
-        demands.add(new Demand(produto.getName(), quantity));
-    }
-}
 
 // 3. Classe do Menu
 public class Menu {
