@@ -1,37 +1,41 @@
 package view;
 
 import domain.entities.demand.Demand;
+import domain.entities.machines.conveyor.Conveyor;
+import domain.entities.machines.machine.Machine;
 import domain.entities.product.Product;
 import domain.entities.productionmanager.ProductionManager;
+import domain.entities.rawmaterial.RawMaterial;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
-    private final Scanner scanner = new Scanner(System.in);
+        private final Scanner scanner = new Scanner(System.in);
 
-    private final ProductionManager productionManager = new ProductionManager();
-    private List<Product> availableProducts = new ArrayList<Product>();
+        private final ProductionManager productionManager = new ProductionManager(
+                new RawMaterial("Vidro", 50, "kg", 5, 1), // R$ 1,00
+                1000);
 
     public void start() {
         boolean running = true;
 
         // Produtos hardcoded
-        availableProducts.add(new Product("Prod1", 5));
-        availableProducts.add(new Product("Prod2", 10));
-        availableProducts.add(new Product("Prod3", 15));
+        productionManager.addNewProduct(new Product("Copo", 5));
+        productionManager.addNewProduct(new Product("Prato", 10));
+        productionManager.addNewProduct(new Product("Travessa", 15));
 
-        // Inicialização das demandas
-        for (Product product : availableProducts) {
-            productionManager.registerDemand(product, 0);
-        }
+        productionManager.addNewConveyor(new Conveyor("Esteira", 20));
+
+        productionManager.addNewMachine(new Machine("Máquina de Processamento", 20));
+        productionManager.addNewMachine(new Machine("Máquina de Empacotamento", 20));
+        productionManager.addNewMachine(new Machine("Máquina de Inspecionamento", 20));
 
         while (running) {
             System.out.println("\nTELA 1: ESCOLHER FUNCIONALIDADE");
             System.out.println("[1] Atualizar demandas");
             System.out.println("[2] Fabricar demandas");
-            System.out.println("[3] Consultar armazém");
+            System.out.println("[3] Ver armazém");
             System.out.println("[4] Comprar matéria-prima");
             System.out.println("[0] Sair");
 
@@ -42,7 +46,7 @@ public class Menu {
                 case 1 -> updateDemandSubmenu();
                 case 2 -> fabricateDemandSubmenu();
                 case 3 -> showStorageSubmenu();
-                case 4 -> System.out.println("Submenu Matéria-Prima (Em breve)");
+                case 4 -> buyRawMaterialSubmenu();
                 case 0 -> running = false;
                 default -> System.out.println("Opção inválida!");
             }
@@ -60,7 +64,7 @@ public class Menu {
                 System.out.printf("[%d] %s (Demanda atual: %d)\n", i++, demand.getProductName(), demand.getAmount());
             }
 
-            System.out.println("Qual demanda deseja atualizar? (0 para voltar): ");
+            System.out.println("Qual demanda deseja ATUALIZAR? (0 para voltar): ");
             int option = scanner.nextInt();
 
             if (option == 0) {
@@ -81,6 +85,12 @@ public class Menu {
 
     private void fabricateDemandSubmenu() {
         boolean running = true;
+
+        productionManager.getConveyor().turnOn();
+        for (Machine m: productionManager.getMachines()) {
+            m.turnOn();
+        }
+
         while (running) {
             List<Demand> demands = productionManager.getDemands();
 
@@ -89,14 +99,35 @@ public class Menu {
             for (Demand demand : demands) {
                 System.out.printf("[%d] %s (Demanda atual: %d)\n", i++, demand.getProductName(), demand.getAmount());
             }
-            System.out.println("Qual demanda deseja fabricar? (0 para voltar): ");
-            Demand chosenDemand = demands.get((scanner.nextInt() - 1));
+
+            System.out.println("Qual demanda deseja FABRICAR? (0 para voltar): ");
+            int option = scanner.nextInt();
+
+            if (option == 0) {
+                break; // Retorna ao menu principal
+            }
+
+            Demand chosenDemand = productionManager.getDemands().get(option - 1);
             productionManager.fabricateDemand(chosenDemand);
-            running = false;
+
+            System.out.println("Demanda fabricada com sucesso!");
+            running = false; // Retorna ao menu principal
+        }
+
+        productionManager.getConveyor().turnOff();
+        for (Machine m: productionManager.getMachines()) {
+            m.turnOff();
         }
     }
 
     private void showStorageSubmenu() {
         boolean running = true;
+        System.out.println("Ainda não implementado.");
     }
+
+    private void buyRawMaterialSubmenu() {
+        boolean running = true;
+        System.out.println("Ainda não implementado.");
+    }
+
 }
