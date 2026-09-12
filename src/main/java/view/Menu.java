@@ -2,7 +2,13 @@ package view;
 
 import domain.entities.demand.Demand;
 import domain.entities.machines.conveyor.Conveyor;
+import domain.entities.machines.machine.InspectionMachine;
 import domain.entities.machines.machine.Machine;
+import domain.entities.machines.machine.PackingMachine;
+import domain.entities.machines.machine.ProcessingMachine;
+import domain.entities.product.CopoDeVidro;
+import domain.entities.product.KitCopoDeVidro;
+import domain.entities.product.PoteDeVidro;
 import domain.entities.product.Product;
 import domain.entities.productionmanager.ProductionManager;
 import domain.entities.rawmaterial.RawMaterial;
@@ -21,15 +27,15 @@ public class Menu {
         boolean running = true;
 
         // Produtos hardcoded
-        productionManager.addNewProduct(new Product("Copo", 5));
-        productionManager.addNewProduct(new Product("Prato", 10));
-        productionManager.addNewProduct(new Product("Travessa", 15));
+        productionManager.addNewProduct(new CopoDeVidro("Copo", 5));
+        productionManager.addNewProduct(new PoteDeVidro("Pote", 10));
+        productionManager.addNewProduct(new KitCopoDeVidro("Kit Copo", 15));
 
         productionManager.addNewConveyor(new Conveyor("Esteira", 20));
 
-        productionManager.addNewMachine(new Machine("Máquina de Processamento", 20));
-        productionManager.addNewMachine(new Machine("Máquina de Empacotamento", 20));
-        productionManager.addNewMachine(new Machine("Máquina de Inspecionamento", 20));
+        productionManager.addNewMachine(new ProcessingMachine("Máquina de Processamento", 20, 0.3, 34.78));
+        productionManager.addNewMachine(new PackingMachine("Máquina de Empacotamento", 20, 0.2, 7.5));
+        productionManager.addNewMachine(new InspectionMachine("Máquina de Inspecionamento", 20, 0.1, 15.33));
 
         while (running) {
             System.out.println("\nTELA 1: ESCOLHER FUNCIONALIDADE");

@@ -1,28 +1,31 @@
 package domain.entities.machines.machine;
 
 import domain.entities.product.Product;
+import domain.entities.product.ProductStatus;
 
 public class InspectionMachine extends Machine {
 
-    public InspectionMachine(String name, int maxCapacity, float failureOdd,
-                             float operationCost) {
+    public InspectionMachine(String name, int maxCapacity, double failureOdd, double operationCost) {
         super(name, maxCapacity, failureOdd, operationCost);
     }
 
     @Override
-    public void process(Product product) {
+    public Product process(Product product, ProductStatus status) {
         if (!isOn()) {
-            throw new IllegalStateException("[Eitcha, João...] The machine can't proccess anything, since it ain't on!");
+            throw new IllegalStateException("[Eitcha, João...] The machine can't process anything, since it ain't on!");
         }
 
-        boolean failureFloor = checkFailure();
+        if (isProcessFailure(product)) {
+            product.setStatus(ProductStatus.FAILED);
+            return product;
+        }
 
-        /* The greate the quality, thej gratear the rejection odds.
-        The greater the cumulativeFailureOdd, the greater the rejection odds */
-//        double chanceRejeicao = product.getQuality() * 0.3 + product.getCumulativeFailureOdd();
+        product.setStatus(status);
+        return product;
+    }
 
-//        boolean isFailure = failureFloor || (random.nextDouble() < chanceRejeicao);
-
-
+    @Override
+    public String getType() {
+        return "Inspection";
     }
 }
