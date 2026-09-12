@@ -9,9 +9,10 @@ public class RawMaterial {
     private final String unit;
     private final int minQuantity;
     private int quantity;
+    private final float price;
 
     // My methods
-    public RawMaterial(String name, int initialQuantity, String unit, int minQuantity) {
+    public RawMaterial(String name, int initialQuantity, String unit, int minQuantity, float price) {
         if (initialQuantity < 0 || minQuantity < 0) {
             throw new IllegalArgumentException("Quantidades iniciais e mínimas não podem ser negativas.");
         }
@@ -21,6 +22,7 @@ public class RawMaterial {
         this.unit = unit;
         this.minQuantity = minQuantity;
         this.quantity = initialQuantity;
+        this.price = price;
     }
 
     // Mandatory methods
@@ -46,23 +48,27 @@ public class RawMaterial {
     }
 
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getUnit() {
-        return unit;
+        return this.unit;
     }
 
     public int getMinQuantity() {
-        return minQuantity;
+        return this.minQuantity;
+    }
+
+    public float getPrice() {
+        return this.price;
     }
 
     public int getQuantity() {
-        return quantity;
+        return this.quantity;
     }
 
     public void setQuantity(int quantity) {
