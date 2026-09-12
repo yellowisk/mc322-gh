@@ -73,10 +73,7 @@ public class ProductionManager {
             System.out.println("[OK] Etapa iniciada: PROCESSAMENTO.\n");
             currentMachine = this.machines.get(ProductionStages.PROCESSING.getCode());
             currentProduct = currentMachine.process(this.chosenProduct, ProductStatus.PROCESSED);
-            if (currentProduct == null) {
-                rawMaterial.consume(chosenProduct.getRawMaterialPerUnit());
-                break; // TODO: tratar erro
-            }
+            rawMaterial.consume(chosenProduct.getRawMaterialPerUnit());
             System.out.println("[OK] Etapa concluída: PROCESSAMENTO.\n");
             this.conveyor.addProduct(currentProduct);
 
