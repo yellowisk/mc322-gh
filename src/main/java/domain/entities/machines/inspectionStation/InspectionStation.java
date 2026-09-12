@@ -24,7 +24,7 @@ public class InspectionStation {
             throw new IllegalArgumentException("[NÃO FOI DESSA VEZ...] There's no product to inspect.");
         }
 
-        product.setStatus(ProductStatus.INSPECTED);
+        product.setStatus(ProductStatus.APPROVED);
         this.inspectedProducts += 1;
     }
 

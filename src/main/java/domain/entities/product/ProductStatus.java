@@ -1,7 +1,9 @@
 package domain.entities.product;
 
 public enum ProductStatus {
-    INSPECTED,
     PROCESSED,
-    UNPROCESSED
+    PACKED,
+    APPROVED,
+    UNDERGOING,
+    FAILED
 }

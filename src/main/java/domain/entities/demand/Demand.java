@@ -15,7 +15,7 @@ public class Demand {
 
     public int calcRawMaterialNeeded(Product product) {
         // for those who just joined the stream: "calc" is short for "calculate"
-        return (product.getRawMaterialAmountNeeded() * this.amount);
+        return (product.getRawMaterialPerUnit() * this.amount);
     }
 
     public String getProductName() {
