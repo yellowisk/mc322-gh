@@ -3,6 +3,7 @@ package domain.entities.productionmanager;
 import domain.entities.demand.Demand;
 import domain.entities.machines.conveyor.Conveyor;
 import domain.entities.machines.machine.Machine;
+import domain.entities.machines.machine.ProcessingMachine;
 import domain.entities.product.Product;
 import domain.entities.product.ProductStatus;
 import domain.entities.rawmaterial.RawMaterial;
@@ -89,7 +90,7 @@ public class ProductionManager {
             // 3. Inspeção
             System.out.println("[OK] Etapa iniciada: INSPEÇÃO.");
             currentMachine = this.machines.get(ProductionStages.INSPECTION.getCode());
-            currentProduct = currentMachine.process(this.conveyor.removeProduct(), ProductStatus.INSPECTED);
+            currentProduct = currentMachine.process(this.conveyor.removeProduct(), ProductStatus.APPROVED);
             this.conveyor.addProduct(currentProduct);
             System.out.println("[OK] Etapa concluída: INSPEÇÃO.\n");
 
