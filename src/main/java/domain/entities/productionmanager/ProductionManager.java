@@ -67,13 +67,13 @@ public class ProductionManager {
 
         while (fabricatedProducts <= remainingProducts) {
 
-            this.conveyor.addRawMaterial(chosenProduct.getRawMaterialAmountNeeded());
+            this.conveyor.addRawMaterial(chosenProduct.getRawMaterialPerUnit());
             // 1. Processamento
             System.out.println("[OK] Etapa iniciada: PROCESSAMENTO.\n");
             currentMachine = this.machines.get(ProductionStages.PROCESSING.getCode());
             currentProduct = currentMachine.process(this.chosenProduct, ProductStatus.PROCESSED);
             if (currentProduct == null) {
-                rawMaterial.consume(chosenProduct.getRawMaterialAmountNeeded());
+                rawMaterial.consume(chosenProduct.getRawMaterialPerUnit());
                 break; // TODO: tratar erro
             }
             System.out.println("[OK] Etapa concluída: PROCESSAMENTO.\n");
@@ -93,7 +93,7 @@ public class ProductionManager {
             this.conveyor.addProduct(currentProduct);
             System.out.println("[OK] Etapa concluída: INSPEÇÃO.\n");
 
-            if (currentProduct.getStatus() == ProductStatus.SUCCESS) {
+            if (currentProduct.getStatus() == ProductStatus.APPROVED) {
                 fabricatedProducts++;
                 this.fabricatedProducts.add(this.conveyor.removeProduct());
             } else {
