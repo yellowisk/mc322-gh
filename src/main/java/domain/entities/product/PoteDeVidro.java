@@ -2,7 +2,7 @@ package domain.entities.product;
 
 public class PoteDeVidro extends Product {
     public PoteDeVidro(String name, int rawMaterialPerUnit) {
-        super(name, rawMaterialPerUnit, 7.0, 0.0);
+        super(name, rawMaterialPerUnit, 0.7, 0.0);
     }
 
     @Override

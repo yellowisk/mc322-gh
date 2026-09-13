@@ -3,7 +3,7 @@ package domain.entities.product;
 public class CopoDeVidro extends Product {
 
     public CopoDeVidro(String name, int rawMaterialPerUnit) {
-        super(name, rawMaterialPerUnit, 4.0, 0.0);
+        super(name, rawMaterialPerUnit, 0.4, 0.0);
     }
 
     @Override

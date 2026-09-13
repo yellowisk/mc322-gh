@@ -11,14 +11,14 @@ public class PackingMachine extends Machine {
     }
 
     @Override
-    public Product process(Product product, ProductStatus status) {
+    public Product process(Product product) {
         if (!isOn()) {
             throw new IllegalStateException("[Eitcha, João...] The machine can't process anything, since it ain't on!");
         }
 
         tryIncreaseFailureOdd(product, getFailureOdd());
 
-        product.setStatus(status);
+        product.setStatus(ProductStatus.PACKED);
         return product;
     }
 

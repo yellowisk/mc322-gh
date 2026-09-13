@@ -3,13 +3,11 @@ package view;
 import domain.entities.demand.Demand;
 import domain.entities.machines.conveyor.Conveyor;
 import domain.entities.machines.machine.InspectionMachine;
-import domain.entities.machines.machine.Machine;
 import domain.entities.machines.machine.PackingMachine;
 import domain.entities.machines.machine.ProcessingMachine;
 import domain.entities.product.CopoDeVidro;
 import domain.entities.product.KitCopoDeVidro;
 import domain.entities.product.PoteDeVidro;
-import domain.entities.product.Product;
 import domain.entities.productionmanager.ProductionManager;
 import domain.entities.rawmaterial.RawMaterial;
 
@@ -31,14 +29,16 @@ public class Menu {
         productionManager.addNewProduct(new PoteDeVidro("Pote", 10));
         productionManager.addNewProduct(new KitCopoDeVidro("Kit Copo", 15));
 
+        // Esteira hardcoded
         productionManager.addNewConveyor(new Conveyor("Esteira", 20));
 
-        productionManager.addNewMachine(new ProcessingMachine("Máquina de Processamento", 20, 0.3, 34.78));
-        productionManager.addNewMachine(new PackingMachine("Máquina de Empacotamento", 20, 0.2, 7.5));
-        productionManager.addNewMachine(new InspectionMachine("Máquina de Inspecionamento", 20, 0.1, 15.33));
+        // Máquinas hardcoded
+        productionManager.addNewMachine(new ProcessingMachine("Máquina de Processamento", 20, 0.25, 34.78));
+        productionManager.addNewMachine(new PackingMachine("Máquina de Empacotamento", 20, 0.15, 7.5));
+        productionManager.addNewMachine(new InspectionMachine("Máquina de Inspecionamento", 20, 0.10, 15.33));
 
         while (running) {
-            System.out.println("\nTELA 1: ESCOLHER FUNCIONALIDADE");
+            System.out.println("\nTELA 1: ESCOLHER FUNCIONALIDADE \\u0007");
             System.out.println("[1] Atualizar demandas");
             System.out.println("[2] Fabricar demandas");
             System.out.println("[3] Ver armazém");
@@ -92,11 +92,6 @@ public class Menu {
     private void fabricateDemandSubmenu() {
         boolean running = true;
 
-        productionManager.getConveyor().turnOn();
-        for (Machine m: productionManager.getMachines()) {
-            m.turnOn();
-        }
-
         while (running) {
             List<Demand> demands = productionManager.getDemands();
 
@@ -116,13 +111,8 @@ public class Menu {
             Demand chosenDemand = productionManager.getDemands().get(option - 1);
             productionManager.fabricateDemand(chosenDemand);
 
-            System.out.println("Demanda fabricada com sucesso!");
+            System.out.println("Processo de fabricação finalizado.");
             running = false; // Retorna ao menu principal
-        }
-
-        productionManager.getConveyor().turnOff();
-        for (Machine m: productionManager.getMachines()) {
-            m.turnOff();
         }
     }
 
