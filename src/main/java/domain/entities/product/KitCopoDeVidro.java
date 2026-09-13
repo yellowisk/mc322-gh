@@ -3,7 +3,7 @@ package domain.entities.product;
 public class KitCopoDeVidro extends Product {
 
     public KitCopoDeVidro(String name, int rawMaterialPerUnit) {
-        super(name, rawMaterialPerUnit, 10.0, 0.0);
+        super(name, rawMaterialPerUnit, 1.0, 0.0);
     }
 
     @Override

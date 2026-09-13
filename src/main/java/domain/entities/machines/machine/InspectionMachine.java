@@ -10,7 +10,7 @@ public class InspectionMachine extends Machine {
     }
 
     @Override
-    public Product process(Product product, ProductStatus status) {
+    public Product process(Product product) {
         if (!isOn()) {
             throw new IllegalStateException("[Eitcha, João...] The machine can't process anything, since it ain't on!");
         }
@@ -20,7 +20,7 @@ public class InspectionMachine extends Machine {
             return product;
         }
 
-        product.setStatus(status);
+        product.setStatus(ProductStatus.APPROVED);
         return product;
     }
 
