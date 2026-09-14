@@ -1,4 +1,4 @@
-package domain.entities.machines.conveyor;
+package domain.entities.conveyor;
 
 import domain.entities.product.Product;
 
@@ -6,7 +6,7 @@ public class Conveyor {
     // Mandatory attributes
     private final String name;
     private Product product;
-    private int rawMaterial;
+    private double rawMaterial;
     private boolean isOn; // emMovimento
     private final int maxCapacity;
 
@@ -27,7 +27,7 @@ public class Conveyor {
         this.isOn = true;
     }
 
-    private void checkCanCarry(int quantity) {
+    private void checkCanCarry(double quantity) {
         if (!this.isOn) {
             throw new IllegalStateException("[NÃO FOI DESSA VEZ...] The conveyor is off.");
         }
@@ -40,12 +40,12 @@ public class Conveyor {
     }
 
     // >>>>> RECURSO
-    public void addRawMaterial(int quantity) {
+    public void addRawMaterial(double quantity) {
         checkCanCarry(quantity);
         this.rawMaterial = quantity;
     }
 
-    public int removeRawMaterial() {
+    public double removeRawMaterial() {
         if (!isOn()) {
             throw new IllegalStateException("[NÃO FOI DESSA VEZ...] The conveyor is off.");
         }
@@ -54,7 +54,7 @@ public class Conveyor {
             throw new IllegalStateException("[NÃO FOI DESSA VEZ...] There's no product on the conveyor.");
         }
 
-        int n = this.rawMaterial;
+        double n = this.rawMaterial;
         this.rawMaterial = 0;
         return n;
     }
@@ -80,7 +80,7 @@ public class Conveyor {
         return p;
     }
 
-    private boolean verifyCapacity(int weight) {
+    private boolean verifyCapacity(double weight) {
         if (weight < 0) {
             throw new IllegalArgumentException("[NÃO FOI DESSA VEZ...] The weight can't be negative");
         }
@@ -88,7 +88,7 @@ public class Conveyor {
         return (weight <= this.maxCapacity);
     }
 
-    public int getRawMaterial() {
+    public double getRawMaterial() {
         return rawMaterial;
     }
 

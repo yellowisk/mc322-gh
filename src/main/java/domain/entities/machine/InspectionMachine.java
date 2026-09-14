@@ -1,12 +1,11 @@
-package domain.entities.machines.machine;
+package domain.entities.machine;
 
 import domain.entities.product.Product;
 import domain.entities.product.ProductStatus;
 
-public class ProcessingMachine extends Machine {
+public class InspectionMachine extends Machine {
 
-    public ProcessingMachine(String name, int maxCapacity, double failureOdd,
-                             double operationCost) {
+    public InspectionMachine(String name, int maxCapacity, double failureOdd, double operationCost) {
         super(name, maxCapacity, failureOdd, operationCost);
     }
 
@@ -16,13 +15,17 @@ public class ProcessingMachine extends Machine {
             throw new IllegalStateException("[Eitcha, João...] The machine can't process anything, since it ain't on!");
         }
 
-        Product newProduct = product.process(product, ProductStatus.PROCESSED);
-        tryIncreaseFailureOdd(newProduct, getFailureOdd());
-        return newProduct;
+        if (isProcessFailure(product)) {
+            product.setStatus(ProductStatus.FAILED);
+            return product;
+        }
+
+        product.setStatus(ProductStatus.APPROVED);
+        return product;
     }
 
     @Override
     public String getType() {
-        return "Processing";
+        return "Inspection";
     }
 }
