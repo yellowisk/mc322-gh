@@ -1,4 +1,4 @@
-package presentation.console;
+package view;
 
 import domain.entities.demand.Demand;
 import domain.entities.demand.DemandStatus;
