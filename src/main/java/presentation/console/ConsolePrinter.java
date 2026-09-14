@@ -1,6 +1,8 @@
 package presentation.console;
 
 import domain.entities.demand.Demand;
+import domain.entities.demand.DemandStatus;
+import domain.entities.product.Product;
 import domain.entities.productionmanager.ProductionManager;
 
 import java.util.List;
@@ -15,6 +17,7 @@ public class ConsolePrinter {
     public static final String YELLOW = "\u001B[38;5;221m";
     public static final String GRAY = "\u001B[38;5;246m";
     public static final String RED = "\033[38;2;234;67;53m";
+    private static final int TREE_LINE_DELAY_MS = 250;
 
     public static void clearScreen() {
         System.out.print("\033[H\033[2J");
@@ -37,17 +40,37 @@ public class ConsolePrinter {
         System.out.print(BLUE + "\t" + String.format(format, args) + RESET);
     }
 
+    public static void stageHeader(String stageName) {
+        System.out.printf(YELLOW + "▸ %s" + RESET + "\n", stageName);
+    }
+
+    private static void treeLine(String icon, String color, boolean isLast, String format, Object... args) {
+        String connector = isLast ? "└─" : "├─";
+        System.out.printf("  %s " + color + "%s" + RESET + " %s\n", connector, icon, String.format(format, args));
+        try {
+            Thread.sleep(TREE_LINE_DELAY_MS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public static void treeOk(boolean isLast, String format, Object... args) {
+        treeLine("✓", GREEN, isLast, format, args);
+    }
+
+    public static void treeFail(boolean isLast, String format, Object... args) {
+        treeLine("✗", RED, isLast, format, args);
+    }
+
+    public static void treeInfo(boolean isLast, String format, Object... args) {
+        treeLine("ℹ", GRAY, isLast, format, args);
+    }
+
     public static String centerString(int width, String text) {
         if (text == null || text.length() >= width) return text;
         int leftPadding = (width - text.length()) / 2;
         int rightPadding = width - text.length() - leftPadding;
         return " ".repeat(leftPadding) + text + " ".repeat(rightPadding);
-    }
-
-    public static void card(String color, String format, Object... args) {
-        line();
-        System.out.printf(color + " %s" + RESET + "\n", String.format(format, args));
-        line();
     }
 
     public static void card(String format, Object... args) {
@@ -76,17 +99,17 @@ public class ConsolePrinter {
         System.out.printf(GRAY + " 0." + RESET + " ↩ Sair\n\n" + RESET);
     }
 
-    public static void printOneLineStats(ProductionManager pm) {
+    public static void printOneLineStats(double budget, double rawMaterialQuantity, int fabricatedCount) {
         System.out.printf(GRAY + "[ "
                         + "Budget: R$ %.2f"
                         + " | "
-                        + "Mat. Prima: %d kg"
+                        + "Mat. Prima: %.2f kg"
                         + " | "
                         + "Produtos: %d un"
                         + " ]\n" + RESET,
-                pm.getBudget(),
-                pm.getRawMaterial().getQuantity(),
-                pm.getFabricatedProducts().size()
+                budget,
+                rawMaterialQuantity,
+                fabricatedCount
         );
     }
 
@@ -98,8 +121,9 @@ public class ConsolePrinter {
             unitOperationCost += pm.getMachines().get(i).getOperationCost();
         }
 
-        System.out.printf("    " + GRAY + "%-16s   %-7s   %-7s %-15s" + RESET + "\n", "Produto", "Demanda", "MP", "Custo");
-        line(44);
+        System.out.printf("    " + GRAY + "%-16s   %-7s   %-12s %-15s %-18s %-10s" + RESET + "\n",
+                "Produto", "Demanda", "MP", "Custo", "Status", "Tempo");
+        line(82);
 
         double totalProjectedCost = 0;
         for (int i = 0; i < demands.size(); i++) {
@@ -107,12 +131,36 @@ public class ConsolePrinter {
             double demandCost = demand.getAmount() * unitOperationCost;
             totalProjectedCost += demandCost;
 
-            System.out.printf(GRAY + " %-1s." + RESET + " %-16s   %-7s   %-5s   R$ %-12.2f" + RESET + "\n",
+            /* Padding the plain text to the Status column's visible width yah */
+            String statusLabel;
+            String statusColor;
+            switch (demand.getStatus()) {
+                case COMPLETED -> {
+                    statusLabel = "Concluída";
+                    statusColor = GREEN;
+                }
+                case PARTIAL -> {
+                    statusLabel = String.format("Parcial (%d/%d)", demand.getProducedAmount(), demand.getAmount());
+                    statusColor = YELLOW;
+                }
+                default -> {
+                    statusLabel = "Pendente";
+                    statusColor = GRAY;
+                }
+            }
+            String status = statusColor + String.format("%-18s", statusLabel) + RESET;
+            String time = demand.getStatus() == DemandStatus.PENDING
+                    ? "-"
+                    : String.format("%.2fs", demand.getTotalProductionTime());
+
+            System.out.printf(GRAY + " %-1s." + RESET + " %-16s   %-7s   %-12s R$ %-12.2f %s %-10s" + RESET + "\n",
                     (i + 1),
                     demand.getProductName(),
                     demand.getAmount() + " un",
-                    demand.getTotalRawMaterial() + " kg",
-                    demandCost
+                    String.format("%.2f kg", demand.getTotalRawMaterial()),
+                    demandCost,
+                    status,
+                    time
             );
         }
 
@@ -123,6 +171,29 @@ public class ConsolePrinter {
         } else {
             System.out.printf(" Projeção Total de Custo Operacional: R$ %.2f\n" + RESET, pm.getBudget());
         }
+        System.out.println();
+    }
+
+    public static void listStorage(List<Demand> demands, List<Product> storage) {
+        System.out.printf("    " + GRAY + "%-16s   %-10s" + RESET + "\n", "Produto", "Estoque");
+        line(44);
+
+        for (int i = 0; i < demands.size(); i++) {
+            String productName = demands.get(i).getProductName();
+            int count = 0;
+            for (Product p : storage) {
+                if (p.getName().equals(productName)) {
+                    count++;
+                }
+            }
+
+            System.out.printf(GRAY + " %-1s." + RESET + " %-16s   %-7s\n" + RESET,
+                    (i + 1),
+                    productName,
+                    count + " un"
+            );
+        }
+
         System.out.println();
     }
 }
