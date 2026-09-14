@@ -10,14 +10,14 @@ public abstract class Product {
     private final int id;
     private final String name;
     private ProductStatus status;
-    private final int rawMaterialPerUnit;
+    private final double rawMaterialPerUnit;
     private final double quality;
     private double cumulativeFailureOdd;
     private static int productsCounter;
 
     private static final Random random = new Random();
 
-    public Product(String name, int rawMaterialPerUnit, double quality,
+    public Product(String name, double rawMaterialPerUnit, double quality,
                    double cumulativeFailureOdd) {
         this.id = globalUniqueId++;
         this.name = name;
@@ -28,6 +28,10 @@ public abstract class Product {
 
         /* As every subclass uses super, this will run for every subclass created */
         productsCounter++;
+    }
+
+    public static void resetIdCounter() {
+        globalUniqueId = 1;
     }
 
     public abstract Product process(Product model, ProductStatus newStatus);
@@ -55,7 +59,7 @@ public abstract class Product {
         this.status = status;
     }
 
-    public int getRawMaterialPerUnit() {
+    public double getRawMaterialPerUnit() {
         return rawMaterialPerUnit;
     }
 

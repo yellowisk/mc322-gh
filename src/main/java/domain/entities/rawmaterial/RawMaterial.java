@@ -8,7 +8,7 @@ public class RawMaterial {
     private final String name;
     private final String unit;
     private final int minQuantity;
-    private int quantity;
+    private double quantity;
     private final float price;
 
     // My methods
@@ -26,7 +26,7 @@ public class RawMaterial {
     }
 
     // Mandatory methods
-    public void consume(int demand) {
+    public void consume(double demand) {
         if (demand <= 0) {
             throw new IllegalArgumentException("A demanda para consumo deve ser maior que zero.");
         }
@@ -43,7 +43,7 @@ public class RawMaterial {
         this.quantity += quantity;
     }
 
-    public boolean isAvailable(int demand) {
+    public boolean isAvailable(double demand) {
         return demand > 0 && this.quantity >= demand && (this.quantity - demand) >= minQuantity;
     }
 
@@ -67,11 +67,11 @@ public class RawMaterial {
         return this.price;
     }
 
-    public int getQuantity() {
+    public double getQuantity() {
         return this.quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(double quantity) {
         this.quantity = quantity;
     }
 
