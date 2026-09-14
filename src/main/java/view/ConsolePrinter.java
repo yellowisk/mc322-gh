@@ -17,7 +17,7 @@ public class ConsolePrinter {
     public static final String YELLOW = "\u001B[38;5;221m";
     public static final String GRAY = "\u001B[38;5;246m";
     public static final String RED = "\033[38;2;234;67;53m";
-    private static final int TREE_LINE_DELAY_MS = 250;
+    private static final int TREE_LINE_DELAY_MS = 200;
 
     public static void clearScreen() {
         System.out.print("\033[H\033[2J");
