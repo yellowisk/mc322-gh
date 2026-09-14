@@ -1,4 +1,4 @@
-package domain.entities.machines.machine;
+package domain.entities.machine;
 
 import domain.entities.product.Product;
 
