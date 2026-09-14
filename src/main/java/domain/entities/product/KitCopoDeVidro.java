@@ -2,7 +2,7 @@ package domain.entities.product;
 
 public class KitCopoDeVidro extends Product {
 
-    public KitCopoDeVidro(String name, int rawMaterialPerUnit) {
+    public KitCopoDeVidro(String name, double rawMaterialPerUnit) {
         super(name, rawMaterialPerUnit, 1.0, 0.0);
     }
 
