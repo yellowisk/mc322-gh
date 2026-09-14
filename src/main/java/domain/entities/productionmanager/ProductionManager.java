@@ -6,7 +6,7 @@ import domain.entities.machine.Machine;
 import domain.entities.product.Product;
 import domain.entities.product.ProductStatus;
 import domain.entities.rawmaterial.RawMaterial;
-import presentation.console.ConsolePrinter;
+import view.ConsolePrinter;
 
 import java.util.ArrayList;
 import java.util.List;

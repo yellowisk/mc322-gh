@@ -11,7 +11,6 @@ import domain.entities.product.PoteDeVidro;
 import domain.entities.product.Product;
 import domain.entities.productionmanager.ProductionManager;
 import domain.entities.rawmaterial.RawMaterial;
-import presentation.console.ConsolePrinter;
 
 import java.util.List;
 import java.util.Scanner;
