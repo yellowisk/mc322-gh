@@ -1,8 +1,8 @@
 package domain.entities.productionmanager;
 
 import domain.entities.demand.Demand;
-import domain.entities.machines.conveyor.Conveyor;
-import domain.entities.machines.machine.Machine;
+import domain.entities.conveyor.Conveyor;
+import domain.entities.machine.Machine;
 import domain.entities.product.Product;
 import domain.entities.product.ProductStatus;
 import domain.entities.rawmaterial.RawMaterial;
@@ -37,6 +37,9 @@ public class ProductionManager {
 
     public void updateDemand(Demand demand, int newValue) {
         demand.setAmount(newValue);
+        Product product = getProductByName(demand.getProductName());
+        demand.setTotalRawMaterial(product.getRawMaterialPerUnit() * demand.getAmount());
+        demand.reset();
     }
 
     public Product getProductByName(String productName) {
@@ -60,6 +63,11 @@ public class ProductionManager {
             return;
         }
 
+        if (demand.getAmount() <= 0) {
+            ConsolePrinter.fail("Nenhuma unidade de %s foi demandada. Atualize a demanda antes de fabricar.\n", chosenProduct.getName());
+            return;
+        }
+
         this.getConveyor().turnOn();
         for (Machine m: this.getMachines()) {
             m.turnOn();
@@ -70,78 +78,92 @@ public class ProductionManager {
         int productsRemaining = demand.getAmount();
         int fabricatedAmount = 0;
         int approvedAmount = 0;
-        int nextId = chosenProduct.getId();
+        double totalProductionTime = 0;
 
         Machine currentMachine;
         Product currentProduct;
 
         while (fabricatedAmount < productsRemaining) {
-            System.out.printf("(%d/%d) %s #%d \n", (fabricatedAmount + 1), productsRemaining, chosenProduct.getName(), ++nextId);
+            System.out.printf("(%d/%d) %s\n", (fabricatedAmount + 1), productsRemaining, chosenProduct.getName());
 
-            // 1. Processamento
-            System.out.print("Etapa iniciada: " + ConsolePrinter.YELLOW + "PROCESSAMENTO" + ConsolePrinter.RESET + ".\n");
-            currentMachine = this.machines.get(ProductionStages.PROCESSING.getCode());
-            if (!calcProductionCost(currentMachine)) {
-                ConsolePrinter.fail("Orçamento insuficiente para operar a máquina de processamento!\n");
+            try {
+                // 1. Processamento
+                ConsolePrinter.stageHeader("PROCESSAMENTO");
+                currentMachine = this.machines.get(ProductionStages.PROCESSING.getCode());
+                if (!calcProductionCost(currentMachine)) {
+                    ConsolePrinter.treeFail(true, "Orçamento insuficiente para operar a máquina de processamento!");
+                    break;
+                }
+
+                conveyor.addRawMaterial(chosenProduct.getRawMaterialPerUnit());
+                ConsolePrinter.treeInfo(false, "%s carregado para a esteira.", this.rawMaterial.getName());
+
+                this.rawMaterial.consume(conveyor.removeRawMaterial());
+                ConsolePrinter.treeInfo(false, "%s transportado até a máquina de processamento.", this.rawMaterial.getName());
+                ConsolePrinter.treeInfo(false, "Máquina processando %.2f %s de %s...", this.chosenProduct.getRawMaterialPerUnit(), this.rawMaterial.getUnit(), this.rawMaterial.getName());
+                currentProduct = currentMachine.process(this.chosenProduct);
+                ConsolePrinter.treeOk(true, "Produto %s #%d criado.", currentProduct.getName(), currentProduct.getId());
+
+                // 2. Empacotamento
+                ConsolePrinter.stageHeader("EMPACOTAMENTO");
+
+                currentMachine = this.machines.get(ProductionStages.PACKAGING.getCode());
+                if (!calcProductionCost(currentMachine)) {
+                    ConsolePrinter.treeFail(true, "Orçamento insuficiente para operar a máquina de empacotamento!");
+                    break;
+                }
+
+                this.conveyor.addProduct(currentProduct);
+                ConsolePrinter.treeInfo(false, "%s #%d carregado para a esteira.", currentProduct.getName(), currentProduct.getId());
+                ConsolePrinter.treeInfo(false, "%s #%d transportado(a) até a máquina de empacotamento.", currentProduct.getName(), currentProduct.getId());
+                ConsolePrinter.treeInfo(false, "Máquina empacotando %s #%d...", currentProduct.getName(), currentProduct.getId());
+                currentProduct = currentMachine.process(this.conveyor.removeProduct());
+                ConsolePrinter.treeOk(true, "Produto %s #%d empacotado.", currentProduct.getName(), currentProduct.getId());
+
+                // 3. Inspeção
+                ConsolePrinter.stageHeader("INSPEÇÃO");
+                currentMachine = this.machines.get(ProductionStages.INSPECTION.getCode());
+                if (!calcProductionCost(currentMachine)) {
+                    ConsolePrinter.treeFail(true, "Orçamento insuficiente para operar a máquina de inspeção!");
+                    break;
+                }
+                this.conveyor.addProduct(currentProduct);
+                ConsolePrinter.treeInfo(false, "%s #%d carregado para a esteira.", currentProduct.getName(), currentProduct.getId());
+                ConsolePrinter.treeInfo(false, "%s #%d transportado(a) até a máquina de inspeção.", currentProduct.getName(), currentProduct.getId());
+                ConsolePrinter.treeInfo(false, "Máquina inspecionando %s #%d...", currentProduct.getName(), currentProduct.getId());
+                currentProduct = currentMachine.process(this.conveyor.removeProduct());
+                conveyor.addProduct(currentProduct);
+                ConsolePrinter.treeInfo(false, "Produto %s #%d inspecionado.", currentProduct.getName(), currentProduct.getId());
+
+                if (currentProduct.getStatus() == ProductStatus.APPROVED) {
+                    this.fabricatedProducts.add(this.conveyor.removeProduct());
+                    ConsolePrinter.treeOk(true, "O produto %s #%d foi aprovado e enviado ao armazém!", currentProduct.getName(), currentProduct.getId());
+                    approvedAmount++;
+                } else {
+                    ConsolePrinter.treeFail(true, "O produto %s #%d foi rejeitado na inspeção e descartado.", currentProduct.getName(), currentProduct.getId());
+                    this.conveyor.removeProduct();
+                }
+
+                totalProductionTime += chosenProduct.countProductionTime();
+                fabricatedAmount++;
+            } catch (IllegalStateException | IllegalArgumentException e) {
+                ConsolePrinter.treeFail(true, e.getMessage());
                 break;
             }
-
-            conveyor.addRawMaterial(chosenProduct.getRawMaterialPerUnit());
-            ConsolePrinter.info("%s carregado para a esteira.\n", this.rawMaterial.getName());
-
-            this.rawMaterial.consume(conveyor.removeRawMaterial());
-            ConsolePrinter.info("%s transportado até a máquina de processamento.\n", this.rawMaterial.getName());
-            ConsolePrinter.info("Máquina processando %d %s de %s...\n", this.chosenProduct.getRawMaterialPerUnit(), this.rawMaterial.getUnit(), this.rawMaterial.getName());
-            currentProduct = currentMachine.process(this.chosenProduct);
-            ConsolePrinter.info("Produto %s #%d criado.\n", currentProduct.getName(), currentProduct.getId());
-            ConsolePrinter.ok("Etapa concluída: PROCESSAMENTO.\n");
-
-            // 2. Empacotamento
-            System.out.print("Etapa iniciada: " + ConsolePrinter.YELLOW + "EMPACOTAMENTO" + ConsolePrinter.RESET + ".\n");
-
-            currentMachine = this.machines.get(ProductionStages.PACKAGING.getCode());
-            if (!calcProductionCost(currentMachine)) {
-                ConsolePrinter.fail("Orçamento insuficiente para operar a máquina de empacotamento!\n");
-                break;
-            }
-
-            this.conveyor.addProduct(currentProduct);
-            ConsolePrinter.info("%s #%d carregado para a esteira.\n", currentProduct.getName(), currentProduct.getId());
-            ConsolePrinter.info("%s #%d transportado(a) até a máquina de empacotamento.\n", currentMachine.getName(), currentProduct.getId());
-            ConsolePrinter.info("Máquina empacotando %s #%d...\n", currentProduct.getName(), currentProduct.getId());
-            currentProduct = currentMachine.process(this.conveyor.removeProduct());
-            ConsolePrinter.info("Produto %s #%d empacotado.\n", currentProduct.getName(), currentProduct.getId());
-            ConsolePrinter.ok("Etapa concluída: EMPACOTAMENTO.\n");
-
-            // 3. Inspeção
-            System.out.print("Etapa iniciada: " + ConsolePrinter.YELLOW + "INSPEÇÃO" + ConsolePrinter.RESET + ".\n");
-            currentMachine = this.machines.get(ProductionStages.INSPECTION.getCode());
-            if (!calcProductionCost(currentMachine)) {
-                ConsolePrinter.fail("Orçamento insuficiente para operar a máquina de inspeção!\n");
-                break;
-            }
-            this.conveyor.addProduct(currentProduct);
-            ConsolePrinter.info("%s #%d carregado para a esteira.\n", currentProduct.getName(), currentProduct.getId());
-            ConsolePrinter.info("%s #%d transportado(a) até a máquina de inspeção.\n", currentProduct.getName(), currentProduct.getId());
-            ConsolePrinter.info("Máquina inspecionando %s #%d...\n", currentProduct.getName(), currentProduct.getId());
-            currentProduct = currentMachine.process(this.conveyor.removeProduct());
-            conveyor.addProduct(currentProduct);
-            ConsolePrinter.info("Produto %s #%d inspecionado.\n", currentProduct.getName(), currentProduct.getId());
-
-            if (currentProduct.getStatus() == ProductStatus.APPROVED) {
-                this.fabricatedProducts.add(this.conveyor.removeProduct());
-                ConsolePrinter.ok("O produto %s #%d foi aprovado e enviado ao armazém!\n", currentProduct.getName(), currentProduct.getId());
-                approvedAmount++;
-            } else {
-                ConsolePrinter.fail("O produto %s #%d foi rejeitado na inspeção e descartado.\n", currentProduct.getName(), currentProduct.getId());
-                this.conveyor.removeProduct();
-            }
-            ConsolePrinter.ok("[OK] Etapa concluída: INSPEÇÃO.\n");
-
-            fabricatedAmount++;
         }
 
         ConsolePrinter.card("%d produtos fabricados e %d aprovados.\n", fabricatedAmount, approvedAmount);
+
+        if (fabricatedAmount == productsRemaining) {
+            demand.fulfill(fabricatedAmount, totalProductionTime);
+            ConsolePrinter.info("Demanda de %s concluída em %.2f segundos de produção.\n", demand.getProductName(), totalProductionTime);
+        } else if (fabricatedAmount > 0) {
+            demand.partiallyFulfill(fabricatedAmount, totalProductionTime);
+            ConsolePrinter.info("Demanda de %s atendida parcialmente (%d/%d) em %.2f segundos de produção.\n",
+                    demand.getProductName(), fabricatedAmount, productsRemaining, totalProductionTime);
+        } else {
+            demand.reset();
+        }
 
         this.getConveyor().turnOff();
         for (Machine m: this.getMachines()) {
@@ -166,7 +188,7 @@ public class ProductionManager {
         }
         budget -= totalCost;
         this.rawMaterial.addStock(amount);
-        ConsolePrinter.ok("Compra de matéria-prima realizada com sucesso!\n");
+        ConsolePrinter.card(" [" + ConsolePrinter.GREEN + "OK" + ConsolePrinter.RESET + "] Compra de matéria-prima realizada com sucesso!");
     }
 
     public void setChosenProduct(Product chosenProduct) {
@@ -203,6 +225,16 @@ public class ProductionManager {
 
     public float getBudget() {
         return budget;
+    }
+
+    public void displayBudget() {
+        ConsolePrinter.printOneLineStats(this.budget, this.rawMaterial.getQuantity(), this.fabricatedProducts.size());
+    }
+
+    public void displayStorage() {
+        System.out.printf("   Estoque de Matéria-Prima: " + ConsolePrinter.GREEN + "%.2f %s\n\n" + ConsolePrinter.RESET,
+                this.rawMaterial.getQuantity(), this.rawMaterial.getUnit());
+        ConsolePrinter.listStorage(this.demands, this.fabricatedProducts);
     }
 
 }
