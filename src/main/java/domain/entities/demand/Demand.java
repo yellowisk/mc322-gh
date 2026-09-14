@@ -6,16 +6,26 @@ public class Demand {
     private final String productName;
     private int amount;
     private boolean isDone;
+    private int totalRawMaterial;
 
-    public Demand(String productName, int amount) {
-        this.productName = productName;
+    public Demand(Product product, int amount) {
+        this.productName = product.getName();
         this.amount = amount;
         this.isDone = false;
+        this.totalRawMaterial = calcRawMaterialNeeded(product);
     }
 
     public int calcRawMaterialNeeded(Product product) {
         // for those who just joined the stream: "calc" is short for "calculate"
         return (product.getRawMaterialPerUnit() * this.amount);
+    }
+
+    public void setTotalRawMaterial(int totalRawMaterial) {
+        this.totalRawMaterial = totalRawMaterial;
+    }
+
+    public int getTotalRawMaterial() {
+        return totalRawMaterial;
     }
 
     public String getProductName() {
