@@ -21,6 +21,6 @@ public class KitCopoDeVidro extends Product {
 
     @Override
     public String getType() {
-        return "High Quality";
+        return "Alta Qualidade";
     }
 }

@@ -101,7 +101,7 @@ public class ConsolePrinter {
 
     public static void printOneLineStats(double budget, double rawMaterialQuantity, int fabricatedCount) {
         System.out.printf(GRAY + "[ "
-                        + "Budget: R$ %.2f"
+                        + "Orçamento: R$ %.2f"
                         + " | "
                         + "Mat. Prima: %.2f kg"
                         + " | "

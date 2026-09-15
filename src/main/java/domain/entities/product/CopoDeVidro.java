@@ -21,6 +21,6 @@ public class CopoDeVidro extends Product {
 
     @Override
     public String getType() {
-        return "Low quality";
+        return "Baixa Qualidade";
     }
 }
