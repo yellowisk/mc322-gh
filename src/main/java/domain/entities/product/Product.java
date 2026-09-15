@@ -26,7 +26,7 @@ public abstract class Product {
         this.cumulativeFailureOdd = cumulativeFailureOdd;
         this.status = ProductStatus.UNDERGOING;
 
-        /* As every subclass uses super, this will run for every subclass created */
+        /* As every subclass of Product uses super, this will run for every subclass created */
         productsCounter++;
     }
 
@@ -78,7 +78,6 @@ public abstract class Product {
     public static int getProductsCounter() {
         return productsCounter;
     }
-
 
     protected double randomFactor() {
         return 1.2 * BigDecimal.valueOf(random.nextDouble())

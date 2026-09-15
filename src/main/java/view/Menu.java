@@ -34,12 +34,12 @@ public class Menu {
         Product.resetIdCounter();
 
         // Esteira hardcoded
-        productionManager.addNewConveyor(new Conveyor("Esteira", 20));
+        productionManager.addNewConveyor(new Conveyor("Esteira Ligeira", 20));
 
         // Máquinas hardcoded
         productionManager.addNewMachine(new ProcessingMachine("Máquina de Processamento", 20, 0.25, 0.78));
         productionManager.addNewMachine(new PackingMachine("Máquina de Empacotamento", 20, 0.15, 0.5));
-        productionManager.addNewMachine(new InspectionMachine("Máquina de Inspecionamento", 20, 0.10, 0.43));
+        productionManager.addNewMachine(new InspectionMachine("Máquina de Inspeção", 20, 0.10, 0.43));
 
         while (running) {
             ConsolePrinter.clearScreen();
@@ -63,7 +63,7 @@ public class Menu {
                 case 3 -> showStorageSubmenu();
                 case 4 -> buyRawMaterialSubmenu();
                 case 0 -> running = false;
-                default -> this.lastBuffer = ConsolePrinter.RED + "Opção inválida!" + ConsolePrinter.RESET;
+                default -> this.lastBuffer = ConsolePrinter.RED + " Dessa vez não é! Opção inválida!" + ConsolePrinter.RESET;
             }
         }
     }
@@ -99,7 +99,7 @@ public class Menu {
                 this.lastBuffer = String.format(" [" + ConsolePrinter.GREEN + "OK" + ConsolePrinter.RESET + "] Demanda de "
                         + "%s atualizada para %d!", selectedDemand.getProductName(), newValue);
             } else {
-                this.lastBuffer = ConsolePrinter.RED + "Opção inválida!" + ConsolePrinter.RESET;
+                this.lastBuffer = ConsolePrinter.RED + "Dessa vez não é! Opção inválida!" + ConsolePrinter.RESET;
             }
         }
     }
@@ -133,7 +133,7 @@ public class Menu {
                 scanner.nextLine();
                 running = false;
             } else {
-                this.lastBuffer = ConsolePrinter.RED + "Opção inválida!" + ConsolePrinter.RESET;
+                this.lastBuffer = ConsolePrinter.RED + "Dessa vez não é! Opção inválida!" + ConsolePrinter.RESET;
             }
         }
     }
@@ -152,7 +152,7 @@ public class Menu {
             int option = readInt("Escolha: ");
 
             if (option == 0) break;
-            else this.lastBuffer = ConsolePrinter.RED + "Opção inválida!" + ConsolePrinter.RESET;
+            else this.lastBuffer = ConsolePrinter.RED + "Dessa vez não é! Opção inválida!" + ConsolePrinter.RESET;
         }
     }
 
@@ -190,7 +190,7 @@ public class Menu {
                     this.lastBuffer = ConsolePrinter.YELLOW + "Compra cancelada." + ConsolePrinter.RESET;
                 }
             } else {
-                this.lastBuffer = ConsolePrinter.RED + "Quantidade inválida!" + ConsolePrinter.RESET;
+                this.lastBuffer = ConsolePrinter.RED + "Dessa vez não é! Quantidade inválida!" + ConsolePrinter.RESET;
             }
         }
     }
@@ -227,7 +227,7 @@ public class Menu {
                 return scanner.nextInt();
             }
             scanner.next();
-            System.out.println(ConsolePrinter.RED + "Entrada inválida! Digite um número." + ConsolePrinter.RESET);
+            System.out.println(ConsolePrinter.RED + "Dessa vez não é! Digite um número." + ConsolePrinter.RESET);
         }
     }
 

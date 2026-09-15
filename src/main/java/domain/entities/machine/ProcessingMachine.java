@@ -13,7 +13,7 @@ public class ProcessingMachine extends Machine {
     @Override
     public Product process(Product product) {
         if (!isOn()) {
-            throw new IllegalStateException("[Eitcha, João...] The machine can't process anything, since it ain't on!");
+            throw new IllegalStateException("Eitcha, João! The machine can't process anything, since it ain't on!");
         }
 
         Product newProduct = product.process(product, ProductStatus.PROCESSED);

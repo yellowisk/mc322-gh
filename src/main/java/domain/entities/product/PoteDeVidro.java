@@ -20,6 +20,6 @@ public class PoteDeVidro extends Product {
 
     @Override
     public String getType() {
-        return "Average quality";
+        return "Média Qualidade";
     }
 }

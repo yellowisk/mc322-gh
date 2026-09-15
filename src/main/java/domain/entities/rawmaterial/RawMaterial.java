@@ -14,7 +14,7 @@ public class RawMaterial {
     // My methods
     public RawMaterial(String name, int initialQuantity, String unit, int minQuantity, float price) {
         if (initialQuantity < 0 || minQuantity < 0) {
-            throw new IllegalArgumentException("Quantidades iniciais e mínimas não podem ser negativas.");
+            throw new IllegalArgumentException("Cadê a força? Quantidades iniciais e mínimas não podem ser negativas.");
         }
 
         this.id = UUID.randomUUID();
@@ -28,17 +28,17 @@ public class RawMaterial {
     // Mandatory methods
     public void consume(double demand) {
         if (demand <= 0) {
-            throw new IllegalArgumentException("A demanda para consumo deve ser maior que zero.");
+            throw new IllegalArgumentException("Cadê a força? A demanda para consumo deve ser maior que zero.");
         }
         if (!isAvailable(demand)) {
-            throw new IllegalStateException("Estoque insuficiente para atender à demanda de " + demand + " " + unit + ".");
+            throw new IllegalStateException("Cadê a força? Estoque insuficiente para atender à demanda de " + demand + " " + unit + ".");
         }
         this.quantity -= demand;
     }
 
     public void addStock(int quantity) {
         if (quantity <= 0) {
-            throw new IllegalArgumentException("A quantidade para adicionar ao estoque deve ser maior que zero.");
+            throw new IllegalArgumentException("Cadê a força? A quantidade para adicionar ao estoque deve ser maior que zero.");
         }
         this.quantity += quantity;
     }

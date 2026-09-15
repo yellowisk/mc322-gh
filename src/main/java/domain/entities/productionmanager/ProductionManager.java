@@ -73,7 +73,7 @@ public class ProductionManager {
             m.turnOn();
         }
 
-        System.out.printf("Iniciando produção de: %s\n", chosenProduct.getName());
+        System.out.printf("Eitcha!!! Iniciando produção de: %s\n", chosenProduct.getName());
 
         int productsRemaining = demand.getAmount();
         int fabricatedAmount = 0;
@@ -91,7 +91,7 @@ public class ProductionManager {
                 ConsolePrinter.stageHeader("PROCESSAMENTO");
                 currentMachine = this.machines.get(ProductionStages.PROCESSING.getCode());
                 if (!calcProductionCost(currentMachine)) {
-                    ConsolePrinter.treeFail(true, "Orçamento insuficiente para operar a máquina de processamento!");
+                    ConsolePrinter.treeFail(true, "Dessa vez não é! Orçamento insuficiente para operar a máquina de processamento!");
                     break;
                 }
 
@@ -99,17 +99,17 @@ public class ProductionManager {
                 ConsolePrinter.treeInfo(false, "%s carregado para a esteira.", this.rawMaterial.getName());
 
                 this.rawMaterial.consume(conveyor.removeRawMaterial());
-                ConsolePrinter.treeInfo(false, "%s transportado até a máquina de processamento.", this.rawMaterial.getName());
+                ConsolePrinter.treeInfo(false, "%s transportado até a máquina de processamento. E é ligeiro!", this.rawMaterial.getName());
                 ConsolePrinter.treeInfo(false, "Máquina processando %.2f %s de %s...", this.chosenProduct.getRawMaterialPerUnit(), this.rawMaterial.getUnit(), this.rawMaterial.getName());
                 currentProduct = currentMachine.process(this.chosenProduct);
-                ConsolePrinter.treeOk(true, "Produto %s #%d criado.", currentProduct.getName(), currentProduct.getId());
+                ConsolePrinter.treeOk(true, "Tu não acredita! Sabe o que é? \"%s\" #%d criado.", currentProduct.getName(), currentProduct.getId());
 
                 // 2. Empacotamento
                 ConsolePrinter.stageHeader("EMPACOTAMENTO");
 
                 currentMachine = this.machines.get(ProductionStages.PACKAGING.getCode());
                 if (!calcProductionCost(currentMachine)) {
-                    ConsolePrinter.treeFail(true, "Orçamento insuficiente para operar a máquina de empacotamento!");
+                    ConsolePrinter.treeFail(true, "Dessa vez não é! Orçamento insuficiente para operar a máquina de empacotamento!");
                     break;
                 }
 
@@ -124,7 +124,7 @@ public class ProductionManager {
                 ConsolePrinter.stageHeader("INSPEÇÃO");
                 currentMachine = this.machines.get(ProductionStages.INSPECTION.getCode());
                 if (!calcProductionCost(currentMachine)) {
-                    ConsolePrinter.treeFail(true, "Orçamento insuficiente para operar a máquina de inspeção!");
+                    ConsolePrinter.treeFail(true, "Dessa vez não é! Orçamento insuficiente para operar a máquina de inspeção!");
                     break;
                 }
                 this.conveyor.addProduct(currentProduct);
@@ -137,10 +137,10 @@ public class ProductionManager {
 
                 if (currentProduct.getStatus() == ProductStatus.APPROVED) {
                     this.fabricatedProducts.add(this.conveyor.removeProduct());
-                    ConsolePrinter.treeOk(true, "O produto %s #%d foi aprovado e enviado ao armazém!", currentProduct.getName(), currentProduct.getId());
+                    ConsolePrinter.treeOk(true, "Eitcha, como ele tem força! O produto %s #%d foi aprovado e enviado ao armazém!", currentProduct.getName(), currentProduct.getId());
                     approvedAmount++;
                 } else {
-                    ConsolePrinter.treeFail(true, "O produto %s #%d foi rejeitado na inspeção e descartado.", currentProduct.getName(), currentProduct.getId());
+                    ConsolePrinter.treeFail(true, "Cade a força? O produto %s #%d foi rejeitado na inspeção e descartado.", currentProduct.getName(), currentProduct.getId());
                     this.conveyor.removeProduct();
                 }
 
@@ -173,6 +173,7 @@ public class ProductionManager {
 
     private boolean calcProductionCost(Machine machine) {
         // for those who just entered the stream: calc is short for _calculate_
+        // yellowisk: lol, good one
         if (this.budget >= machine.getOperationCost()) {
             this.budget -= machine.getOperationCost();
             return true;
@@ -183,12 +184,18 @@ public class ProductionManager {
     public void buyRawMaterial(int amount) {
         float totalCost = amount * this.rawMaterial.getPrice();
         if (this.budget < totalCost) {
-            ConsolePrinter.fail("Orçamento insuficiente para comprar matéria-prima!\n");
+            ConsolePrinter.fail("Dessa vez não é! Orçamento insuficiente para comprar matéria-prima!\n");
             return;
         }
         budget -= totalCost;
         this.rawMaterial.addStock(amount);
-        ConsolePrinter.card(" [" + ConsolePrinter.GREEN + "OK" + ConsolePrinter.RESET + "] Compra de matéria-prima realizada com sucesso!");
+
+        if (totalCost >= 150) {
+            ConsolePrinter.card(" [" + ConsolePrinter.GREEN + "OK" + ConsolePrinter.RESET
+                    + "] Dessa vez não é! Cliente comprou 150 reais e, sim, cliente ganhou um balão de presente!");
+        } else {
+            ConsolePrinter.card(" [" + ConsolePrinter.GREEN + "OK" + ConsolePrinter.RESET + "] Eitcha!!! Compra de matéria-prima realizada com sucesso!");
+        }
     }
 
     public void setChosenProduct(Product chosenProduct) {
