@@ -1,8 +1,8 @@
 package domain.entities.product;
 
 public class PoteDeVidro extends Product {
-    public PoteDeVidro(String name, int rawMaterialPerUnit) {
-        super(name, rawMaterialPerUnit, 7.0, 0.0);
+    public PoteDeVidro(String name, double rawMaterialPerUnit) {
+        super(name, rawMaterialPerUnit, 0.7, 0.0);
     }
 
     @Override
@@ -20,6 +20,6 @@ public class PoteDeVidro extends Product {
 
     @Override
     public String getType() {
-        return "Average quality";
+        return "Média Qualidade";
     }
 }

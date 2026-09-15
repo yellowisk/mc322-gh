@@ -1,4 +1,4 @@
-package domain.entities.machines.machine;
+package domain.entities.machine;
 
 import domain.entities.product.Product;
 import domain.entities.product.ProductStatus;
@@ -10,9 +10,9 @@ public class InspectionMachine extends Machine {
     }
 
     @Override
-    public Product process(Product product, ProductStatus status) {
+    public Product process(Product product) {
         if (!isOn()) {
-            throw new IllegalStateException("[Eitcha, João...] The machine can't process anything, since it ain't on!");
+            throw new IllegalStateException("Eitcha, João! The machine can't process anything, since it ain't on!");
         }
 
         if (isProcessFailure(product)) {
@@ -20,7 +20,7 @@ public class InspectionMachine extends Machine {
             return product;
         }
 
-        product.setStatus(status);
+        product.setStatus(ProductStatus.APPROVED);
         return product;
     }
 

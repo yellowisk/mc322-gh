@@ -1,7 +1,5 @@
-package domain.entities.machines.machine;
+package domain.entities.machine;
 
-import domain.entities.product.ProductStatus;
-import domain.entities.rawmaterial.RawMaterial;
 import domain.entities.product.Product;
 
 import java.util.Random;
@@ -22,7 +20,7 @@ public abstract class Machine {
     }
 
     /* ====== Abstract ====== */
-    public abstract Product process(Product product, ProductStatus status);
+    public abstract Product process(Product product);
 
     public abstract String getType();
 
@@ -39,7 +37,7 @@ public abstract class Machine {
     }
 
     protected void tryIncreaseFailureOdd(Product product, double increment) {
-        if (isProcessFailure(product)) {
+        if (isMachineFailure()) {
             product.increaseCumulativeFailureOdd(increment);
         }
     }

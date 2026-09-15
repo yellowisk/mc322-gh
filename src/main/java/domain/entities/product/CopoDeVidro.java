@@ -2,8 +2,8 @@ package domain.entities.product;
 
 public class CopoDeVidro extends Product {
 
-    public CopoDeVidro(String name, int rawMaterialPerUnit) {
-        super(name, rawMaterialPerUnit, 4.0, 0.0);
+    public CopoDeVidro(String name, double rawMaterialPerUnit) {
+        super(name, rawMaterialPerUnit, 0.4, 0.0);
     }
 
     @Override
@@ -21,6 +21,6 @@ public class CopoDeVidro extends Product {
 
     @Override
     public String getType() {
-        return "Low quality";
+        return "Baixa Qualidade";
     }
 }
