@@ -11,26 +11,46 @@ Além do valor cômico, a página presta caridade para seus clientes, o que acha
 - Personalização: Utilizamos slogans dos vídeos da página nos código e os produtos refletem os
 produtos reais do mercadinho.
 
+=========
+HISTÓRICO
+=========
+
+Tarefa 2:
+- Criamos 3 produtos novos, com nomes baseados no que tem no Mercadinho Ideal: Copo de vidro,
+Kit Copo e Pote de Vidro
+- Adicionamos máquinas específicas de processamento, empacotamento e inspeção
+- Adiconamos um armazém
+- Compactamos as nove opções do menu de exemplo do pdf para as seções:
+Atualizar demandas, Fabricar demandas, Ver armazém, Comprar matéria-prima e Sair.
+- Adicionamos as etapas de empacotamento
+- Adicionamos cores, símbolos unicode e tempos de loading para logs
+- Adicionamos mais bordões do mercadinho ideal no Terminal
+- Atualizamos a página de introdução
+
 - Planos de Expansão:
     - Produtos:
-        - Novos produtos baseados nos produtos presentes no Mercadinho Ideal, como salgadinhos,
+        [x] Novos produtos baseados nos produtos presentes no Mercadinho Ideal, como salgadinhos,
            brinquedos e doces
-        - Kits prontos (kits de copos e o kit mega-feliz, já presentes no Mercadinho Ideal)
-        - Kits personalizados que o próprio usuário poderá montar a partir dos produtos
+        [] Kits prontos (kits de copos e o kit mega-feliz, já presentes no Mercadinho Ideal)
+        [] Kits personalizados que o próprio usuário poderá montar a partir dos produtos
         existentes na fábrica
 
     - Equipamentos:
-        - Máquinas espeifícas por produto
+        [] Máquinas especifícas por produto
         - Máquina montadora de kits
-        - Armazém/Estoque
+        [x] Armazém/Estoque
 
     - Novas etapas:
-        - Empacotamento
+        [x] Empacotamento
         - Montagem de kits
 
     - Automação:
-        - Cálculo automático da quantidade de produtos baseado na demanda de kg
-        - CRUD (Create, Read, Update, Delete) de produtos
+        [] Cálculo automático da quantidade de produtos baseado na demanda de kg
+        [] CRUD (Create, Read, Update, Delete) de produtos
+
+    - Estilização
+        [] Trocar ícones dos menus por balões com cores diferentes. O texto de
+        escolher "Escolha um balão"
 
 - Fontes:
     - https://www.instagram.com/merc.adinhoideall?igsi=MWkyNWV0Y3ExcnV1Nw==
