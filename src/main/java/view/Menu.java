@@ -31,6 +31,7 @@ public class Menu {
         productionManager.addNewProduct(new PoteDeVidro("Pote", 10));
         productionManager.addNewProduct(new KitCopoDeVidro("Kit Copo", 15));
 
+
         // Esteira hardcoded
         productionManager.addNewConveyor(new Conveyor("Esteira", 20));
 
@@ -46,7 +47,7 @@ public class Menu {
 
             ConsolePrinter.optionsList(ConsolePrinter.GRAY,
                     ConsolePrinter.YELLOW + "⟳" + ConsolePrinter.RESET + " Atualizar demandas",
-                    ConsolePrinter.RED + "⚙" + ConsolePrinter.RESET + " Fabricar demandas",
+                    ConsolePrinter.PURPLE + "⚙" + ConsolePrinter.RESET + " Fabricar demandas",
                     ConsolePrinter.BLUE + "≡" + ConsolePrinter.RESET + " Ver armazém",
                     ConsolePrinter.GREEN + "$" + ConsolePrinter.RESET + " Comprar matéria-prima"
             );
@@ -113,7 +114,7 @@ public class Menu {
             ConsolePrinter.clearScreen();
 
             // Header
-            ConsolePrinter.card(ConsolePrinter.RED + "⚙" + ConsolePrinter.RESET + " FABRICAR DEMANDAS");
+            ConsolePrinter.card(ConsolePrinter.PURPLE + "⚙" + ConsolePrinter.RESET + " FABRICAR DEMANDAS");
             System.out.println();
 
             // Lista as demandas
@@ -123,7 +124,7 @@ public class Menu {
 
             // Footer
             printFooterBlock();
-            System.out.print("Qual demanda deseja " + ConsolePrinter.RED + "FABRICAR" + ConsolePrinter.RESET + "? ");
+            System.out.print("Qual demanda deseja " + ConsolePrinter.PURPLE + "FABRICAR" + ConsolePrinter.RESET + "? ");
             int option = scanner.nextInt();
 
             if (option == 0) break;

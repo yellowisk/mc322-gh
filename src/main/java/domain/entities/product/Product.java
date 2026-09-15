@@ -81,4 +81,7 @@ public abstract class Product {
                 .setScale(1, RoundingMode.UP).doubleValue();
     }
 
+    public static void resetGlobalUniqueId() {
+        globalUniqueId = 1;
+    }
 }

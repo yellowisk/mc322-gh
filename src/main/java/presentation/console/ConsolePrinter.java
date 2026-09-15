@@ -10,7 +10,7 @@ public class ConsolePrinter {
     public static final String BOLD = "\u001B[1m";
     public static final String ORANGE = "\u001B[38;5;208m";
     public static final String BLUE = "\u001B[38;5;75m";
-    public static final String GEMINI_PURPLE = "\u001B[38;5;141m";
+    public static final String PURPLE = "\u001B[38;5;141m";
     public static final String GREEN = "\u001B[38;5;114m";
     public static final String YELLOW = "\u001B[38;5;221m";
     public static final String GRAY = "\u001B[38;5;246m";
@@ -34,7 +34,11 @@ public class ConsolePrinter {
     }
 
     public static void step(String format, Object... args) {
-        System.out.print(BLUE + "\t" + String.format(format, args) + RESET);
+        System.out.print("\t├─ " + String.format(format, args) + RESET);
+    }
+
+    public static void stage(String format, Object... args) {
+        System.out.print("▸ Etapa iniciada: " + PURPLE + String.format(format, args).toUpperCase() + RESET + "\n");
     }
 
     public static String centerString(int width, String text) {
@@ -57,11 +61,11 @@ public class ConsolePrinter {
     }
 
     public static void line() {
-        System.out.println(GRAY + "─".repeat(65) + RESET);
+        System.out.println(BOLD + "─".repeat(65) + RESET);
     }
 
-    public static void line(int size) {
-        System.out.println(GRAY + "    " + "─".repeat(size) + RESET);
+    public static void line(String color, int size) {
+        System.out.println(color + "    " + "─".repeat(size) + RESET);
     }
 
     public static void printBackOption() {
@@ -78,11 +82,11 @@ public class ConsolePrinter {
 
     public static void printOneLineStats(ProductionManager pm) {
         System.out.printf(GRAY + "[ "
-                        + "Budget: R$ %.2f"
+                        + GREEN + "Budget: R$ %.2f" + GRAY
                         + " | "
-                        + "Mat. Prima: %d kg"
+                        + BLUE + "Mat. Prima: %d kg" + GRAY
                         + " | "
-                        + "Produtos: %d un"
+                        + PURPLE + "Produtos: %d un" + GRAY
                         + " ]\n" + RESET,
                 pm.getBudget(),
                 pm.getRawMaterial().getQuantity(),
@@ -99,7 +103,7 @@ public class ConsolePrinter {
         }
 
         System.out.printf("    " + GRAY + "%-16s   %-7s   %-7s %-15s" + RESET + "\n", "Produto", "Demanda", "MP", "Custo");
-        line(44);
+        line(GRAY, 44);
 
         double totalProjectedCost = 0;
         for (int i = 0; i < demands.size(); i++) {
