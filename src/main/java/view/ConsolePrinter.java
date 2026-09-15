@@ -96,7 +96,7 @@ public class ConsolePrinter {
             System.out.printf(color + " %d." + RESET + " %s\n", (i + 1), options[i]);
         }
         System.out.println();
-        System.out.printf(GRAY + " 0." + RESET + " ↩ Sair\n\n" + RESET);
+        System.out.printf(GRAY + " 0." + RED + " ⏻ " + RESET + "Sair\n\n" + RESET);
     }
 
     public static void printOneLineStats(double budget, double rawMaterialQuantity, int fabricatedCount) {
