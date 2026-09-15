@@ -84,7 +84,7 @@ public class ProductionManager {
         Product currentProduct;
 
         while (fabricatedAmount < productsRemaining) {
-            System.out.printf("(%d/%d) %s\n", (fabricatedAmount + 1), productsRemaining, chosenProduct.getName());
+            System.out.printf("(%d/%d) %s " + "─".repeat(24) + "\n", (fabricatedAmount + 1), productsRemaining, chosenProduct.getName());
 
             try {
                 // 1. Processamento
@@ -137,10 +137,10 @@ public class ProductionManager {
 
                 if (currentProduct.getStatus() == ProductStatus.APPROVED) {
                     this.fabricatedProducts.add(this.conveyor.removeProduct());
-                    ConsolePrinter.treeOk(true, "Eitcha, como ele tem força! O produto %s #%d foi aprovado e enviado ao armazém!", currentProduct.getName(), currentProduct.getId());
+                    ConsolePrinter.treeOk(true, "Eitcha, como ele tem força! O produto %s #%d" + ConsolePrinter.GREEN + " foi aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getName(), currentProduct.getId());
                     approvedAmount++;
                 } else {
-                    ConsolePrinter.treeFail(true, "Cade a força? O produto %s #%d foi rejeitado na inspeção e descartado.", currentProduct.getName(), currentProduct.getId());
+                    ConsolePrinter.treeFail(true, "Cade a força? O produto %s #%d" + ConsolePrinter.RED + " foi rejeitado" + ConsolePrinter.RESET + " na inspeção e descartado.", currentProduct.getName(), currentProduct.getId());
                     this.conveyor.removeProduct();
                 }
 
@@ -152,18 +152,20 @@ public class ProductionManager {
             }
         }
 
-        ConsolePrinter.card("%d produtos fabricados e %d aprovados.\n", fabricatedAmount, approvedAmount);
+        String infoText = "";
 
         if (fabricatedAmount == productsRemaining) {
             demand.fulfill(fabricatedAmount, totalProductionTime);
-            ConsolePrinter.info("Demanda de %s concluída em %.2f segundos de produção.\n", demand.getProductName(), totalProductionTime);
+            infoText = String.format(" Demanda de %s concluída em %.2f segundos de produção.", demand.getProductName(), totalProductionTime);
         } else if (fabricatedAmount > 0) {
             demand.partiallyFulfill(fabricatedAmount, totalProductionTime);
-            ConsolePrinter.info("Demanda de %s atendida parcialmente (%d/%d) em %.2f segundos de produção.\n",
+            infoText = String.format(" Demanda de %s atendida parcialmente (%d/%d) em %.2f segundos de produção.",
                     demand.getProductName(), fabricatedAmount, productsRemaining, totalProductionTime);
         } else {
             demand.reset();
         }
+
+        ConsolePrinter.card("%d produtos fabricados e %d aprovados." + (infoText.isEmpty() ? "\n" : "\n" + infoText), fabricatedAmount, approvedAmount);
 
         this.getConveyor().turnOff();
         for (Machine m: this.getMachines()) {

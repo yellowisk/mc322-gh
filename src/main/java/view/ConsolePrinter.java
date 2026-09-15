@@ -12,12 +12,12 @@ public class ConsolePrinter {
     public static final String BOLD = "\u001B[1m";
     public static final String ORANGE = "\u001B[38;5;208m";
     public static final String BLUE = "\u001B[38;5;75m";
-    public static final String GEMINI_PURPLE = "\u001B[38;5;141m";
+    public static final String PURPLE = "\u001B[38;5;141m";
     public static final String GREEN = "\u001B[38;5;114m";
     public static final String YELLOW = "\u001B[38;5;221m";
     public static final String GRAY = "\u001B[38;5;246m";
     public static final String RED = "\033[38;2;234;67;53m";
-    private static final int TREE_LINE_DELAY_MS = 200;
+    private static final int TREE_LINE_DELAY_MS = 125;
 
     public static void clearScreen() {
         System.out.print("\033[H\033[2J");
@@ -33,7 +33,7 @@ public class ConsolePrinter {
     }
 
     public static void info(String format, Object... args) {
-        System.out.print("[ INFO" + RESET + "] " + String.format(format, args) + RESET);
+        System.out.print("[INFO" + RESET + "] " + String.format(format, args) + RESET);
     }
 
     public static void step(String format, Object... args) {
@@ -41,7 +41,7 @@ public class ConsolePrinter {
     }
 
     public static void stageHeader(String stageName) {
-        System.out.printf(YELLOW + "▸ %s" + RESET + "\n", stageName);
+        System.out.printf(PURPLE + "▸ %s" + RESET + "\n", stageName);
     }
 
     private static void treeLine(String icon, String color, boolean isLast, String format, Object... args) {
@@ -101,11 +101,11 @@ public class ConsolePrinter {
 
     public static void printOneLineStats(double budget, double rawMaterialQuantity, int fabricatedCount) {
         System.out.printf(GRAY + "[ "
-                        + "Orçamento: R$ %.2f"
+                        + GREEN + "Orçamento: R$ %.2f" + GRAY
                         + " | "
-                        + "Mat. Prima: %.2f kg"
+                        + BLUE + "Mat. Prima: %.2f kg"  + GRAY
                         + " | "
-                        + "Produtos: %d un"
+                        + PURPLE + "Produtos: %d un" + GRAY
                         + " ]\n" + RESET,
                 budget,
                 rawMaterialQuantity,
@@ -166,10 +166,10 @@ public class ConsolePrinter {
 
         System.out.println();
         if (totalProjectedCost > 0) {
-            System.out.printf(" Projeção Total de Custo Operacional: R$ %.2f " + RED + "(▾ R$ -%.2f)\n" + RESET,
+            System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f " + RED + "(▾ R$ -%.2f)\n" + RESET,
                     pm.getBudget() - totalProjectedCost, totalProjectedCost);
         } else {
-            System.out.printf(" Projeção Total de Custo Operacional: R$ %.2f\n" + RESET, pm.getBudget());
+            System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f\n" + RESET, pm.getBudget());
         }
         System.out.println();
     }

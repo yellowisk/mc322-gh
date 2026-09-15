@@ -48,7 +48,7 @@ public class Menu {
 
             ConsolePrinter.optionsList(ConsolePrinter.GRAY,
                     ConsolePrinter.YELLOW + "⟳" + ConsolePrinter.RESET + " Atualizar demandas",
-                    ConsolePrinter.RED + "⚙" + ConsolePrinter.RESET + " Fabricar demandas",
+                    ConsolePrinter.PURPLE + "⚙" + ConsolePrinter.RESET + " Fabricar demandas",
                     ConsolePrinter.BLUE + "≡" + ConsolePrinter.RESET + " Ver armazém",
                     ConsolePrinter.GREEN + "$" + ConsolePrinter.RESET + " Comprar matéria-prima"
             );
@@ -110,7 +110,7 @@ public class Menu {
             ConsolePrinter.clearScreen();
 
             // Header
-            ConsolePrinter.card(ConsolePrinter.RED + "⚙" + ConsolePrinter.RESET + " FABRICAR DEMANDAS");
+            ConsolePrinter.card(ConsolePrinter.PURPLE + "⚙" + ConsolePrinter.RESET + " FABRICAR DEMANDAS");
             System.out.println();
 
             // Lista as demandas
@@ -120,7 +120,7 @@ public class Menu {
 
             // Footer
             printFooterBlock();
-            int option = readInt("Qual demanda deseja " + ConsolePrinter.RED + "FABRICAR" + ConsolePrinter.RESET + "? ");
+            int option = readInt("Qual demanda deseja " + ConsolePrinter.PURPLE + "FABRICAR" + ConsolePrinter.RESET + "? ");
 
             if (option == 0) break;
 
