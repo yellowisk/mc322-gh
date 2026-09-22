@@ -11,9 +11,11 @@ public abstract class Machine {
     private final double failureOdd;
     private final double operationCost;
     // Saúde
+    private StatusDeMaquina status = StatusDeMaquina.FUNCIONAL;
     private static final int saudeMaxima = 100; /** Saúde máxima. */
     private int saude = saudeMaxima; /** Saúde atual. */
     private int desgasteMaximo = 5; /** Valor máximo de desgaste por ciclo. */
+    private final int saudeCritica = 15; /** Limiar crítico da saúde para manutenção. */
 
     public Machine(String name, int maxCapacity, double failureOdd, double operationCost) {
         this.name = name;
@@ -33,14 +35,29 @@ public abstract class Machine {
 
     /**
      * Método 'process()' principal. Funciona como um Decorator.
+     * Aqui ficam trechos de código compartilhados por
+     * todas as máquinas.
      *
      * @param product O produto deverá ser fabricado.
      * @return Produto fabricado.
      */
     public Product process(Product product) {
-        Product produto = processAux(product);
-        desgastar(); // Trecho que será rodado sempre que o 'process()' for utilizado
-        return product;
+        if (!isOn()) {
+            throw new IllegalStateException("Eitcha, João! The machine can't process anything, since it ain't on!");
+        }
+
+        if (precisaManutencao()) {
+            String mensagem = String.format("[FALHA] A máquina de %s está QUEBRADA!!!", getType());
+            throw new IllegalStateException(mensagem);
+        }
+
+        try {
+            Product produto = processAux(product);
+            desgastar(); // Trecho que será rodado sempre que o 'process()' for utilizado
+            return produto;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public abstract String getType();
@@ -63,16 +80,36 @@ public abstract class Machine {
         }
     }
 
+    // === SAÚDE DA MÁQUINA ===
+
+    /**
+     * Diminui a saúde da máquina em [1, this.desgasteMaximo]
+     */
     private void desgastar() {
-        this.saude -= RandomProvider.nextInt(this.desgasteMaximo);
+        this.saude -= RandomProvider.nextInt(this.desgasteMaximo) + 1;
+        if (this.saude < this.saudeCritica) {
+            this.status = StatusDeMaquina.QUEBRADA;
+        }
         System.out.printf("♡ Saúde atual da máquina de '%s': %d\n", getType(), saude); // TODO: remover debug
     }
 
-    private void reparar() {
+    /**
+     * Restaura a saúde da máquina para this.saudeMaxima
+     */
+    public void reparar() {
         /* TODO: Método `reparar()` aumentar a saúde da máquina aos poucos para
             a barra de progresso da reparação.
          */
-        setSaude(100);
+        setSaude(saudeMaxima);
+        this.status = StatusDeMaquina.FUNCIONAL;
+    }
+
+    /**
+     * Indica se a saúde da máquina está abaixo do limiar crítico.
+     * @return true se a saúde estiver abaixo do limiar crítico.
+     */
+    public boolean precisaManutencao() {
+        return this.saude <= this.saudeCritica;
     }
 
     // ---- Getters e Setters ----
@@ -118,5 +155,9 @@ public abstract class Machine {
 
     public double getOperationCost() {
         return operationCost;
+    }
+
+    public int getSaudeCritica() {
+        return saudeCritica;
     }
 }

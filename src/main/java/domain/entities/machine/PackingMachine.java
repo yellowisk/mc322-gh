@@ -12,10 +12,6 @@ public class PackingMachine extends Machine {
 
     @Override
     public Product processAux(Product product) {
-        if (!isOn()) {
-            throw new IllegalStateException("Eitcha, João! The machine can't process anything, since it ain't on!");
-        }
-
         tryIncreaseFailureOdd(product, getFailureOdd());
 
         product.setStatus(ProductStatus.PACKED);

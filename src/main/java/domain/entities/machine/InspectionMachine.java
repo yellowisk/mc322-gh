@@ -11,10 +11,6 @@ public class InspectionMachine extends Machine {
 
     @Override
     public Product processAux(Product product) {
-        if (!isOn()) {
-            throw new IllegalStateException("Eitcha, João! The machine can't process anything, since it ain't on!");
-        }
-
         if (isProcessFailure(product)) {
             product.setStatus(ProductStatus.FAILED);
             return product;
