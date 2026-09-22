@@ -11,6 +11,7 @@ import domain.entities.product.PoteDeVidro;
 import domain.entities.product.Product;
 import domain.entities.productionmanager.ProductionManager;
 import domain.entities.rawmaterial.RawMaterial;
+import domain.exceptions.MachineNeedsRepairException;
 
 import java.util.List;
 import java.util.Scanner;
@@ -125,13 +126,18 @@ public class Menu {
             if (option == 0) break;
 
             if (option > 0 && option <= demands.size()) {
-                Demand chosenDemand = productionManager.getDemands().get(option - 1);
-                productionManager.fabricateDemand(chosenDemand);
+                try {
+                    Demand chosenDemand = productionManager.getDemands().get(option - 1);
+                    productionManager.fabricateDemand(chosenDemand);
 
-                System.out.println("\n" + ConsolePrinter.YELLOW + "Pressione ENTER para voltar..." + ConsolePrinter.RESET);
-                scanner.nextLine();
-                scanner.nextLine();
-                running = false;
+                    System.out.println("\n" + ConsolePrinter.YELLOW + "Pressione ENTER para voltar..." + ConsolePrinter.RESET);
+                    scanner.nextLine();
+                    scanner.nextLine();
+                    running = false;
+                } catch (Exception e) {
+                    productionManager.setTemMaquinaQuebrada(true);
+                    this.lastBuffer = ConsolePrinter.RED + "Dessa vez não é! " + e.getMessage() + ConsolePrinter.RESET;
+                }
             } else {
                 this.lastBuffer = ConsolePrinter.RED + "Dessa vez não é! Opção inválida!" + ConsolePrinter.RESET;
             }
