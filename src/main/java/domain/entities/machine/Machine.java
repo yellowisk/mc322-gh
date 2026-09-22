@@ -47,7 +47,7 @@ public abstract class Machine {
         }
 
         if (precisaManutencao()) {
-            String mensagem = String.format("[FALHA] A máquina de %s está QUEBRADA!!!", getType());
+            String mensagem = String.format("A máquina de %s está QUEBRADA!!!", getType());
             throw new IllegalStateException(mensagem);
         }
 

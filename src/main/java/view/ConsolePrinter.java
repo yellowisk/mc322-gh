@@ -40,8 +40,8 @@ public class ConsolePrinter {
         System.out.print(BLUE + "\t" + String.format(format, args) + RESET);
     }
 
-    public static void stageHeader(String stageName) {
-        System.out.printf(PURPLE + "▸ %s" + RESET + "\n", stageName);
+    public static void stageHeader(String format, Object... args) {
+        System.out.printf(PURPLE + "▸ %s" + RESET + "\n", String.format(format.toUpperCase(), args));
     }
 
     private static void treeLine(String icon, String color, boolean isLast, String format, Object... args) {
