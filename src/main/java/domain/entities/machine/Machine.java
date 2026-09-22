@@ -1,8 +1,7 @@
 package domain.entities.machine;
 
 import domain.entities.product.Product;
-
-import java.util.Random;
+import domain.utils.RandomProvider;
 
 public abstract class Machine {
     private final String name;
@@ -10,7 +9,6 @@ public abstract class Machine {
     private final int maxCapacity;
     private final double failureOdd;
     private final double operationCost;
-    protected static final Random random = new Random();
 
     public Machine(String name, int maxCapacity, double failureOdd, double operationCost) {
         this.name = name;
@@ -33,7 +31,7 @@ public abstract class Machine {
         The greater tcheckFailurehe cumulativeFailureOdd, the greater the rejection odds */
         double rejectionOdds = product.getQuality() * 0.3 + product.getCumulativeFailureOdd();
 
-        return failureFloor || (random.nextDouble() < rejectionOdds);
+        return failureFloor || (RandomProvider.chance(rejectionOdds));
     }
 
     protected void tryIncreaseFailureOdd(Product product, double increment) {
@@ -69,7 +67,7 @@ public abstract class Machine {
     }
 
     protected boolean isMachineFailure() {
-        return random.nextDouble() < failureOdd;
+        return RandomProvider.chance(failureOdd);
     }
 
     public double getOperationCost() {
