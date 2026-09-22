@@ -36,10 +36,8 @@ public class ProductionManager {
     }
 
     public void updateDemand(Demand demand, int newValue) {
-        demand.setAmount(newValue);
         Product product = getProductByName(demand.getProductName());
-        demand.setTotalRawMaterial(product.getRawMaterialPerUnit() * demand.getAmount());
-        demand.reset();
+        demand.updateAmount(product, newValue);
     }
 
     public Product getProductByName(String productName) {

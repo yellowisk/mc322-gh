@@ -19,13 +19,9 @@ public class Demand {
         this.totalProductionTime = 0.0;
     }
 
-    public double calcRawMaterialNeeded(Product product) {
+    private double calcRawMaterialNeeded(Product product) {
         // for those who just joined the stream: "calc" is short for "calculate"
         return (product.getRawMaterialPerUnit() * this.amount);
-    }
-
-    public void setTotalRawMaterial(double totalRawMaterial) {
-        this.totalRawMaterial = totalRawMaterial;
     }
 
     public double getTotalRawMaterial() {
@@ -48,8 +44,10 @@ public class Demand {
         return this.producedAmount;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void updateAmount(Product product, int newAmount) {
+        this.amount = newAmount;
+        this.totalRawMaterial = calcRawMaterialNeeded(product);
+        reset();
     }
 
     public double getTotalProductionTime() {
