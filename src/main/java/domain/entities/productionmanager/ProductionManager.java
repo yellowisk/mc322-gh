@@ -19,7 +19,7 @@ public class ProductionManager {
     private Conveyor conveyor;
     private Product chosenProduct;
     private RawMaterial rawMaterial;
-    private float budget;
+    private double budget;
 
     public ProductionManager(RawMaterial rawMaterial, float budget) {
         this.rawMaterial = rawMaterial;
@@ -167,17 +167,6 @@ public class ProductionManager {
 
         ConsolePrinter.card("%d produtos fabricados e %d aprovados." + (infoText.isEmpty() ? "\n" : "\n" + infoText), fabricatedAmount, approvedAmount);
 
-        if (fabricatedAmount == productsRemaining) {
-            demand.fulfill(fabricatedAmount, totalProductionTime);
-            ConsolePrinter.info("Demanda de %s concluída em %.2f segundos de produção.\n", demand.getProductName(), totalProductionTime);
-        } else if (fabricatedAmount > 0) {
-            demand.partiallyFulfill(fabricatedAmount, totalProductionTime);
-            ConsolePrinter.info("Demanda de %s atendida parcialmente (%d/%d) em %.2f segundos de produção.\n",
-                    demand.getProductName(), fabricatedAmount, productsRemaining, totalProductionTime);
-        } else {
-            demand.reset();
-        }
-
         this.getConveyor().turnOff();
         for (Machine m: this.getMachines()) {
             m.turnOff();
@@ -243,7 +232,7 @@ public class ProductionManager {
         return this.conveyor;
     }
 
-    public float getBudget() {
+    public double getBudget() {
         return budget;
     }
 

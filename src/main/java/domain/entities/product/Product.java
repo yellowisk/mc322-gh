@@ -1,8 +1,9 @@
 package domain.entities.product;
 
+import domain.utils.RandomProvider;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Random;
 
 public abstract class Product {
     private static int globalUniqueId = 1;
@@ -14,8 +15,6 @@ public abstract class Product {
     private final double quality;
     private double cumulativeFailureOdd;
     private static int productsCounter;
-
-    private static final Random random = new Random();
 
     public Product(String name, double rawMaterialPerUnit, double quality,
                    double cumulativeFailureOdd) {
@@ -80,7 +79,7 @@ public abstract class Product {
     }
 
     protected double randomFactor() {
-        return 1.2 * BigDecimal.valueOf(random.nextDouble())
+        return 1.2 * BigDecimal.valueOf(RandomProvider.nextDouble())
                 .setScale(1, RoundingMode.UP).doubleValue();
     }
 
