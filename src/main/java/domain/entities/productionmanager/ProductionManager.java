@@ -7,6 +7,8 @@ import domain.entities.machine.StatusDeMaquina;
 import domain.entities.product.Product;
 import domain.entities.product.ProductStatus;
 import domain.entities.rawmaterial.RawMaterial;
+import domain.exceptions.InsufficientBudgetException;
+import domain.exceptions.MachineNeedsRepairException;
 import view.ConsolePrinter;
 
 import java.util.ArrayList;
@@ -21,6 +23,8 @@ public class ProductionManager {
     private Product chosenProduct;
     private RawMaterial rawMaterial;
     private double budget;
+
+    private boolean temMaquinaQuebrada = false;
 
     /**
      * Lista das etapas de produção instanciada para evitar laço 'for' otimizado
@@ -67,6 +71,10 @@ public class ProductionManager {
      * @param demand A demanda que será fabricada.
      */
     public void fabricateDemand(Demand demand) {
+        if (temMaquinaQuebrada()) {
+            throw new MachineNeedsRepairException("Não podemos iniciar a fabricação. Há máquinas precisando de reparo.");
+        }
+
         this.chosenProduct = this.getProductByName(demand.getProductName());
 
         if (chosenProduct == null) {
@@ -103,9 +111,8 @@ public class ProductionManager {
                     Machine currentMachine = this.machines.get(etapaAtual.getCode());
 
                     if (!calcProductionCost(currentMachine)) {
-                        ConsolePrinter.treeFail(true, "Dessa vez não é! Orçamento insuficiente para operar a máquina de %s!", currentMachine.getType());
-                        orcamentoSuficiente = false;
-                        break;
+                        String mensagem = String.format("Dessa vez não é! Orçamento insuficiente para operar a máquina de %s!", currentMachine.getType());
+                        throw new InsufficientBudgetException(mensagem);
                     }
 
                     if (etapaAtual == ProductionStages.PROCESSING) {
@@ -132,11 +139,6 @@ public class ProductionManager {
                     }
                 }
 
-                // Encerra a produção se faltar orçamento
-                if (!orcamentoSuficiente) {
-                    throw new IllegalStateException("Orçamento insuficiente.");
-                }
-
                 // Validação final
                 if (currentProduct != null && currentProduct.getStatus() == ProductStatus.APPROVED) {
                     this.fabricatedProducts.add(this.conveyor.removeProduct());
@@ -150,6 +152,10 @@ public class ProductionManager {
                 totalProductionTime += chosenProduct.countProductionTime();
                 fabricatedAmount++;
 
+            } catch (MachineNeedsRepairException e) {
+                setTemMaquinaQuebrada(true);
+                ConsolePrinter.treeFail(true, e.getMessage());
+                break;
             } catch (Exception e) {
                 ConsolePrinter.treeFail(true, e.getMessage());
                 break;
@@ -248,6 +254,14 @@ public class ProductionManager {
         System.out.printf("   Estoque de Matéria-Prima: " + ConsolePrinter.GREEN + "%.2f %s\n\n" + ConsolePrinter.RESET,
                 this.rawMaterial.getQuantity(), this.rawMaterial.getUnit());
         ConsolePrinter.listStorage(this.demands, this.fabricatedProducts);
+    }
+
+    public boolean temMaquinaQuebrada() {
+        return temMaquinaQuebrada;
+    }
+
+    public void setTemMaquinaQuebrada(boolean temMaquinaQuebrada) {
+        this.temMaquinaQuebrada = temMaquinaQuebrada;
     }
 
 }

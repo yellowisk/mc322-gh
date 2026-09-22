@@ -1,6 +1,7 @@
 package domain.entities.machine;
 
 import domain.entities.product.Product;
+import domain.exceptions.MachineNeedsRepairException;
 import domain.utils.RandomProvider;
 
 public abstract class Machine {
@@ -12,7 +13,7 @@ public abstract class Machine {
     private final double operationCost;
     // Saúde
     private StatusDeMaquina status = StatusDeMaquina.FUNCIONAL;
-    private static final int saudeMaxima = 100; /** Saúde máxima. */
+    private static final int saudeMaxima = 23; /** Saúde máxima. */
     private int saude = saudeMaxima; /** Saúde atual. */
     private int desgasteMaximo = 5; /** Valor máximo de desgaste por ciclo. */
     private final int saudeCritica = 15; /** Limiar crítico da saúde para manutenção. */
@@ -47,8 +48,8 @@ public abstract class Machine {
         }
 
         if (precisaManutencao()) {
-            String mensagem = String.format("A máquina de %s está QUEBRADA!!!", getType());
-            throw new IllegalStateException(mensagem);
+            String mensagem = String.format("A %s quebrou!", getName().toLowerCase());
+            throw new MachineNeedsRepairException(mensagem);
         }
 
         try {
