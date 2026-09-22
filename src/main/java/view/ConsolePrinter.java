@@ -128,7 +128,8 @@ public class ConsolePrinter {
         double totalProjectedCost = 0;
         for (int i = 0; i < demands.size(); i++) {
             Demand demand = demands.get(i);
-            double demandCost = demand.getAmount() * unitOperationCost;
+            demand.updateEstimatedCost(unitOperationCost);
+            double demandCost = demand.getEstimatedCost();
             totalProjectedCost += demandCost;
 
             /* Padding the plain text to the Status column's visible width yah */

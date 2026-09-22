@@ -9,6 +9,7 @@ public class Demand {
     private int producedAmount;
     private double totalRawMaterial;
     private double totalProductionTime;
+    private double estimatedCost;
 
     public Demand(Product product, int amount) {
         this.productName = product.getName();
@@ -52,6 +53,19 @@ public class Demand {
 
     public double getTotalProductionTime() {
         return totalProductionTime;
+    }
+
+    public double getEstimatedCost() {
+        return estimatedCost;
+    }
+
+    /* Must be called with a fresh unitOperationCost */
+    public void updateEstimatedCost(double unitOperationCost) {
+        this.estimatedCost = this.amount * unitOperationCost;
+    }
+
+    public boolean isViable(double availableBudget) {
+        return this.estimatedCost <= availableBudget;
     }
 
     public void fulfill(int producedAmount, double totalProductionTime) {
