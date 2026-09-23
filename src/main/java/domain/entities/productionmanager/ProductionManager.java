@@ -1,6 +1,7 @@
 package domain.entities.productionmanager;
 
 import domain.entities.demand.Demand;
+import domain.entities.demand.DemandStatus;
 import domain.entities.conveyor.Conveyor;
 import domain.entities.machine.Machine;
 import domain.entities.machine.StatusDeMaquina;
@@ -87,6 +88,17 @@ public class ProductionManager {
             return;
         }
 
+        if (demand.getStatus() == DemandStatus.CANCELLED) {
+            demand.reset();
+            ConsolePrinter.treeInfo(false, "Retomando demanda de %s após cancelamento anterior.", chosenProduct.getName());
+        } else if (!demand.getStatus().isSelectable()) {
+            ConsolePrinter.fail("Demanda de %s está %s e não pode ser fabricada. Atualize a demanda para reativá-la.\n",
+                    chosenProduct.getName(), demand.getStatus().getDescription());
+            return;
+        }
+
+        demand.startProduction();
+
         this.getConveyor().turnOn();
         for (Machine m: this.getMachines()) {
             m.turnOn();
@@ -172,7 +184,8 @@ public class ProductionManager {
             infoText = String.format(" Demanda de %s atendida parcialmente (%d/%d) em %.2f segundos de produção.",
                     demand.getProductName(), fabricatedAmount, productsRemaining, totalProductionTime);
         } else {
-            demand.reset();
+            demand.cancel();
+            infoText = String.format(" Demanda de %s cancelada por falta de orçamento ou insumos.", demand.getProductName());
         }
 
         ConsolePrinter.card("%d produtos fabricados e %d aprovados." + (infoText.isEmpty() ? "\n" : "\n" + infoText), fabricatedAmount, approvedAmount);
