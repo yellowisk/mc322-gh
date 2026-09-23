@@ -1,6 +1,7 @@
 package domain.entities.demand;
 
 import domain.entities.product.Product;
+import domain.exceptions.InvalidDemandTransitionException;
 
 public class Demand {
     private final String productName;
@@ -9,6 +10,7 @@ public class Demand {
     private int producedAmount;
     private double totalRawMaterial;
     private double totalProductionTime;
+    private double estimatedCost;
 
     public Demand(Product product, int amount) {
         this.productName = product.getName();
@@ -54,21 +56,50 @@ public class Demand {
         return totalProductionTime;
     }
 
+    public double getEstimatedCost() {
+        return estimatedCost;
+    }
+
+    /* Must be called with a fresh unitOperationCost */
+    public void updateEstimatedCost(double unitOperationCost) {
+        this.estimatedCost = this.amount * unitOperationCost;
+    }
+
+    public boolean isViable(double availableBudget) {
+        return this.estimatedCost <= availableBudget;
+    }
+
+    public void startProduction() {
+        transitionTo(DemandStatus.IN_PRODUCTION);
+    }
+
     public void fulfill(int producedAmount, double totalProductionTime) {
-        this.status = DemandStatus.COMPLETED;
+        transitionTo(DemandStatus.COMPLETED);
         this.producedAmount = producedAmount;
         this.totalProductionTime = totalProductionTime;
     }
 
     public void partiallyFulfill(int producedAmount, double totalProductionTime) {
-        this.status = DemandStatus.PARTIAL;
+        transitionTo(DemandStatus.PARTIAL);
         this.producedAmount = producedAmount;
         this.totalProductionTime = totalProductionTime;
     }
 
+    public void cancel() {
+        transitionTo(DemandStatus.CANCELLED);
+    }
+
     public void reset() {
-        this.status = DemandStatus.PENDING;
+        transitionTo(DemandStatus.PENDING);
         this.producedAmount = 0;
         this.totalProductionTime = 0;
+    }
+
+    private void transitionTo(DemandStatus target) {
+        if (!this.status.canTransitionTo(target)) {
+            throw new InvalidDemandTransitionException("Transição de status inválida para "
+                    + this.productName + ": " + this.status.getDescription() + " -> " + target.getDescription());
+        }
+        this.status = target;
     }
 }

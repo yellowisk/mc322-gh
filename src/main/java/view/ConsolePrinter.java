@@ -142,7 +142,8 @@ public class ConsolePrinter {
         double totalProjectedCost = 0;
         for (int i = 0; i < demands.size(); i++) {
             Demand demand = demands.get(i);
-            double demandCost = demand.getAmount() * unitOperationCost;
+            demand.updateEstimatedCost(unitOperationCost);
+            double demandCost = demand.getEstimatedCost();
             totalProjectedCost += demandCost;
 
             /* Padding the plain text to the Status column's visible width yah */
@@ -157,13 +158,17 @@ public class ConsolePrinter {
                     statusLabel = String.format("Parcial (%d/%d)", demand.getProducedAmount(), demand.getAmount());
                     statusColor = YELLOW;
                 }
+                case CANCELLED -> {
+                    statusLabel = "Cancelada";
+                    statusColor = RED;
+                }
                 default -> {
                     statusLabel = "Pendente";
                     statusColor = GRAY;
                 }
             }
             String status = statusColor + String.format("%-18s", statusLabel) + RESET;
-            String time = demand.getStatus() == DemandStatus.PENDING
+            String time = demand.getStatus() == DemandStatus.PENDING || demand.getStatus() == DemandStatus.CANCELLED
                     ? "-"
                     : String.format("%.2fs", demand.getTotalProductionTime());
 
