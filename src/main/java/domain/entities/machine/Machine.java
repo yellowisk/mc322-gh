@@ -9,11 +9,11 @@ public abstract class Machine {
     private final String name;
     private boolean isOn;
     private final int maxCapacity;
-    private final double failureOdd;
+    private final double failureOdd; /** Chance base de falha. */
     private final double operationCost;
     // Saúde
     private StatusDeMaquina status = StatusDeMaquina.FUNCIONAL;
-    private static final int saudeMaxima = 23; /** Saúde máxima. */
+    private static final int saudeMaxima = 40; /** Saúde máxima. */
     private int saude = saudeMaxima; /** Saúde atual. */
     private int desgasteMaximo = 5; /** Valor máximo de desgaste por ciclo. */
     private final int saudeCritica = 15; /** Limiar crítico da saúde para manutenção. */
@@ -91,7 +91,6 @@ public abstract class Machine {
         if (this.saude < this.saudeCritica) {
             this.status = StatusDeMaquina.QUEBRADA;
         }
-        System.out.printf("♡ Saúde atual da máquina de '%s': %d\n", getType(), saude); // TODO: remover debug
     }
 
     /**
@@ -146,8 +145,15 @@ public abstract class Machine {
         return maxCapacity;
     }
 
+    /**
+     * Calcula e retorna a chance de falha atual baseando-se na saúde atual da
+     * máquina.
+     * falhaEfetiva = falhaBase * (1 + (100 - saúde)/100)
+     *
+     * @return A chance de falha da máquina.
+     */
     public double getFailureOdd() {
-        return failureOdd;
+        return this.failureOdd * (1 + (double) (100 - this.saude) / 100);
     }
 
     protected boolean isMachineFailure() {
