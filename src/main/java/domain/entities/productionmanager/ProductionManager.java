@@ -25,6 +25,7 @@ public class ProductionManager {
     private double budget;
 
     private boolean temMaquinaQuebrada = false;
+    private boolean modoDebug = false; /** Flag de ativação do modo debug com logs adicionais. */
 
     /**
      * Lista das etapas de produção instanciada para evitar laço 'for' otimizado
@@ -98,7 +99,6 @@ public class ProductionManager {
         int fabricatedAmount = 0;
         int approvedAmount = 0;
         double totalProductionTime = 0;
-        boolean orcamentoSuficiente = true;
 
         Product currentProduct = null;
 
@@ -107,8 +107,13 @@ public class ProductionManager {
 
             try {
                 for (ProductionStages etapaAtual : etapasProducao) {
-                    ConsolePrinter.stageHeader("%s", etapaAtual.getNome());
                     Machine currentMachine = this.machines.get(etapaAtual.getCode());
+
+                    if (this.modoDebug) {
+                        ConsolePrinter.stageHeaderDebug(currentMachine, "%s", etapaAtual.getNome());
+                    } else {
+                        ConsolePrinter.stageHeader("%s", etapaAtual.getNome());
+                    }
 
                     if (!calcProductionCost(currentMachine)) {
                         String mensagem = String.format("Dessa vez não é! Orçamento insuficiente para operar a máquina de %s!", currentMachine.getType());

@@ -153,7 +153,11 @@ public abstract class Machine {
      * @return A chance de falha da máquina.
      */
     public double getFailureOdd() {
-        return this.failureOdd * (1 + (double) (100 - this.saude) / 100);
+        return this.failureOdd * (1 + (double) (this.getSaudeMaxima() - this.saude) / this.getSaudeMaxima());
+    }
+
+    public double getRawChanceFalha() {
+        return this.failureOdd;
     }
 
     protected boolean isMachineFailure() {
@@ -166,5 +170,9 @@ public abstract class Machine {
 
     public int getSaudeCritica() {
         return saudeCritica;
+    }
+
+    public int getSaudeMaxima() {
+        return saudeMaxima;
     }
 }
