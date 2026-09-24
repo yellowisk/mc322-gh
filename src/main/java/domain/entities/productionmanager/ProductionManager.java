@@ -100,7 +100,7 @@ public class ProductionManager {
     }
 
     /**
-     * Shows which demand t he current strategy would pick rn, but without fabricating it.
+     * Shows which demand the current strategy would pick rn, but without fabricating it.
      * Returns null when there's no strategy or no eligible demand.
      */
     public Demand peekNextDemand() {
@@ -291,6 +291,27 @@ public class ProductionManager {
             ConsolePrinter.card(" [" + ConsolePrinter.GREEN + "OK" + ConsolePrinter.RESET + "] Eitcha!!! Compra de matéria-prima realizada com sucesso!");
         }
     }
+
+    // === REPAIR ===
+
+    /**
+     * Função que repara a máquina escolhida.
+     * @param m A máquina a ser reparada
+     */
+    public void repairMachine(Machine m) {
+        // TODO: personalizar log
+        if (m == null) {
+            throw new IllegalArgumentException("Máquina nula");
+        }
+
+        if (!m.precisaManutencao()) {
+            throw new IllegalStateException("A " + m.getName() + " não precisa de reparo");
+        }
+        m.reparar();
+        setTemMaquinaQuebrada(false);
+    }
+
+    // === GETTERS and SETTERS
 
     public void setChosenProduct(Product chosenProduct) {
         this.chosenProduct = chosenProduct;
