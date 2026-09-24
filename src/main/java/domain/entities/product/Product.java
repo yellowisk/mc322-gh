@@ -16,6 +16,7 @@ public abstract class Product implements Auditable {
     private final double rawMaterialPerUnit;
     private final double quality;
     private double cumulativeFailureOdd;
+    private int batch; /* 0 = ainda não fabricado (modelos do catálogo) */
     private static int productsCounter;
 
     public Product(String name, double rawMaterialPerUnit, double quality,
@@ -80,6 +81,14 @@ public abstract class Product implements Auditable {
         return productsCounter;
     }
 
+    public int getBatch() {
+        return batch;
+    }
+
+    public void setBatch(int batch) {
+        this.batch = batch;
+    }
+
     public double getRejectionRisk() {
         return this.quality * 0.3 + this.cumulativeFailureOdd;
     }
@@ -91,8 +100,8 @@ public abstract class Product implements Auditable {
 
     @Override
     public String generateDiagnosticReport() {
-        return String.format("%s #%d [%s] | Qualidade: %.2f | Risco acumulado: %.2f | Risco de rejeição: %.0f%% | %s",
-                this.name, this.id, getType(), this.quality, this.cumulativeFailureOdd,
+        return String.format("%s #%d [%s] | Lote %d | Qualidade: %.2f | Risco acumulado: %.2f | Risco de rejeição: %.0f%% | %s",
+                this.name, this.id, getType(), this.batch, this.quality, this.cumulativeFailureOdd,
                 getRejectionRisk() * 100,
                 needsMaintenance() ? "Precisa de nova inspeção" : "OK!!! Eitcha!!!");
     }

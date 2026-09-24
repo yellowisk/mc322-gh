@@ -4,7 +4,6 @@ import domain.entities.demand.Demand;
 import domain.entities.demand.DemandStatus;
 import domain.entities.conveyor.Conveyor;
 import domain.entities.machine.Machine;
-import domain.entities.machine.StatusDeMaquina;
 import domain.entities.product.Product;
 import domain.entities.product.ProductStatus;
 import domain.entities.rawmaterial.RawMaterial;
@@ -26,6 +25,7 @@ public class ProductionManager {
     private RawMaterial rawMaterial;
     private double budget;
     private ProductionStrategy currentStrategy;
+    private int batchCounter = 0;
 
     private boolean temMaquinaQuebrada = false;
     private boolean modoDebug = false; /** Flag de ativação do modo debug com logs adicionais. */
@@ -149,13 +149,14 @@ public class ProductionManager {
         }
 
         demand.startProduction();
+        int batch = ++this.batchCounter;
 
         this.getConveyor().turnOn();
         for (Machine m: this.getMachines()) {
             m.turnOn();
         }
 
-        System.out.printf("Eitcha!!! Iniciando produção de: %s\n", chosenProduct.getName());
+        System.out.printf("Eitcha!!! Iniciando produção de: %s (lote %d)\n", chosenProduct.getName(), batch);
 
         int productsRemaining = demand.getAmount();
         int fabricatedAmount = 0;
@@ -191,6 +192,7 @@ public class ProductionManager {
 
                         ConsolePrinter.treeInfo(false, "Máquina %s %.2f %s de %s...", etapaAtual.getGerundio(), this.chosenProduct.getRawMaterialPerUnit(), this.rawMaterial.getUnit(), this.rawMaterial.getName());
                         currentProduct = currentMachine.process(this.chosenProduct);
+                        currentProduct.setBatch(batch);
 
                         ConsolePrinter.treeOk(true, "Tu não acredita! Sabe o que é? \"%s\" #%d criado.", currentProduct.getName(), currentProduct.getId());
                         this.conveyor.addProduct(currentProduct);
