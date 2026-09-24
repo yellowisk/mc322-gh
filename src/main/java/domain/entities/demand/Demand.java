@@ -60,7 +60,7 @@ public class Demand {
         return estimatedCost;
     }
 
-    /* Must be called with a fresh unitOperationCost */
+    /** Must be called with a fresh unitOperationCost */
     public void updateEstimatedCost(double unitOperationCost) {
         this.estimatedCost = this.amount * unitOperationCost;
     }

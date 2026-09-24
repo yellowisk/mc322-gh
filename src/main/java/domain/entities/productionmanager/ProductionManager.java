@@ -10,6 +10,7 @@ import domain.entities.product.ProductStatus;
 import domain.entities.rawmaterial.RawMaterial;
 import domain.exceptions.InsufficientBudgetException;
 import domain.exceptions.MachineNeedsRepairException;
+import domain.interfaces.ProductionStrategy;
 import view.ConsolePrinter;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class ProductionManager {
     private Product chosenProduct;
     private RawMaterial rawMaterial;
     private double budget;
+    private ProductionStrategy currentStrategy;
 
     private boolean temMaquinaQuebrada = false;
     private boolean modoDebug = false; /** Flag de ativação do modo debug com logs adicionais. */
@@ -64,6 +66,54 @@ public class ProductionManager {
 
     public void addNewMachine(Machine machine) {
         this.machines.add(machine);
+    }
+
+    public void setStrategy(ProductionStrategy newStrategy) {
+        this.currentStrategy = newStrategy;
+    }
+
+    public ProductionStrategy getCurrentStrategy() {
+        return this.currentStrategy;
+    }
+
+    /**
+     * Asks the currrent strategy which demand should be fabricated and does so.
+     * Manager never knows the chosen strategy's concrete implementation
+     */
+    public void runNextProduction() {
+        if (this.currentStrategy == null) {
+            ConsolePrinter.fail("Nenhuma estratégia de produção selecionada.\n");
+            return;
+        }
+
+        // isViable() and getEstimatedCost() read cached cost, so it's gotta be fresh beforehand
+        refreshEstimatedCosts();
+        Demand nextDemand = this.currentStrategy.selectDemand(this.demands, this.budget);
+
+        if (nextDemand == null) {
+            ConsolePrinter.fail("Dessa vez não é! %s não encontrou nenhuma demanda elegível.\n",
+                    this.currentStrategy.getStrategyName());
+            return;
+        }
+
+        System.out.printf("%s escolheu: %s (%d un)\n",
+                this.currentStrategy.getStrategyName(), nextDemand.getProductName(), nextDemand.getAmount());
+        fabricateDemand(nextDemand);
+    }
+
+    public double getUnitOperationCost() {
+        double unitOperationCost = 0;
+        for (Machine m : this.machines) {
+            unitOperationCost += m.getOperationCost();
+        }
+        return unitOperationCost;
+    }
+
+    public void refreshEstimatedCosts() {
+        double unitOperationCost = getUnitOperationCost();
+        for (Demand d : this.demands) {
+            d.updateEstimatedCost(unitOperationCost);
+        }
     }
 
     /**

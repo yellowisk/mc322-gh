@@ -129,11 +129,7 @@ public class ConsolePrinter {
 
     public static void listDemands(ProductionManager pm) {
         List<Demand> demands = pm.getDemands();
-        double unitOperationCost = 0;
-
-        for (int i = 0; i < pm.getMachines().size(); i++) {
-            unitOperationCost += pm.getMachines().get(i).getOperationCost();
-        }
+        pm.refreshEstimatedCosts();
 
         System.out.printf("    " + GRAY + "%-16s   %-7s   %-12s %-15s %-18s %-10s" + RESET + "\n",
                 "Produto", "Demanda", "MP", "Custo", "Status", "Tempo");
@@ -142,7 +138,6 @@ public class ConsolePrinter {
         double totalProjectedCost = 0;
         for (int i = 0; i < demands.size(); i++) {
             Demand demand = demands.get(i);
-            demand.updateEstimatedCost(unitOperationCost);
             double demandCost = demand.getEstimatedCost();
             totalProjectedCost += demandCost;
 
