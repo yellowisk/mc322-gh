@@ -11,7 +11,7 @@ public interface ProductionStrategy {
     /** Same filter for all three strategies */
     default List<Demand> selectable(List<Demand> demands) {
         return demands.stream()
-                .filter(d -> d.getStatus().isSelectable())
+                .filter(d -> d.getStatus().isSelectable() && d.getAmount() > 0)
                 .toList();
     }
 }
