@@ -1,12 +1,14 @@
 package domain.entities.product;
 
+import domain.interfaces.Auditable;
 import domain.utils.RandomProvider;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public abstract class Product {
+public abstract class Product implements Auditable {
     private static int globalUniqueId = 1;
+    private static final double RISK_THRESHOLD = 0.5;
 
     private final int id;
     private final String name;
@@ -76,6 +78,23 @@ public abstract class Product {
 
     public static int getProductsCounter() {
         return productsCounter;
+    }
+
+    public double getRejectionRisk() {
+        return this.quality * 0.3 + this.cumulativeFailureOdd;
+    }
+
+    @Override
+    public boolean needsMaintenance() {
+        return getRejectionRisk() >= RISK_THRESHOLD;
+    }
+
+    @Override
+    public String generateDiagnosticReport() {
+        return String.format("%s #%d [%s] | Qualidade: %.2f | Risco acumulado: %.2f | Risco de rejeição: %.0f%% | %s",
+                this.name, this.id, getType(), this.quality, this.cumulativeFailureOdd,
+                getRejectionRisk() * 100,
+                needsMaintenance() ? "Precisa de nova inspeção" : "OK!!! Eitcha!!!");
     }
 
     protected double randomFactor() {

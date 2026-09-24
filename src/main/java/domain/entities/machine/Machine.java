@@ -70,7 +70,7 @@ public abstract class Machine {
 
         /* The greate the quality, thej gratear the rejection odds.
         The greater tcheckFailurehe cumulativeFailureOdd, the greater the rejection odds */
-        double rejectionOdds = product.getQuality() * 0.3 + product.getCumulativeFailureOdd();
+        double rejectionOdds = product.getRejectionRisk();
 
         return failureFloor || (RandomProvider.chance(rejectionOdds));
     }
