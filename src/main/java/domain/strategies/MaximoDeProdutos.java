@@ -15,14 +15,11 @@ public class MaximoDeProdutos implements ProductionStrategy {
 
     @Override
     public Demand selectDemand(List<Demand> demands, double availableBudget) {
-        // Pega a demanda com a maior quantidade de produtos
-        demands.sort(Comparator.comparingInt(Demand::getAmount));
-
-        if (demands.getFirst().getEstimatedCost() > availableBudget) {
-            return null;
-        }
-
-        return demands.getFirst();
+        // Entre as demandas que cabem no orçamento, pega a de maior quantidade de produtos
+        return selectable(demands).stream()
+                .filter(d -> d.isViable(availableBudget))
+                .max(Comparator.comparingInt(Demand::getAmount))
+                .orElse(null);
     }
 
     @Override
