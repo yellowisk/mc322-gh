@@ -2,6 +2,7 @@ package view;
 
 import domain.entities.demand.Demand;
 import domain.entities.demand.DemandStatus;
+import domain.entities.machine.Machine;
 import domain.entities.product.Product;
 import domain.entities.productionmanager.ProductionManager;
 
@@ -42,6 +43,19 @@ public class ConsolePrinter {
 
     public static void stageHeader(String format, Object... args) {
         System.out.printf(PURPLE + "▸ %s" + RESET + "\n", String.format(format.toUpperCase(), args));
+    }
+
+    public static void stageHeaderDebug(Machine machine, String format, Object... args) {
+        String buffer = PURPLE + "▸ " + String.format(format.toUpperCase(), args) + RESET;
+        String saude = String.format("%d/%d", machine.getSaude(), machine.getSaudeMaxima());
+        String chanceFalha = "";
+        if (machine.getRawChanceFalha() == machine.getFailureOdd()) {
+            chanceFalha = String.format("%.2f", machine.getFailureOdd());
+        } else {
+            double diffChanceFalha = machine.getFailureOdd() - machine.getRawChanceFalha();
+            chanceFalha = String.format("%.2f " + GRAY +"(▴ %.2f)", machine.getFailureOdd(), diffChanceFalha);
+        }
+        System.out.printf(buffer + " [ " + RED + "❤ %s"+ RESET + " | " + BLUE + "⚂ %s" + RESET + " ]\n", saude, chanceFalha);
     }
 
     private static void treeLine(String icon, String color, boolean isLast, String format, Object... args) {
