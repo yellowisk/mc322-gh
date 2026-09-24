@@ -3,6 +3,7 @@ package view;
 import domain.entities.demand.Demand;
 import domain.entities.conveyor.Conveyor;
 import domain.entities.machine.InspectionMachine;
+import domain.entities.machine.Machine;
 import domain.entities.machine.PackingMachine;
 import domain.entities.machine.ProcessingMachine;
 import domain.entities.product.CopoDeVidro;
@@ -52,9 +53,10 @@ public class Menu {
             ConsolePrinter.optionsList(ConsolePrinter.GRAY,
                     ConsolePrinter.YELLOW + "⟳" + ConsolePrinter.RESET + " Atualizar demandas",
                     ConsolePrinter.PURPLE + "⚙" + ConsolePrinter.RESET + " Fabricar demandas",
-                    ConsolePrinter.BLUE + "≡" + ConsolePrinter.RESET + " Ver armazém",
-                    ConsolePrinter.GREEN + "$" + ConsolePrinter.RESET + " Comprar matéria-prima",
-                    ConsolePrinter.ORANGE + "⇄" + ConsolePrinter.RESET + " Estratégia de produção"
+                    ConsolePrinter.BLUE   + "≡" + ConsolePrinter.RESET + " Ver armazém",
+                    ConsolePrinter.GREEN  + "$" + ConsolePrinter.RESET + " Comprar matéria-prima",
+                    ConsolePrinter.ORANGE + "⇄" + ConsolePrinter.RESET + " Estratégia de produção",
+                    ConsolePrinter.YELLOW + "⚒" + ConsolePrinter.RESET + " Reparar máquinas"
             );
 
             // Footer
@@ -67,6 +69,7 @@ public class Menu {
                 case 3 -> showStorageSubmenu();
                 case 4 -> buyRawMaterialSubmenu();
                 case 5 -> strategyMenu.show();
+                case 6 -> repairSubmenu();
                 case 0 -> running = false;
                 default -> this.lastBuffer = ConsolePrinter.RED + " Dessa vez não é! Opção inválida!" + ConsolePrinter.RESET;
             }
@@ -211,6 +214,74 @@ public class Menu {
             } else {
                 this.lastBuffer = ConsolePrinter.RED + "Dessa vez não é! Quantidade inválida!" + ConsolePrinter.RESET;
             }
+        }
+    }
+
+    private void repairSubmenu() {
+        boolean running = true;
+
+        while (running) {
+            // Header
+            ConsolePrinter.clearScreen();
+            ConsolePrinter.card(ConsolePrinter.YELLOW + "⚒" + ConsolePrinter.RESET + " REPARAR MÁQUINAS");
+            System.out.println();
+
+            // Lista de máquinas
+            int i = 1;
+            for (Machine m: productionManager.getMachines()) {
+                if (m.precisaManutencao()) {
+                    System.out.printf(" %d. %s " + ConsolePrinter.RED + "(quebrada)" + ConsolePrinter.RESET + "\n", i++, m.getName());
+                } else {
+                    System.out.printf(" %d. %s\n", i++, m.getName());
+                }
+            }
+
+            // Footer
+            System.out.println();
+            ConsolePrinter.printBackOption();
+            printFooterBlock();
+
+            int option = readInt("Qual máquina você deseja " + ConsolePrinter.YELLOW + "REPARAR" + ConsolePrinter.RESET + "? ");
+
+            if (option == 0) break;
+
+            try {
+                // Processo de reparo
+                Machine chosenMachine = productionManager.getMachines().get(option - 1);
+                productionManager.repairMachine(chosenMachine);
+                animateRepair(chosenMachine.getName()); // Animação
+
+                this.lastBuffer = ConsolePrinter.GREEN + chosenMachine.getName().toUpperCase() + " reparada!" + ConsolePrinter.RESET;
+            } catch (IndexOutOfBoundsException e) {
+                this.lastBuffer = ConsolePrinter.RED + "Dessa vez não é! Máquina inválida!" + ConsolePrinter.RESET;
+            } catch (Exception e) {
+                this.lastBuffer = ConsolePrinter.RED + e.getMessage() + ConsolePrinter.RESET;
+            }
+        }
+    }
+
+    /**
+     * Imprime uma nova linha com uma animação de um bloco se mexendo
+     * para simular o reparo em andamento.
+     */
+    private void animateRepair(String machineName) {
+        System.out.println();
+        int travelDistance = 5; // Distância que o bloco vai percorrer
+        int loops = 3;
+
+        try {
+            for (int loop = 0; loop < loops; loop++) {
+                for (int i = 0; i <= travelDistance; i++) {
+                    String spaces = " ".repeat(i);
+                    String trail = " ".repeat(travelDistance - i); // Serve para tampar os blocos das iterações anteriores
+
+                    System.out.print("\rReparando " + machineName + " [" + ConsolePrinter.YELLOW + spaces + "█" + trail + ConsolePrinter.RESET + "]");
+                    Thread.sleep(150);
+                }
+            }
+        } catch (InterruptedException e) {
+            // Try-catch obrigatório por conta do Thread.sleep()
+            Thread.currentThread().interrupt();
         }
     }
 

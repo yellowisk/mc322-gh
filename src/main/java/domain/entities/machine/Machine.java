@@ -13,9 +13,8 @@ public abstract class Machine {
     private final double operationCost;
     // Saúde
     private StatusDeMaquina status = StatusDeMaquina.FUNCIONAL;
-    private static final int saudeMaxima = 40; /** Saúde máxima. */
-    private int saude = saudeMaxima; /** Saúde atual. */
-    private int desgasteMaximo = 5; /** Valor máximo de desgaste por ciclo. */
+    private static final int saudeMaxima = 20; /** Saúde máxima. */
+    private int saude = saudeMaxima;
     private final int saudeCritica = 15; /** Limiar crítico da saúde para manutenção. */
 
     public Machine(String name, int maxCapacity, double failureOdd, double operationCost) {
@@ -87,7 +86,9 @@ public abstract class Machine {
      * Diminui a saúde da máquina em [1, this.desgasteMaximo]
      */
     private void desgastar() {
-        this.saude -= RandomProvider.nextInt(this.desgasteMaximo) + 1;
+        /** Saúde atual. */
+        int desgasteMaximo = 3;
+        this.saude -= RandomProvider.nextInt(desgasteMaximo) + 1;
         if (this.saude < this.saudeCritica) {
             this.status = StatusDeMaquina.QUEBRADA;
         }
@@ -97,9 +98,6 @@ public abstract class Machine {
      * Restaura a saúde da máquina para this.saudeMaxima
      */
     public void reparar() {
-        /* TODO: Método `reparar()` aumentar a saúde da máquina aos poucos para
-            a barra de progresso da reparação.
-         */
         setSaude(saudeMaxima);
         this.status = StatusDeMaquina.FUNCIONAL;
     }
