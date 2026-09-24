@@ -11,7 +11,6 @@ import domain.entities.product.PoteDeVidro;
 import domain.entities.product.Product;
 import domain.entities.productionmanager.ProductionManager;
 import domain.entities.rawmaterial.RawMaterial;
-import domain.exceptions.MachineNeedsRepairException;
 
 import java.util.List;
 import java.util.Scanner;
@@ -22,6 +21,7 @@ public class Menu {
     private final ProductionManager productionManager = new ProductionManager(
             new RawMaterial("Vidro", 50, "kg", 5, 1),
             1000);
+    private final StrategyMenu strategyMenu = new StrategyMenu(this, productionManager);
 
     public void start() {
         boolean running = true;
@@ -42,6 +42,8 @@ public class Menu {
         productionManager.addNewMachine(new PackingMachine("Máquina de Empacotamento", 20, 0.15, 0.5));
         productionManager.addNewMachine(new InspectionMachine("Máquina de Inspeção", 20, 0.10, 0.43));
 
+        productionManager.setStrategy(strategyMenu.defaultStrategy());
+
         while (running) {
             ConsolePrinter.clearScreen();
             ConsolePrinter.card(ConsolePrinter.GRAY + "⌂" + ConsolePrinter.RESET + " FÁBRICA IDEAL");
@@ -51,7 +53,8 @@ public class Menu {
                     ConsolePrinter.YELLOW + "⟳" + ConsolePrinter.RESET + " Atualizar demandas",
                     ConsolePrinter.PURPLE + "⚙" + ConsolePrinter.RESET + " Fabricar demandas",
                     ConsolePrinter.BLUE + "≡" + ConsolePrinter.RESET + " Ver armazém",
-                    ConsolePrinter.GREEN + "$" + ConsolePrinter.RESET + " Comprar matéria-prima"
+                    ConsolePrinter.GREEN + "$" + ConsolePrinter.RESET + " Comprar matéria-prima",
+                    ConsolePrinter.ORANGE + "⇄" + ConsolePrinter.RESET + " Estratégia de produção"
             );
 
             // Footer
@@ -63,6 +66,7 @@ public class Menu {
                 case 2 -> fabricateDemandSubmenu();
                 case 3 -> showStorageSubmenu();
                 case 4 -> buyRawMaterialSubmenu();
+                case 5 -> strategyMenu.show();
                 case 0 -> running = false;
                 default -> this.lastBuffer = ConsolePrinter.RED + " Dessa vez não é! Opção inválida!" + ConsolePrinter.RESET;
             }
@@ -117,6 +121,12 @@ public class Menu {
             // Lista as demandas
             List<Demand> demands = productionManager.getDemands();
             ConsolePrinter.listDemands(productionManager);
+
+            // Mostra a próxima demanda escolhida pela estratégia ativa
+            int nextByStrategy = demands.size() + 1;
+            System.out.printf(ConsolePrinter.GRAY + " %d." + ConsolePrinter.RESET + " " + ConsolePrinter.ORANGE + "▶" + ConsolePrinter.RESET
+                            + " Próxima demanda pela estratégia " + ConsolePrinter.ORANGE + "%s" + ConsolePrinter.RESET + "\n\n",
+                    nextByStrategy, productionManager.getCurrentStrategy().getStrategyName());
             ConsolePrinter.printBackOption();
 
             // Footer
@@ -125,10 +135,13 @@ public class Menu {
 
             if (option == 0) break;
 
-            if (option > 0 && option <= demands.size()) {
+            if (option > 0 && option <= nextByStrategy) {
                 try {
-                    Demand chosenDemand = productionManager.getDemands().get(option - 1);
-                    productionManager.fabricateDemand(chosenDemand);
+                    if (option == nextByStrategy) {
+                        productionManager.runNextProduction();
+                    } else {
+                        productionManager.fabricateDemand(demands.get(option - 1));
+                    }
 
                     System.out.println("\n" + ConsolePrinter.YELLOW + "Pressione ENTER para voltar..." + ConsolePrinter.RESET);
                     scanner.nextLine();
@@ -226,7 +239,7 @@ public class Menu {
         scanner.nextLine();
     }
 
-    private int readInt(String prompt) {
+    int readInt(String prompt) {
         while (true) {
             System.out.print(prompt);
             if (scanner.hasNextInt()) {
@@ -237,7 +250,11 @@ public class Menu {
         }
     }
 
-    private void printFooterBlock() {
+    void setLastBuffer(String message) {
+        this.lastBuffer = message;
+    }
+
+    void printFooterBlock() {
         if (this.lastBuffer != null) {
             ConsolePrinter.card(this.lastBuffer);
             this.lastBuffer = null;

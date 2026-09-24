@@ -19,4 +19,9 @@ public class FilaDoCaixa implements ProductionStrategy {
     public String getStrategyName() {
         return "Fila do Caixa";
     }
+
+    @Override
+    public String getStrategyRule() {
+        return "ordem de chegada";
+    }
 }

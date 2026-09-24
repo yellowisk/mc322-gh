@@ -61,8 +61,13 @@ public class ConsolePrinter {
     private static void treeLine(String icon, String color, boolean isLast, String format, Object... args) {
         String connector = isLast ? "└─" : "├─";
         System.out.printf("  %s " + color + "%s" + RESET + " %s\n", connector, icon, String.format(format, args));
+        pause(TREE_LINE_DELAY_MS);
+    }
+
+    /* Segura o terminal por um instante pro usuário conseguir ler a mensagem */
+    public static void pause(int millis) {
         try {
-            Thread.sleep(TREE_LINE_DELAY_MS);
+            Thread.sleep(millis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

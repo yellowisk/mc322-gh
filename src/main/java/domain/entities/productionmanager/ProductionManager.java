@@ -86,9 +86,7 @@ public class ProductionManager {
             return;
         }
 
-        // isViable() and getEstimatedCost() read cached cost, so it's gotta be fresh beforehand
-        refreshEstimatedCosts();
-        Demand nextDemand = this.currentStrategy.selectDemand(this.demands, this.budget);
+        Demand nextDemand = peekNextDemand();
 
         if (nextDemand == null) {
             ConsolePrinter.fail("Dessa vez não é! %s não encontrou nenhuma demanda elegível.\n",
@@ -99,6 +97,19 @@ public class ProductionManager {
         System.out.printf("%s escolheu: %s (%d un)\n",
                 this.currentStrategy.getStrategyName(), nextDemand.getProductName(), nextDemand.getAmount());
         fabricateDemand(nextDemand);
+    }
+
+    /**
+     * Shows which demand t he current strategy would pick rn, but without fabricating it.
+     * Returns null when there's no strategy or no eligible demand.
+     */
+    public Demand peekNextDemand() {
+        if (this.currentStrategy == null) {
+            return null;
+        }
+        // isViable() and getEstimatedCost() read cached cost, so it's gotta be fresh beforehand
+        refreshEstimatedCosts();
+        return this.currentStrategy.selectDemand(this.demands, this.budget);
     }
 
     public double getUnitOperationCost() {
@@ -157,6 +168,7 @@ public class ProductionManager {
         }
 
         System.out.printf("Eitcha!!! Iniciando produção de: %s (lote %d)\n", chosenProduct.getName(), batch);
+        ConsolePrinter.pause(1500);
 
         int productsRemaining = demand.getAmount();
         int fabricatedAmount = 0;
