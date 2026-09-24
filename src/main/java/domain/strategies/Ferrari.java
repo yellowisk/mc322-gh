@@ -25,4 +25,9 @@ public class Ferrari implements ProductionStrategy {
     public String getStrategyName() {
         return "Ferrari";
     }
+
+    @Override
+    public String getStrategyRule() {
+        return "maior demanda";
+    }
 }

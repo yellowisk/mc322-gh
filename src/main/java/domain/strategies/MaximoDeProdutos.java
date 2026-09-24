@@ -26,4 +26,9 @@ public class MaximoDeProdutos implements ProductionStrategy {
     public String getStrategyName() {
         return this.nome;
     }
+
+    @Override
+    public String getStrategyRule() {
+        return "máximo de produtos no orçamento";
+    }
 }
