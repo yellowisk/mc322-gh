@@ -30,7 +30,7 @@ public class RepairMenu extends Submenu {
             List<Machine> machines = productionManager.getMachines();
             for (int i = 0; i < machines.size(); i++) {
                 Machine m = machines.get(i);
-                if (m.precisaManutencao()) {
+                if (m.needsMaintenance()) {
                     System.out.printf(" %d. %s " + ConsolePrinter.color(ConsolePrinter.RED, "(quebrada)") + "\n", i + 1, m.getName());
                 } else {
                     System.out.printf(" %d. %s\n", i + 1, m.getName());
@@ -38,24 +38,22 @@ public class RepairMenu extends Submenu {
             }
             System.out.println();
             ConsolePrinter.printBackOption();
-
             menu.printFooter();
+
             int option = menu.readInt("Qual máquina você deseja " + ConsolePrinter.color(color, "REPARAR") + "? ");
 
             if (option == 0) break;
 
             Machine chosenMachine;
+
+            // Processo principal
             try {
                 chosenMachine = machines.get(option - 1);
-            } catch (IndexOutOfBoundsException e) {
-                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Máquina inválida!"));
-                continue;
-            }
-
-            try {
                 productionManager.repairMachine(chosenMachine);
-                animateRepair(chosenMachine.getName());
+                animateRepair(chosenMachine.getName()); // Animação
                 menu.setLastBuffer(ConsolePrinter.okText("%s reparada!", chosenMachine.getName().toUpperCase()));
+            } catch (IndexOutOfBoundsException e) { // Caso o índice seja inválido
+                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Máquina inválida!"));
             } catch (IllegalArgumentException | IllegalStateException e) {
                 menu.setLastBuffer(ConsolePrinter.failText("%s", e.getMessage()));
             }

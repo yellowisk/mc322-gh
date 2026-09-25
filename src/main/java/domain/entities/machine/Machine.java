@@ -2,9 +2,11 @@ package domain.entities.machine;
 
 import domain.entities.product.Product;
 import domain.exceptions.MachineNeedsRepairException;
+import domain.interfaces.Auditable;
 import domain.utils.RandomProvider;
+import view.ConsolePrinter;
 
-public abstract class Machine {
+public abstract class Machine implements Auditable {
     // === Atributos ===
     private final String name;
     private boolean isOn;
@@ -46,7 +48,7 @@ public abstract class Machine {
             throw new IllegalStateException("Eitcha, João! The machine can't process anything, since it ain't on!");
         }
 
-        if (precisaManutencao()) {
+        if (needsMaintenance()) {
             String mensagem = String.format("A %s quebrou!", getName().toLowerCase());
             throw new MachineNeedsRepairException(mensagem);
         }
@@ -86,7 +88,7 @@ public abstract class Machine {
      * Diminui a saúde da máquina em [1, this.desgasteMaximo]
      */
     private void desgastar() {
-        /** Saúde atual. */
+        // Saúde atual
         int desgasteMaximo = 3;
         this.saude -= RandomProvider.nextInt(desgasteMaximo) + 1;
         if (this.saude < this.saudeCritica) {
@@ -102,16 +104,70 @@ public abstract class Machine {
         this.status = StatusDeMaquina.FUNCIONAL;
     }
 
+    // === AUDITÁVEL ===
+
+    /**
+     * Retorna um relatório de diagnóstico formatado com o estado completo
+     * da máquina, incluindo saúde, status, custos, etc.
+     * @return String formatada com o diagnóstico.
+     */
+    @Override
+    public String generateDiagnosticReport() {
+        String reset = ConsolePrinter.RESET;
+        String blue = ConsolePrinter.BLUE;
+        String green = ConsolePrinter.GREEN;
+        String red = ConsolePrinter.RED;
+        String yellow = ConsolePrinter.YELLOW;
+        String gray = ConsolePrinter.GRAY;
+
+        // Saúde
+        String corSaude = needsMaintenance() ? red : green;
+        String saudeFormatada = String.format("%s%d/%d%s", corSaude, getSaude(), getSaudeMaxima(), reset);
+
+        // Chance de falha
+        String chanceFalhaFormatada;
+        if (getRawChanceFalha() == getFailureOdd()) {
+            chanceFalhaFormatada = String.format("%s %.2f%s", blue, getFailureOdd(), reset);
+        } else {
+            double diffChanceFalha = getFailureOdd() - getRawChanceFalha();
+            chanceFalhaFormatada = String.format("%s⚂ %.2f %s(▴ %.2f)%s", blue, getFailureOdd(), gray, diffChanceFalha, reset);
+        }
+
+        // Status
+        String statusEnergia = isOn() ? green + "Ligada" + reset : gray + "Desligada" + reset;
+        String statusFisico = (this.status == StatusDeMaquina.FUNCIONAL) ? green + "✓ Funcional" + reset : red + "✗ Quebrada" + reset;
+
+        // Custo operacional
+        String custo = String.format("%sR$ %.2f%s", yellow, getOperationCost(), reset);
+        String capacidade = String.format("%s%d un/ciclo%s", blue, getMaxCapacity(), reset);
+
+        // Texto
+        return String.format(
+                """
+                       ├─ ⏻ Status: %s | %s
+                       ├─ ❤ Saúde: %s
+                       ├─ ⚂ Chance de Falha: %s
+                       ├─ $ Custo Operacional: %s
+                       └─ Capacidade Máx: %s
+                """,
+                statusEnergia, statusFisico,
+                saudeFormatada,
+                chanceFalhaFormatada,
+                custo,
+                capacidade
+        );
+    }
+
     /**
      * Indica se a saúde da máquina está abaixo do limiar crítico.
      * @return true se a saúde estiver abaixo do limiar crítico.
      */
-    public boolean precisaManutencao() {
+    @Override
+    public boolean needsMaintenance() {
         return this.saude <= this.saudeCritica;
     }
 
     // ---- Getters e Setters ----
-
 
     public int getSaude() {
         return saude;
