@@ -100,10 +100,28 @@ public abstract class Product implements Auditable {
 
     @Override
     public String generateDiagnosticReport() {
-        return String.format("%s #%d [%s] | Lote %d | Qualidade: %.2f | Risco acumulado: %.2f | Risco de rejeição: %.0f%% | %s",
-                this.name, this.id, getType(), this.batch, this.quality, this.cumulativeFailureOdd,
-                getRejectionRisk() * 100,
-                needsMaintenance() ? "Precisa de nova inspeção" : "OK!!! Eitcha!!!");
+        String reset = view.ConsolePrinter.RESET;
+        String blue = view.ConsolePrinter.BLUE;
+        String green = view.ConsolePrinter.GREEN;
+        String red = view.ConsolePrinter.RED;
+        String yellow = view.ConsolePrinter.YELLOW;
+        String gray = view.ConsolePrinter.GRAY;
+
+        String idStr = gray + String.format("%-5d", this.id) + reset;
+        String nomeStr = gray + String.format("%-16s", this.name) + reset;
+        String loteStr = blue + String.format("%-6d", this.batch) + reset;
+        String qualStr = yellow + String.format("%-10.2f", this.quality) + reset;
+        String riscoAcumStr = yellow + String.format("%-12.2f", this.cumulativeFailureOdd) + reset;
+
+        String corRisco = needsMaintenance() ? red : green;
+        String riscoRejStr = corRisco + String.format("%-10s", String.format("%.0f%%", getRejectionRisk() * 100)) + reset;
+
+        String statusTexto = needsMaintenance() ? "✗ Inspeção" : "✓ OK";
+        String corStatus = needsMaintenance() ? red : green;
+        String statusStr = corStatus + String.format("%-20s", statusTexto) + reset;
+
+        // Retorna a linha completa formatada
+        return String.format("    %s %s %s %s %s %s %s", idStr, nomeStr, loteStr, qualStr, riscoAcumStr, riscoRejStr, statusStr);
     }
 
     protected double randomFactor() {

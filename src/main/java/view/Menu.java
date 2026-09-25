@@ -11,6 +11,7 @@ import domain.entities.product.Product;
 import domain.entities.productionmanager.ProductionManager;
 import domain.entities.rawmaterial.RawMaterial;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -29,7 +30,8 @@ public class Menu {
             new StorageMenu(this, productionManager),
             new BuyRawMaterialMenu(this, productionManager),
             strategyMenu,
-            new RepairMenu(this, productionManager)
+            new RepairMenu(this, productionManager),
+            new AuditMenu(this, productionManager)
     );
 
     public void start() {
@@ -53,24 +55,26 @@ public class Menu {
 
         productionManager.setStrategy(strategyMenu.defaultStrategy());
 
-        String[] options = submenus.stream()
-                .map(submenu -> submenu.icon() + " " + submenu.label())
-                .toArray(String[]::new);
+        // Menu: lista de submenus
+        List<String> optionsList = new ArrayList<>(
+                submenus.stream()
+                    .map(submenu -> submenu.icon() + " " + submenu.label())
+                    .toList()
+        );
+        optionsList.add("Sair");
+        String[] options = optionsList.toArray(new String[0]);
 
         while (running) {
             ConsolePrinter.clearScreen();
             ConsolePrinter.card(ConsolePrinter.color(ConsolePrinter.GRAY, "⌂") + " FÁBRICA IDEAL");
             System.out.println();
 
-            ConsolePrinter.optionsList(ConsolePrinter.GRAY, options);
+            ConsolePrinter.optionsList(options);
 
             printFooter();
             int option = readInt("Escolha: ");
 
-            if (option == 0) {
-                running = false;
-                continue;
-            }
+            if (option == 0) break;
 
             Submenu chosen;
             try {
