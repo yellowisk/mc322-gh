@@ -28,7 +28,6 @@ public class ProductionManager {
     private int batchCounter = 0;
 
     private boolean temMaquinaQuebrada = false;
-    private boolean modoDebug = false; /** Flag de ativação do modo debug com logs adicionais. */
 
     /**
      * Lista das etapas de produção instanciada para evitar laço 'for' otimizado
@@ -128,6 +127,21 @@ public class ProductionManager {
     }
 
     /**
+     * How much it'd cost to fabricate everything still in line (pending + partial).
+     * Completed and cancelled ones are outta the projection.
+     */
+    public double getProjectedCost() {
+        refreshEstimatedCosts();
+        double total = 0;
+        for (Demand d : this.demands) {
+            if (d.getStatus().isSelectable()) {
+                total += d.getEstimatedCost();
+            }
+        }
+        return total;
+    }
+
+    /**
      * Método principal da classe.
      * Realiza o processo de fabricação da demanda escolhida.
      *
@@ -150,13 +164,23 @@ public class ProductionManager {
             return;
         }
 
-        if (demand.getStatus() == DemandStatus.CANCELLED) {
-            demand.reset();
-            ConsolePrinter.treeInfo(false, "Retomando demanda de %s após cancelamento anterior.", chosenProduct.getName());
-        } else if (!demand.getStatus().isSelectable()) {
+        boolean resumingCancelled = demand.getStatus() == DemandStatus.CANCELLED;
+        if (!resumingCancelled && !demand.getStatus().isSelectable()) {
             ConsolePrinter.fail("Demanda de %s está %s e não pode ser fabricada. Atualize a demanda para reativá-la.\n",
                     chosenProduct.getName(), demand.getStatus().getDescription());
             return;
+        }
+
+        refreshEstimatedCosts();
+        if (!demand.isViable(this.budget)) {
+            throw new InsufficientBudgetException(String.format(
+                    "Dessa vez não é! Orçamento insuficiente para fabricar %s: custo R$ %.2f, orçamento R$ %.2f.",
+                    chosenProduct.getName(), demand.getEstimatedCost(), this.budget));
+        }
+
+        if (resumingCancelled) {
+            demand.reset();
+            ConsolePrinter.treeInfo(false, "Retomando demanda de %s após cancelamento anterior.", chosenProduct.getName());
         }
 
         demand.startProduction();
@@ -184,11 +208,7 @@ public class ProductionManager {
                 for (ProductionStages etapaAtual : etapasProducao) {
                     Machine currentMachine = this.machines.get(etapaAtual.getCode());
 
-                    if (this.modoDebug) {
-                        ConsolePrinter.stageHeaderDebug(currentMachine, "%s", etapaAtual.getNome());
-                    } else {
-                        ConsolePrinter.stageHeader("%s", etapaAtual.getNome());
-                    }
+                    ConsolePrinter.stageHeader(currentMachine, "%s", etapaAtual.getNome());
 
                     if (!calcProductionCost(currentMachine)) {
                         String mensagem = String.format("Dessa vez não é! Orçamento insuficiente para operar a máquina de %s!", currentMachine.getType());
@@ -275,21 +295,20 @@ public class ProductionManager {
         return false;
     }
 
-    public void buyRawMaterial(int amount) {
+    /**
+     * Buys raw material and takes it off the budget.
+     *
+     * @return how much the purchase cost in total
+     * @throws InsufficientBudgetException when the budget can't cover it
+     */
+    public float buyRawMaterial(int amount) {
         float totalCost = amount * this.rawMaterial.getPrice();
         if (this.budget < totalCost) {
-            ConsolePrinter.fail("Dessa vez não é! Orçamento insuficiente para comprar matéria-prima!\n");
-            return;
+            throw new InsufficientBudgetException("Dessa vez não é! Orçamento insuficiente para comprar matéria-prima!");
         }
         budget -= totalCost;
         this.rawMaterial.addStock(amount);
-
-        if (totalCost >= 150) {
-            ConsolePrinter.card(" [" + ConsolePrinter.GREEN + "OK" + ConsolePrinter.RESET
-                    + "] Dessa vez não é! Cliente comprou 150 reais e, sim, cliente ganhou um balão de presente!");
-        } else {
-            ConsolePrinter.card(" [" + ConsolePrinter.GREEN + "OK" + ConsolePrinter.RESET + "] Eitcha!!! Compra de matéria-prima realizada com sucesso!");
-        }
+        return totalCost;
     }
 
     // === REPAIR ===
@@ -347,16 +366,6 @@ public class ProductionManager {
 
     public double getBudget() {
         return budget;
-    }
-
-    public void displayBudget() {
-        ConsolePrinter.printOneLineStats(this.budget, this.rawMaterial.getQuantity(), this.fabricatedProducts.size());
-    }
-
-    public void displayStorage() {
-        System.out.printf("   Estoque de Matéria-Prima: " + ConsolePrinter.GREEN + "%.2f %s\n\n" + ConsolePrinter.RESET,
-                this.rawMaterial.getQuantity(), this.rawMaterial.getUnit());
-        ConsolePrinter.listStorage(this.demands, this.fabricatedProducts);
     }
 
     public boolean temMaquinaQuebrada() {
