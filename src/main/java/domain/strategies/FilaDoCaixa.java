@@ -3,15 +3,16 @@ package domain.strategies;
 import domain.entities.demand.Demand;
 import domain.interfaces.ProductionStrategy;
 
+import java.util.Comparator;
 import java.util.List;
 
-/* FIFOOOOOOOOOOO */
+/** FIFOOOOOOOOOOO */
 public class FilaDoCaixa implements ProductionStrategy {
 
     @Override
     public Demand selectDemand(List<Demand> demands, double availableBudget) {
         return selectable(demands).stream()
-                .findFirst()
+                .min(Comparator.comparingLong(Demand::getArrivalOrder))
                 .orElse(null);
     }
 

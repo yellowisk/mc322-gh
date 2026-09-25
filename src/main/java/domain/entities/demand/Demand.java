@@ -4,6 +4,9 @@ import domain.entities.product.Product;
 import domain.exceptions.InvalidDemandTransitionException;
 
 public class Demand {
+    /** Global arrival counter, stamped whenever a demand is (re)placed */
+    private static long nextArrival = 0;
+
     private final String productName;
     private int amount;
     private DemandStatus status;
@@ -11,6 +14,7 @@ public class Demand {
     private double totalRawMaterial;
     private double totalProductionTime;
     private double estimatedCost;
+    private long arrivalOrder;
 
     public Demand(Product product, int amount) {
         this.productName = product.getName();
@@ -19,6 +23,7 @@ public class Demand {
         this.producedAmount = 0;
         this.totalRawMaterial = calcRawMaterialNeeded(product);
         this.totalProductionTime = 0.0;
+        this.arrivalOrder = nextArrival++;
     }
 
     private double calcRawMaterialNeeded(Product product) {
@@ -57,7 +62,12 @@ public class Demand {
         }
         this.amount = newAmount;
         this.totalRawMaterial = calcRawMaterialNeeded(product);
+        this.arrivalOrder = nextArrival++;
         reset();
+    }
+
+    public long getArrivalOrder() {
+        return this.arrivalOrder;
     }
 
     public double getTotalProductionTime() {
