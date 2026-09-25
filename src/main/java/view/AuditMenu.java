@@ -6,6 +6,7 @@ import domain.entities.productionmanager.ProductionManager;
 import domain.interfaces.Auditable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class AuditMenu extends Submenu {
@@ -159,9 +160,7 @@ public class AuditMenu extends Submenu {
             // Tratamento da opção Expandir/Recolher todos
             if (option == 99 && !machineList.isEmpty()) {
                 int newState = expandAll ? 1 : 0;
-                for (int j = 0; j < expandedOptions.length; j++) {
-                    expandedOptions[j] = newState;
-                }
+                Arrays.fill(expandedOptions, newState);
                 expandAll = !expandAll;
                 continue;
             }
