@@ -127,7 +127,7 @@ public class ProductionManager {
     }
 
     /**
-     * How much it'd cost to fabricate everything still in line (pending + partial).
+     * How much it'd cost to fabricate everything still in line (pending ones).
      * Completed and cancelled ones are outta the projection.
      */
     public double getProjectedCost() {
@@ -164,8 +164,7 @@ public class ProductionManager {
             return;
         }
 
-        boolean resumingCancelled = demand.getStatus() == DemandStatus.CANCELLED;
-        if (!resumingCancelled && !demand.getStatus().isSelectable()) {
+        if (!demand.getStatus().canBeFabricated()) {
             ConsolePrinter.fail("Demanda de %s está %s e não pode ser fabricada. Atualize a demanda para reativá-la.\n",
                     chosenProduct.getName(), demand.getStatus().getDescription());
             return;
@@ -178,9 +177,10 @@ public class ProductionManager {
                     chosenProduct.getName(), demand.getEstimatedCost(), this.budget));
         }
 
-        if (resumingCancelled) {
-            demand.reset();
-            ConsolePrinter.treeInfo(false, "Retomando demanda de %s após cancelamento anterior.", chosenProduct.getName());
+        int alreadyProduced = demand.getProducedAmount();
+        if (demand.getStatus() == DemandStatus.CANCELLED && alreadyProduced > 0) {
+            ConsolePrinter.treeInfo(false, "Retomando demanda de %s de onde parou (%d/%d).",
+                    chosenProduct.getName(), alreadyProduced, demand.getAmount());
         }
 
         demand.startProduction();
@@ -194,7 +194,7 @@ public class ProductionManager {
         System.out.printf("Eitcha!!! Iniciando produção de: %s (lote %d)\n", chosenProduct.getName(), batch);
         ConsolePrinter.pause(1500);
 
-        int productsRemaining = demand.getAmount();
+        int productsRemaining = demand.getRemainingAmount();
         int fabricatedAmount = 0;
         int approvedAmount = 0;
         double totalProductionTime = 0;
@@ -202,7 +202,7 @@ public class ProductionManager {
         Product currentProduct = null;
 
         while (fabricatedAmount < productsRemaining) {
-            System.out.printf("(%d/%d) %s " + "─".repeat(24) + "\n", (fabricatedAmount + 1), productsRemaining, chosenProduct.getName());
+            System.out.printf("(%d/%d) %s " + "─".repeat(24) + "\n", (alreadyProduced + fabricatedAmount + 1), demand.getAmount(), chosenProduct.getName());
 
             try {
                 for (ProductionStages etapaAtual : etapasProducao) {
@@ -267,14 +267,12 @@ public class ProductionManager {
 
         if (fabricatedAmount == productsRemaining) {
             demand.fulfill(fabricatedAmount, totalProductionTime);
-            infoText = String.format(" Demanda de %s concluída em %.2f segundos de produção.", demand.getProductName(), totalProductionTime);
-        } else if (fabricatedAmount > 0) {
-            demand.partiallyFulfill(fabricatedAmount, totalProductionTime);
-            infoText = String.format(" Demanda de %s atendida parcialmente (%d/%d) em %.2f segundos de produção.",
-                    demand.getProductName(), fabricatedAmount, productsRemaining, totalProductionTime);
+            infoText = String.format(" Demanda de %s concluída em %.2f segundos de produção.",
+                    demand.getProductName(), demand.getTotalProductionTime());
         } else {
-            demand.cancel();
-            infoText = String.format(" Demanda de %s cancelada por falta de orçamento ou insumos.", demand.getProductName());
+            demand.cancel(fabricatedAmount, totalProductionTime);
+            infoText = String.format(" Demanda de %s cancelada (%d/%d). Fabrique de novo para continuar de onde parou.",
+                    demand.getProductName(), demand.getProducedAmount(), demand.getAmount());
         }
 
         ConsolePrinter.card("%d produtos fabricados e %d aprovados." + (infoText.isEmpty() ? "\n" : "\n" + infoText), fabricatedAmount, approvedAmount);

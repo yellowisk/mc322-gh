@@ -1,7 +1,6 @@
 package view;
 
 import domain.entities.demand.Demand;
-import domain.entities.demand.DemandStatus;
 import domain.entities.machine.Machine;
 import domain.entities.product.Product;
 import domain.entities.productionmanager.ProductionManager;
@@ -159,12 +158,11 @@ public class ConsolePrinter {
                     statusLabel = "Concluída";
                     statusColor = GREEN;
                 }
-                case PARTIAL -> {
-                    statusLabel = String.format("Parcial (%d/%d)", demand.getProducedAmount(), demand.getAmount());
-                    statusColor = YELLOW;
-                }
                 case CANCELLED -> {
-                    statusLabel = "Cancelada";
+                    // shows the progress when it got somewhere before stopping
+                    statusLabel = demand.getProducedAmount() > 0
+                            ? String.format("Cancelada (%d/%d)", demand.getProducedAmount(), demand.getAmount())
+                            : "Cancelada";
                     statusColor = RED;
                 }
                 default -> {
@@ -173,7 +171,7 @@ public class ConsolePrinter {
                 }
             }
             String status = statusColor + String.format("%-18s", statusLabel) + RESET;
-            String time = demand.getStatus() == DemandStatus.PENDING || demand.getStatus() == DemandStatus.CANCELLED
+            String time = demand.getProducedAmount() == 0
                     ? "-"
                     : String.format("%.2fs", demand.getTotalProductionTime());
 
