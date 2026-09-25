@@ -31,7 +31,8 @@ public class Menu {
             new BuyRawMaterialMenu(this, productionManager),
             strategyMenu,
             new RepairMenu(this, productionManager),
-            new AuditMenu(this, productionManager)
+            new AuditMenu(this, productionManager),
+            new RawMaterialStorageMenu(this, productionManager)
     );
 
     public void start() {
