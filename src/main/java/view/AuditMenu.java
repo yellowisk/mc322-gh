@@ -17,7 +17,7 @@ public class AuditMenu extends Submenu {
 
     @Override
     public String icon() {
-        return ConsolePrinter.color(color, "≡");
+        return ConsolePrinter.color(color, "⌕");
     }
 
     @Override
@@ -59,6 +59,8 @@ public class AuditMenu extends Submenu {
         while (running) {
             printHeader();
 
+            System.out.println(ConsolePrinter.color(color," Relatório geral\n"));
+
             // Lista com todas as entidade auditáveis
             List<Auditable> auditables = new ArrayList<>();
             auditables.addAll(productionManager.getMachines());
@@ -81,7 +83,6 @@ public class AuditMenu extends Submenu {
                     issuesCount,
                     ConsolePrinter.RESET);
 
-            ConsolePrinter.line();
             System.out.println(ConsolePrinter.BOLD + " Lista de problemas:" + ConsolePrinter.RESET);
 
             boolean foundIssues = false;
@@ -126,16 +127,18 @@ public class AuditMenu extends Submenu {
 
         while (running) {
             printHeader();
+            System.out.println(ConsolePrinter.color(color," Auditoria de máquinas\n"));
 
             if (machineList.isEmpty()) {
                 System.out.println(ConsolePrinter.GRAY + " Não há nenhuma máquina cadastrada." + ConsolePrinter.RESET);
             }
 
             // Menu: Lista expansível de máquinas
+            System.out.println(" Máquinas disponíveis:\n");
             int i = 0;
             for (Machine m : machineList) {
                 System.out.printf(
-                        ConsolePrinter.GRAY + " %d." + ConsolePrinter.RESET + " %s " + ConsolePrinter.GRAY + "(%s)" + ConsolePrinter.RESET + "\n",
+                        ConsolePrinter.GRAY + "  %d." + ConsolePrinter.RESET + " %s " + ConsolePrinter.GRAY + "(%s)" + ConsolePrinter.RESET + "\n",
                         (i + 1), m.getName(), m.getType());
 
                 if (expandedOptions[i] == 1) { // Expansão
@@ -181,11 +184,13 @@ public class AuditMenu extends Submenu {
 
         while (running) {
             printHeader();
+            System.out.println(ConsolePrinter.color(color," Auditoria de produtos\n"));
 
             if (productList.isEmpty()) {
                 System.out.println(ConsolePrinter.GRAY + " Nenhum produto foi produzido ainda." + ConsolePrinter.RESET);
             } else {
                 // Ccabeçalho alinhado da tabela
+                System.out.println(" Produtos produzidos:\n");
                 System.out.printf("    " + ConsolePrinter.GRAY + "%-5s %-16s %-6s %-10s %-12s %-10s %-20s" + ConsolePrinter.RESET + "\n",
                         "ID", "Nome", "Lote", "Qualidade", "Risco Acum.", "Rejeição", "Status");
                 ConsolePrinter.indentedLine(85);

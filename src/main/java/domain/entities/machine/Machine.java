@@ -144,11 +144,11 @@ public abstract class Machine implements Auditable {
         // Texto
         return String.format(
                 """
-                       ├─ ⏻ Status: %s | %s
-                       ├─ ❤ Saúde: %s
-                       ├─ ⚂ Chance de Falha: %s
-                       ├─ $ Custo Operacional: %s
-                       └─ Capacidade Máx: %s
+                        ├─ ⏻ Status: %s | %s
+                        ├─ ❤ Saúde: %s
+                        ├─ ⚂ Chance de Falha: %s
+                        ├─ $ Custo Operacional: %s
+                        └─ Capacidade Máx: %s
                 """,
                 statusEnergia, statusFisico,
                 saudeFormatada,
