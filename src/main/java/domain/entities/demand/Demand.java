@@ -47,6 +47,9 @@ public class Demand {
     }
 
     public void updateAmount(Product product, int newAmount) {
+        if (newAmount < 0) {
+            throw new IllegalArgumentException("A demanda não pode ser negativa!");
+        }
         this.amount = newAmount;
         this.totalRawMaterial = calcRawMaterialNeeded(product);
         reset();
