@@ -9,31 +9,35 @@ import domain.strategies.MaximoDeProdutos;
 
 import java.util.List;
 
-public class StrategyMenu {
+public class StrategyMenu extends Submenu {
     private final List<ProductionStrategy> strategies = List.of(
             new FilaDoCaixa(),
             new Ferrari(),
             new MaximoDeProdutos()
     );
 
-    private final Menu menu;
-    private final ProductionManager productionManager;
-
     public StrategyMenu(Menu menu, ProductionManager productionManager) {
-        this.menu = menu;
-        this.productionManager = productionManager;
+        super(menu, productionManager, ConsolePrinter.ORANGE);
+    }
+
+    @Override
+    public String icon() {
+        return ConsolePrinter.color(color, "⇄");
+    }
+
+    @Override
+    public String label() {
+        return "Estratégia de produção";
     }
 
     public ProductionStrategy defaultStrategy() {
         return strategies.getFirst();
     }
 
+    @Override
     public void show() {
         while (true) {
-            ConsolePrinter.clearScreen();
-            ConsolePrinter.card(ConsolePrinter.ORANGE + "⇄" + ConsolePrinter.RESET + " ESTRATÉGIA DE PRODUÇÃO");
-            System.out.println();
-
+            printHeader();
             printNextDemandPreview();
 
             for (int i = 0; i < strategies.size(); i++) {
@@ -41,34 +45,36 @@ public class StrategyMenu {
                 boolean active = strategy == productionManager.getCurrentStrategy();
                 System.out.printf(ConsolePrinter.GRAY + " %d." + ConsolePrinter.RESET + " %s %s " + ConsolePrinter.GRAY + "(%s)" + ConsolePrinter.RESET + "\n",
                         i + 1,
-                        active ? ConsolePrinter.GREEN + "●" + ConsolePrinter.RESET : "○",
+                        active ? ConsolePrinter.color(ConsolePrinter.GREEN, "●") : "○",
                         strategy.getStrategyName(),
                         strategy.getStrategyRule());
             }
             System.out.println();
             ConsolePrinter.printBackOption();
 
-            menu.printFooterBlock();
-            int choice = menu.readInt("Qual estratégia deseja " + ConsolePrinter.ORANGE + "USAR" + ConsolePrinter.RESET + "? ");
+            menu.printFooter();
+            int choice = menu.readInt("Qual estratégia deseja " + ConsolePrinter.color(color, "USAR") + "? ");
 
             if (choice == 0) break;
 
-            if (choice > 0 && choice <= strategies.size()) {
-                ProductionStrategy chosen = strategies.get(choice - 1);
-                productionManager.setStrategy(chosen);
-                menu.setLastBuffer(" [" + ConsolePrinter.GREEN + "OK" + ConsolePrinter.RESET + "] Estratégia alterada para "
-                        + chosen.getStrategyName() + "!");
-            } else {
-                menu.setLastBuffer(ConsolePrinter.RED + "Dessa vez não é! Opção inválida!" + ConsolePrinter.RESET);
+            ProductionStrategy chosen;
+            try {
+                chosen = strategies.get(choice - 1);
+            } catch (IndexOutOfBoundsException e) {
+                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Opção inválida!"));
+                continue;
             }
+
+            productionManager.setStrategy(chosen);
+            menu.setLastBuffer(ConsolePrinter.okText("Estratégia alterada para %s!", chosen.getStrategyName()));
         }
     }
 
     private void printNextDemandPreview() {
         Demand next = productionManager.peekNextDemand();
         String preview = (next == null)
-                ? ConsolePrinter.GRAY + "nenhuma demanda elegível" + ConsolePrinter.RESET
-                : ConsolePrinter.YELLOW + next.getProductName() + " (" + next.getAmount() + " un)" + ConsolePrinter.RESET;
+                ? ConsolePrinter.color(ConsolePrinter.GRAY, "nenhuma demanda elegível")
+                : ConsolePrinter.color(color, next.getProductName() + " (" + next.getAmount() + " un)");
         System.out.println("   Próxima demanda a ser fabricada: " + preview + "\n");
     }
 }

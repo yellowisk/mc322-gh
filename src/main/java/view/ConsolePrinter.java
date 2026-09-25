@@ -20,33 +20,39 @@ public class ConsolePrinter {
     public static final String RED = "\033[38;2;234;67;53m";
     private static final int TREE_LINE_DELAY_MS = 125;
 
+    private static final String DEMAND_ROW_FORMAT = "%-16s  %-12s  %-16s  %-16s  %-18s  %-10s";
+    private static final int DEMAND_TABLE_WIDTH = 16 + 12 + 16 + 16 + 18 + 10 + 2 * 5;
+
     public static void clearScreen() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
 
+    public static String color(String color, String text) {
+        return color + text + RESET;
+    }
+
+    /** Success log, returned instead of printed (for the lastBuffer) */
+    public static String okText(String format, Object... args) {
+        return color(GREEN, "✓") + " " + String.format(format, args) + RESET;
+    }
+
+    /** Fail log , returned instead of printed (for the lastBuffer) */
+    public static String failText(String format, Object... args) {
+        return color(RED, "✗") + " " + String.format(format, args) + RESET;
+    }
+
     public static void ok(String format, Object... args) {
-        System.out.print("[" + GREEN + "OK" + RESET + "] " + String.format(format, args) + RESET);
+        System.out.print(okText(format, args));
     }
 
     public static void fail(String format, Object... args) {
-        System.out.print("[" + RED + "FALHA" + RESET + "] " + String.format(format, args) + RESET);
+        System.out.print(failText(format, args));
     }
 
-    public static void info(String format, Object... args) {
-        System.out.print("[INFO" + RESET + "] " + String.format(format, args) + RESET);
-    }
-
-    public static void step(String format, Object... args) {
-        System.out.print(BLUE + "\t" + String.format(format, args) + RESET);
-    }
-
-    public static void stageHeader(String format, Object... args) {
-        System.out.printf(PURPLE + "▸ %s" + RESET + "\n", String.format(format.toUpperCase(), args));
-    }
-
-    public static void stageHeaderDebug(Machine machine, String format, Object... args) {
-        String buffer = PURPLE + "▸ " + String.format(format.toUpperCase(), args) + RESET;
+    /** Stage header w/ the machine's health and failure odds */
+    public static void stageHeader(Machine machine, String format, Object... args) {
+        String title = PURPLE + "▸ " + String.format(format.toUpperCase(), args) + RESET;
         String saude = String.format("%d/%d", machine.getSaude(), machine.getSaudeMaxima());
         String chanceFalha = "";
         if (machine.getRawChanceFalha() == machine.getFailureOdd()) {
@@ -55,7 +61,7 @@ public class ConsolePrinter {
             double diffChanceFalha = machine.getFailureOdd() - machine.getRawChanceFalha();
             chanceFalha = String.format("%.2f " + GRAY +"(▴ %.2f)", machine.getFailureOdd(), diffChanceFalha);
         }
-        System.out.printf(buffer + " [ " + RED + "❤ %s"+ RESET + " | " + BLUE + "⚂ %s" + RESET + " ]\n", saude, chanceFalha);
+        System.out.printf(title + " [ " + RED + "❤ %s"+ RESET + " | " + BLUE + "⚂ %s" + RESET + " ]\n", saude, chanceFalha);
     }
 
     private static void treeLine(String icon, String color, boolean isLast, String format, Object... args) {
@@ -102,7 +108,8 @@ public class ConsolePrinter {
         System.out.println(GRAY + "─".repeat(65) + RESET);
     }
 
-    public static void line(int size) {
+    /** Indented line, goes right under the table headers */
+    public static void indentedLine(int size) {
         System.out.println(GRAY + "    " + "─".repeat(size) + RESET);
     }
 
@@ -134,17 +141,15 @@ public class ConsolePrinter {
 
     public static void listDemands(ProductionManager pm) {
         List<Demand> demands = pm.getDemands();
-        pm.refreshEstimatedCosts();
+        double totalProjectedCost = pm.getProjectedCost(); // also refreshes each demand's cost btw
 
-        System.out.printf("    " + GRAY + "%-16s   %-7s   %-12s %-15s %-18s %-10s" + RESET + "\n",
+        System.out.printf("    " + GRAY + DEMAND_ROW_FORMAT + RESET + "\n",
                 "Produto", "Demanda", "MP", "Custo", "Status", "Tempo");
-        line(82);
+        indentedLine(DEMAND_TABLE_WIDTH);
 
-        double totalProjectedCost = 0;
         for (int i = 0; i < demands.size(); i++) {
             Demand demand = demands.get(i);
             double demandCost = demand.getEstimatedCost();
-            totalProjectedCost += demandCost;
 
             /* Padding the plain text to the Status column's visible width yah */
             String statusLabel;
@@ -172,12 +177,13 @@ public class ConsolePrinter {
                     ? "-"
                     : String.format("%.2fs", demand.getTotalProductionTime());
 
-            System.out.printf(GRAY + " %-1s." + RESET + " %-16s   %-7s   %-12s R$ %-12.2f %s %-10s" + RESET + "\n",
+            // status already comes colored + padded, so it goes in as a plain %s instead of %-18s
+            System.out.printf(GRAY + " %-1s." + RESET + " " + DEMAND_ROW_FORMAT.replace("%-18s", "%s") + RESET + "\n",
                     (i + 1),
                     demand.getProductName(),
                     demand.getAmount() + " un",
                     String.format("%.2f kg", demand.getTotalRawMaterial()),
-                    demandCost,
+                    String.format("R$ %.2f", demandCost),
                     status,
                     time
             );
@@ -185,8 +191,12 @@ public class ConsolePrinter {
 
         System.out.println();
         if (totalProjectedCost > 0) {
-            System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f " + RED + "(▾ R$ -%.2f)\n" + RESET,
-                    pm.getBudget() - totalProjectedCost, totalProjectedCost);
+            double projectedBudget = pm.getBudget() - totalProjectedCost;
+            System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f " + RED + "(▾ R$ -%.2f)" + RESET + "\n",
+                    projectedBudget, totalProjectedCost);
+            if (projectedBudget < 0) {
+                System.out.println("\n" + color(RED, " ⚠ Orçamento insuficiente para fabricar todas as demandas pendentes!"));
+            }
         } else {
             System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f\n" + RESET, pm.getBudget());
         }
@@ -195,7 +205,7 @@ public class ConsolePrinter {
 
     public static void listStorage(List<Demand> demands, List<Product> storage) {
         System.out.printf("    " + GRAY + "%-16s   %-10s" + RESET + "\n", "Produto", "Estoque");
-        line(44);
+        indentedLine(44);
 
         for (int i = 0; i < demands.size(); i++) {
             String productName = demands.get(i).getProductName();
