@@ -116,12 +116,16 @@ public class ConsolePrinter {
         System.out.println(GRAY + " 0. ↩ Voltar" + RESET + "\n");
     }
 
-    public static void optionsList(String color, String... options) {
-        for (int i = 0; i < options.length; i++) {
-            System.out.printf(color + " %d." + RESET + " %s\n", (i + 1), options[i]);
+    /**
+     * Imprime uma lista de opções de menu. O último item da lista é tratado como botão de "Voltar/Sair".4
+     * @param options lista de opções de menu.
+     */
+    public static void optionsList(String... options) {
+        for (int i = 0; i < options.length - 1; i++) {
+            System.out.printf(GRAY + " %d." + RESET + " %s\n", (i + 1), options[i]);
         }
         System.out.println();
-        System.out.printf(GRAY + " 0." + RED + " ⏻ " + RESET + "Sair\n\n" + RESET);
+        System.out.printf(GRAY + " 0. ↩ %s\n\n" + RESET, options[options.length - 1]);
     }
 
     public static void printOneLineStats(double budget, double rawMaterialQuantity, int fabricatedCount) {

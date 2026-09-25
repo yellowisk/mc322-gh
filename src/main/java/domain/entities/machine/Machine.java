@@ -15,7 +15,7 @@ public abstract class Machine implements Auditable {
     private final double operationCost;
     // Saúde
     private StatusDeMaquina status = StatusDeMaquina.FUNCIONAL;
-    private static final int saudeMaxima = 20; /** Saúde máxima. */
+    private static final int saudeMaxima = 100; /** Saúde máxima. */
     private int saude = saudeMaxima;
     private final int saudeCritica = 15; /** Limiar crítico da saúde para manutenção. */
 
@@ -164,7 +164,7 @@ public abstract class Machine implements Auditable {
      */
     @Override
     public boolean needsMaintenance() {
-        return this.saude <= this.saudeCritica;
+        return this.saude < this.saudeCritica;
     }
 
     // ---- Getters e Setters ----
