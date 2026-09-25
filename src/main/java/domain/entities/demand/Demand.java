@@ -46,6 +46,11 @@ public class Demand {
         return this.producedAmount;
     }
 
+    /** Units still missing. A cancelled demand keeps its progress, so this is what a resume makes */
+    public int getRemainingAmount() {
+        return this.amount - this.producedAmount;
+    }
+
     public void updateAmount(Product product, int newAmount) {
         if (newAmount < 0) {
             throw new IllegalArgumentException("A demanda não pode ser negativa!");
@@ -65,7 +70,7 @@ public class Demand {
 
     /** Must be called with a fresh unitOperationCost */
     public void updateEstimatedCost(double unitOperationCost) {
-        this.estimatedCost = this.amount * unitOperationCost;
+        this.estimatedCost = getRemainingAmount() * unitOperationCost;
     }
 
     public boolean isViable(double availableBudget) {
@@ -76,20 +81,19 @@ public class Demand {
         transitionTo(DemandStatus.IN_PRODUCTION);
     }
 
-    public void fulfill(int producedAmount, double totalProductionTime) {
+    public void fulfill(int producedNow, double productionTimeNow) {
         transitionTo(DemandStatus.COMPLETED);
-        this.producedAmount = producedAmount;
-        this.totalProductionTime = totalProductionTime;
+        addProgress(producedNow, productionTimeNow);
     }
 
-    public void partiallyFulfill(int producedAmount, double totalProductionTime) {
-        transitionTo(DemandStatus.PARTIAL);
-        this.producedAmount = producedAmount;
-        this.totalProductionTime = totalProductionTime;
-    }
-
-    public void cancel() {
+    public void cancel(int producedNow, double productionTimeNow) {
         transitionTo(DemandStatus.CANCELLED);
+        addProgress(producedNow, productionTimeNow);
+    }
+
+    private void addProgress(int producedNow, double productionTimeNow) {
+        this.producedAmount += producedNow;
+        this.totalProductionTime += productionTimeNow;
     }
 
     public void reset() {
