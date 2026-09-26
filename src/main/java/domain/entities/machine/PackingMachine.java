@@ -6,8 +6,9 @@ import domain.entities.product.ProductStatus;
 public class PackingMachine extends Machine {
 
     public PackingMachine(String name, int maxCapacity, double failureOdd,
-                          double operationCost) {
-        super(name, maxCapacity, failureOdd, operationCost);
+                             double operationCost, double scenarioMultiplier,
+                             int wearDamage) {
+        super(name, maxCapacity, failureOdd, operationCost, scenarioMultiplier, wearDamage);
     }
 
     @Override

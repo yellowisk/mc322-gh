@@ -13,17 +13,23 @@ public abstract class Machine implements Auditable {
     private final int maxCapacity;
     private final double failureOdd; /** Chance base de falha. */
     private final double operationCost;
+    private final double scenarioMultiplier; // Multiplicador de falha do cenário atual
     // Saúde
     private StatusDeMaquina status = StatusDeMaquina.FUNCIONAL;
     private static final int saudeMaxima = 100; /** Saúde máxima. */
     private int saude = saudeMaxima;
     private final int saudeCritica = 15; /** Limiar crítico da saúde para manutenção. */
+    private final int desgasteMaximo;
 
-    public Machine(String name, int maxCapacity, double failureOdd, double operationCost) {
+    public Machine(String name, int maxCapacity, double failureOdd,
+                   double operationCost, double scenarioMultiplier,
+                   int wearDamage) {
         this.name = name;
         this.maxCapacity = maxCapacity;
         this.failureOdd = failureOdd;
         this.operationCost = operationCost;
+        this.scenarioMultiplier = scenarioMultiplier;
+        this.desgasteMaximo = wearDamage;
     }
 
     /**
@@ -88,9 +94,7 @@ public abstract class Machine implements Auditable {
      * Diminui a saúde da máquina em [1, this.desgasteMaximo]
      */
     private void desgastar() {
-        // Saúde atual
-        int desgasteMaximo = 3;
-        this.saude -= RandomProvider.nextInt(desgasteMaximo) + 1;
+        this.saude -= RandomProvider.nextInt(this.desgasteMaximo) + 1;
         if (this.saude < this.saudeCritica) {
             this.status = StatusDeMaquina.QUEBRADA;
         }
@@ -207,7 +211,7 @@ public abstract class Machine implements Auditable {
      * @return A chance de falha da máquina.
      */
     public double getFailureOdd() {
-        return this.failureOdd * (1 + (double) (this.getSaudeMaxima() - this.saude) / this.getSaudeMaxima());
+        return this.failureOdd * (1 + (double) (this.getSaudeMaxima() - this.saude) / this.getSaudeMaxima()) * this.scenarioMultiplier;
     }
 
     public double getRawChanceFalha() {
@@ -220,10 +224,6 @@ public abstract class Machine implements Auditable {
 
     public double getOperationCost() {
         return operationCost;
-    }
-
-    public int getSaudeCritica() {
-        return saudeCritica;
     }
 
     public int getSaudeMaxima() {

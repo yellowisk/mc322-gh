@@ -22,11 +22,10 @@ public class ProductionManager {
     private List<Machine> machines = new ArrayList<Machine>();
     private Conveyor conveyor;
     private Product chosenProduct;
-    private RawMaterial rawMaterial;
-    private double budget;
+    private final RawMaterial rawMaterial;
+    private float budget;
     private ProductionStrategy currentStrategy;
     private int batchCounter = 0;
-
     private boolean temMaquinaQuebrada = false;
 
     /**
@@ -263,7 +262,7 @@ public class ProductionManager {
             }
         }
 
-        String infoText = "";
+        String infoText;
 
         if (fabricatedAmount == productsRemaining) {
             demand.fulfill(fabricatedAmount, totalProductionTime);
@@ -330,10 +329,6 @@ public class ProductionManager {
 
     // === GETTERS and SETTERS
 
-    public void setChosenProduct(Product chosenProduct) {
-        this.chosenProduct = chosenProduct;
-    }
-
     public List<Demand> getDemands() {
         return this.demands;
     }
@@ -344,10 +339,6 @@ public class ProductionManager {
 
     public List<Machine> getMachines() {
         return this.machines;
-    }
-
-    public Product getChosenProduct() {
-        return this.chosenProduct;
     }
 
     public RawMaterial getRawMaterial() {
@@ -362,7 +353,7 @@ public class ProductionManager {
         return this.conveyor;
     }
 
-    public double getBudget() {
+    public float getBudget() {
         return budget;
     }
 
@@ -373,5 +364,4 @@ public class ProductionManager {
     public void setTemMaquinaQuebrada(boolean temMaquinaQuebrada) {
         this.temMaquinaQuebrada = temMaquinaQuebrada;
     }
-
 }
