@@ -320,7 +320,7 @@ public class ProductionManager {
             throw new IllegalArgumentException("Máquina nula");
         }
 
-        if (!m.needsMaintenance()) {
+        if (!(m.getSaude() < m.getSaudeMaxima())) {
             throw new IllegalStateException("A " + m.getName() + " não precisa de reparo");
         }
         m.reparar();
