@@ -134,7 +134,8 @@ public abstract class Machine implements Auditable {
             chanceFalhaFormatada = String.format("%s %.2f%s", blue, getFailureOdd(), reset);
         } else {
             double diffChanceFalha = getFailureOdd() - getRawChanceFalha();
-            chanceFalhaFormatada = String.format("%s⚂ %.2f %s(▴ %.2f)%s", blue, getFailureOdd(), gray, diffChanceFalha, reset);
+            String triangleSymbol = diffChanceFalha < 0 ? "▾" : "▴";
+            chanceFalhaFormatada = String.format("%s⚂ %.0f%% %s(%s %.0f%%)%s", blue, getFailureOdd() * 100, gray, triangleSymbol, diffChanceFalha * 100, reset);
         }
 
         // Status
