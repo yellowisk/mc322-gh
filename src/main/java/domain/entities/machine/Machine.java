@@ -72,20 +72,14 @@ public abstract class Machine implements Auditable {
 
     /* ====== Concrete ======*/
 
-    protected boolean isProcessFailure(Product product) {
-        boolean failureFloor = isMachineFailure();
-
-        /* The greate the quality, thej gratear the rejection odds.
-        The greater tcheckFailurehe cumulativeFailureOdd, the greater the rejection odds */
-        double rejectionOdds = product.getRejectionRisk();
-
-        return failureFloor || (RandomProvider.chance(rejectionOdds));
+    protected void tryIncreaseFailureOdd(Product product, double increment) {
+        if (willRollFailureOdd()) {
+            product.increaseCumulativeFailureOdd(createProductCumulativeFailureOddIncrement());
+        }
     }
 
-    protected void tryIncreaseFailureOdd(Product product, double increment) {
-        if (isMachineFailure()) {
-            product.increaseCumulativeFailureOdd(increment);
-        }
+    protected double createProductCumulativeFailureOddIncrement() {
+        return 0.3 * this.scenarioMultiplier;
     }
 
     // === SAÚDE DA MÁQUINA ===
@@ -207,7 +201,7 @@ public abstract class Machine implements Auditable {
     /**
      * Calcula e retorna a chance de falha atual baseando-se na saúde atual da
      * máquina.
-     * falhaEfetiva = falhaBase * (1 + (100 - saúde)/100)
+     * falhaEfetiva = falhaBase * (1 + (saudeMaxima - saúde)/saudeMaxima)
      *
      * @return A chance de falha da máquina.
      */
@@ -219,8 +213,8 @@ public abstract class Machine implements Auditable {
         return this.failureOdd;
     }
 
-    protected boolean isMachineFailure() {
-        return RandomProvider.chance(failureOdd);
+    protected boolean willRollFailureOdd() {
+        return RandomProvider.chance(getFailureOdd());
     }
 
     public double getOperationCost() {

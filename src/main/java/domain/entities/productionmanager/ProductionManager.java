@@ -247,6 +247,8 @@ public class ProductionManager {
                 } else if (currentProduct != null) {
                     ConsolePrinter.treeFail(true, "Cade a força? O produto %s #%d" + ConsolePrinter.RED + " foi rejeitado" + ConsolePrinter.RESET + " na inspeção e descartado.", currentProduct.getName(), currentProduct.getId());
                     this.conveyor.removeProduct();
+                } else {
+
                 }
 
                 totalProductionTime += chosenProduct.countProductionTime();

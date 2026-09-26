@@ -146,9 +146,9 @@ public class Menu {
 
     private void scenarioChooserMenu() {
         ScenarioConfiguration[] scenariosList = {
-                new ScenarioConfiguration("Mercadinho Ideal", 1000, 0.6, 1),
-                new ScenarioConfiguration("Mercadinho Razoável", 500, 1, 3),
-                new ScenarioConfiguration("Mercadinho Precário", 100, 1.25, 10)
+                new ScenarioConfiguration("Mercadinho Ideal", 1000, 0.6, 0),
+                new ScenarioConfiguration("Mercadinho Razoável", 1000, 1, 2),
+                new ScenarioConfiguration("Mercadinho Precário", 1000, 1.25, 2)
         };
 
         // Lista de strings para o ConsolePrinter.optionsList
