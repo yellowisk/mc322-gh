@@ -5,7 +5,7 @@ import domain.entities.productionmanager.ProductionManager;
 import domain.interfaces.ProductionStrategy;
 import domain.strategies.Ferrari;
 import domain.strategies.FilaDoCaixa;
-import domain.strategies.MaximoDeProdutos;
+import domain.strategies.Joaozinho;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class StrategyMenu extends Submenu {
     private final List<ProductionStrategy> strategies = List.of(
             new FilaDoCaixa(),
             new Ferrari(),
-            new MaximoDeProdutos()
+            new Joaozinho()
     );
 
     public StrategyMenu(Menu menu, ProductionManager productionManager) {

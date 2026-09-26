@@ -9,9 +9,12 @@ import java.util.List;
 /**
  * Estratégia que seleciona a demanda com a maior quantidade
  * de produtos e que caiba no orçamento.
+ *
+ * Chamamos de João porque ele sempre ganha a maior quantidade de copos
+ * nos vídeos
  */
-public class MaximoDeProdutos implements ProductionStrategy {
-    private final String nome = "Estratégia Máximo de Produtos";
+public class Joaozinho implements ProductionStrategy {
+    private final String nome = "Joãozinho";
 
     @Override
     public Demand selectDemand(List<Demand> demands, double availableBudget) {
