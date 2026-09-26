@@ -1,6 +1,6 @@
 package view;
 
-import domain.ScenarioConfiguration;
+import domain.utils.ScenarioConfiguration;
 import domain.entities.conveyor.Conveyor;
 import domain.entities.machine.InspectionMachine;
 import domain.entities.machine.PackingMachine;
@@ -86,19 +86,19 @@ public class Menu {
         productionManager.addNewMachine(new ProcessingMachine(
                         "Máquina de Processamento", 20, 0.25,
                         0.78, currScenario.getScenarioMultiplier(),
-                        currScenario.getWaarDamage()
+                        currScenario.getWearDamage()
                 )
         );
         productionManager.addNewMachine(new PackingMachine(
                         "Máquina de Empacotamento", 20, 0.15,
                         0.5, currScenario.getScenarioMultiplier(),
-                        currScenario.getWaarDamage()
+                        currScenario.getWearDamage()
                 )
         );
         productionManager.addNewMachine(new InspectionMachine(
                         "Máquina de Inspeção", 20, 0.10,
                         0.43, currScenario.getScenarioMultiplier(),
-                        currScenario.getWaarDamage()
+                        currScenario.getWearDamage()
                 )
         );
 
