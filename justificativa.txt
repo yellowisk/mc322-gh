@@ -15,6 +15,20 @@ produtos reais do mercadinho.
 HISTÓRICO
 =========
 
+Tarefa 3:
+- Adicionamos seed configurável para Random.
+- Os status de demanda são: EM_PRODUÇÃO, PENDENTE, CONCLUIDO e CANCELADO.
+- Criamos as estratégias de produção:
+	- Fila do Caixa: FIFO.
+	- Ferrari: Demanda com maior quantidade de produtos sem checar orçamento.
+	- Joãozinho: Demanda com maior quantidad de produtos checando orçamento.
+- Dividimos os submenus em subclasses de `Submenu` ao invés de deixá-los como métodos da classe Menu.
+- Adicionamos a classe ConfiguracaoCenario com 3 instanciações de cenários:
+	- Mercadinho Ideal: budget farto, chance de falha reduzida e desgaste reduzido.
+	- Mercadinho Razoável: budget médio, chance de falha normal e desgaste normal.
+	- Mercadinho Precário: budget reduzido, chance de falha aumentada e desgaste maior.
+- Traduzimos tudo para português
+
 Tarefa 2:
 - Criamos 3 produtos novos, com nomes baseados no que tem no Mercadinho Ideal: Copo de vidro,
 Kit Copo e Pote de Vidro

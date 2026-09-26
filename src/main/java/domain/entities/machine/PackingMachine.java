@@ -6,16 +6,13 @@ import domain.entities.product.ProductStatus;
 public class PackingMachine extends Machine {
 
     public PackingMachine(String name, int maxCapacity, double failureOdd,
-                          double operationCost) {
-        super(name, maxCapacity, failureOdd, operationCost);
+                             double operationCost, double scenarioMultiplier,
+                             int wearDamage) {
+        super(name, maxCapacity, failureOdd, operationCost, scenarioMultiplier, wearDamage);
     }
 
     @Override
-    public Product process(Product product) {
-        if (!isOn()) {
-            throw new IllegalStateException("Eitcha, João! The machine can't process anything, since it ain't on!");
-        }
-
+    public Product processAux(Product product) {
         tryIncreaseFailureOdd(product, getFailureOdd());
 
         product.setStatus(ProductStatus.PACKED);
