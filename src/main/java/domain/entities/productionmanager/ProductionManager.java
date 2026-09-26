@@ -286,7 +286,7 @@ public class ProductionManager {
         // for those who just entered the stream: calc is short for _calculate_
         // yellowisk: lol, good one
         if (this.budget >= machine.getOperationCost()) {
-            this.budget -= machine.getOperationCost();
+            this.budget -= (float) machine.getOperationCost();
             return true;
         }
         return false;
