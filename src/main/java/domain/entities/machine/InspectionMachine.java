@@ -5,8 +5,10 @@ import domain.entities.product.ProductStatus;
 
 public class InspectionMachine extends Machine {
 
-    public InspectionMachine(String name, int maxCapacity, double failureOdd, double operationCost) {
-        super(name, maxCapacity, failureOdd, operationCost);
+    public InspectionMachine(String name, int maxCapacity, double failureOdd,
+                             double operationCost, double scenarioMultiplier,
+                             int wearDamage) {
+        super(name, maxCapacity, failureOdd, operationCost, scenarioMultiplier, wearDamage);
     }
 
     @Override

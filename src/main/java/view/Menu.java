@@ -1,5 +1,6 @@
 package view;
 
+import domain.ScenarioConfiguration;
 import domain.entities.conveyor.Conveyor;
 import domain.entities.machine.InspectionMachine;
 import domain.entities.machine.PackingMachine;
@@ -16,45 +17,27 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
-    private final ProductionManager productionManager = new ProductionManager(
-            new RawMaterial("Vidro", 50, "kg", 5, 1),
-            1000);
+    private ScenarioConfiguration currScenario;
+    private ProductionManager productionManager;
+
     private final Scanner scanner = new Scanner(System.in);
     private String lastBuffer; // last message, shows up in the next footer
-    private final StrategyMenu strategyMenu = new StrategyMenu(this, productionManager);
+    private StrategyMenu strategyMenu;
+    private List<Submenu> submenus;
 
-    /** List order = option number on the main menu */
-    private final List<Submenu> submenus = List.of(
-            new UpdateDemandMenu(this, productionManager),
-            new FabricateDemandMenu(this, productionManager),
-            new StorageMenu(this, productionManager),
-            new BuyRawMaterialMenu(this, productionManager),
-            strategyMenu,
-            new RepairMenu(this, productionManager),
-            new AuditMenu(this, productionManager),
-            new RawMaterialStorageMenu(this, productionManager)
-    );
 
     public void start() {
         boolean running = true;
 
         printIntroScreen();
+        scenarioChooserMenu();
 
-        // Produtos hardcoded
-        productionManager.addNewProduct(new CopoDeVidro("Copo", 0.5));
-        productionManager.addNewProduct(new PoteDeVidro("Pote", 1.2));
-        productionManager.addNewProduct(new KitCopoDeVidro("Kit Copo", 3));
-        Product.resetIdCounter();
+        productionManager = new ProductionManager(
+                new RawMaterial("Vidro", 50, "kg", 5, 1),
+                currScenario.getBudget()
+        );
 
-        // Esteira hardcoded
-        productionManager.addNewConveyor(new Conveyor("Esteira Ligeira", 20));
-
-        // Máquinas hardcoded
-        productionManager.addNewMachine(new ProcessingMachine("Máquina de Processamento", 20, 0.25, 0.78));
-        productionManager.addNewMachine(new PackingMachine("Máquina de Empacotamento", 20, 0.15, 0.5));
-        productionManager.addNewMachine(new InspectionMachine("Máquina de Inspeção", 20, 0.10, 0.43));
-
-        productionManager.setStrategy(strategyMenu.defaultStrategy());
+        initProductionManager();
 
         // Menu: lista de submenus
         List<String> optionsList = new ArrayList<>(
@@ -69,6 +52,7 @@ public class Menu {
             ConsolePrinter.clearScreen();
             ConsolePrinter.card(ConsolePrinter.color(ConsolePrinter.GRAY, "⌂") + " FÁBRICA IDEAL");
             System.out.println();
+            System.out.println(" Cenário atual: " + currScenario.getName() + "\n");
 
             ConsolePrinter.optionsList(options);
 
@@ -86,6 +70,53 @@ public class Menu {
             }
             chosen.show();
         }
+    }
+
+    private void initProductionManager() {
+        // Produtos hardcoded
+        productionManager.addNewProduct(new CopoDeVidro("Copo", 0.5));
+        productionManager.addNewProduct(new PoteDeVidro("Pote", 1.2));
+        productionManager.addNewProduct(new KitCopoDeVidro("Kit Copo", 3));
+        Product.resetIdCounter();
+
+        // Esteira hardcoded
+        productionManager.addNewConveyor(new Conveyor("Esteira Ligeira", 20));
+
+        // Máquinas hardcoded
+        productionManager.addNewMachine(new ProcessingMachine(
+                        "Máquina de Processamento", 20, 0.25,
+                        0.78, currScenario.getScenarioMultiplier(),
+                        currScenario.getWaarDamage()
+                )
+        );
+        productionManager.addNewMachine(new PackingMachine(
+                        "Máquina de Empacotamento", 20, 0.15,
+                        0.5, currScenario.getScenarioMultiplier(),
+                        currScenario.getWaarDamage()
+                )
+        );
+        productionManager.addNewMachine(new InspectionMachine(
+                        "Máquina de Inspeção", 20, 0.10,
+                        0.43, currScenario.getScenarioMultiplier(),
+                        currScenario.getWaarDamage()
+                )
+        );
+
+        strategyMenu = new StrategyMenu(this, productionManager);
+
+        // List order = option number on the main menu
+        submenus = List.of(
+                new UpdateDemandMenu(this, productionManager),
+                new FabricateDemandMenu(this, productionManager),
+                new StorageMenu(this, productionManager),
+                new BuyRawMaterialMenu(this, productionManager),
+                strategyMenu,
+                new RepairMenu(this, productionManager),
+                new AuditMenu(this, productionManager),
+                new RawMaterialStorageMenu(this, productionManager)
+        );
+
+        productionManager.setStrategy(strategyMenu.defaultStrategy());
     }
 
     private void printIntroScreen() {
@@ -111,6 +142,41 @@ public class Menu {
         System.out.println();
         System.out.println(ConsolePrinter.color(ConsolePrinter.YELLOW, "Pressione ENTER para começar..."));
         scanner.nextLine();
+    }
+
+    private void scenarioChooserMenu() {
+        ScenarioConfiguration[] scenariosList = {
+                new ScenarioConfiguration("Mercadinho Ideal", 1000, 0.6, 1),
+                new ScenarioConfiguration("Mercadinho Razoável", 500, 1, 3),
+                new ScenarioConfiguration("Mercadinho Precário", 100, 1.25, 10)
+        };
+
+        // Lista de strings para o ConsolePrinter.optionsList
+        String[] scenariosStringList = {
+                scenariosList[0].getName(),
+                scenariosList[1].getName(),
+                scenariosList[2].getName(),
+                "Sair"
+        };
+
+        while (true) {
+            ConsolePrinter.clearScreen();
+            ConsolePrinter.card("SELECIONADOR DE CENÁRIO");
+
+            ConsolePrinter.optionsList(scenariosStringList);
+
+            int option = readInt("Escolha: ");
+
+            if (option == 0) System.exit(0);
+
+            try {
+                currScenario = scenariosList[option - 1];
+                break;
+            } catch (IndexOutOfBoundsException e) {
+                System.out.println("\n" + ConsolePrinter.failText("Dessa vez não é! Opção de cenário inválida!"));
+                waitEnter();
+            }
+        }
     }
 
     // === Stuff the submenus use ===
