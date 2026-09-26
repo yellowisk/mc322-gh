@@ -1,16 +1,16 @@
-package domain;
+package domain.utils;
 
 public class ScenarioConfiguration {
     private final String name;
     private final float budget;
     private final double scenarioMultiplier;
-    private final int waarDamage;
+    private final int wearDamage;
 
-    public ScenarioConfiguration(String name, float budget, double failOdd, int waarDamage) {
+    public ScenarioConfiguration(String name, float budget, double failOdd, int wearDamage) {
         this.name = name;
         this.budget = budget;
         this.scenarioMultiplier = failOdd;
-        this.waarDamage = waarDamage;
+        this.wearDamage = wearDamage;
     }
 
     public float getBudget() {
@@ -21,8 +21,8 @@ public class ScenarioConfiguration {
         return scenarioMultiplier;
     }
 
-    public int getWaarDamage() {
-        return waarDamage;
+    public int getWearDamage() {
+        return wearDamage;
     }
 
     public String getName() {
