@@ -31,6 +31,8 @@ Tarefa 3:
 	Mercadinho Razoável (Intermediário) e Mercadinho Precário (Apocalíptico). O Mercadinho Razoável
 	(Cenário Intermediário) foi um cenário bônus que criamos para que desse pra ver o funcionamento
 	do mercadinho em um cenário comum, sem muitas vantagens ou desvantagens.
+- O menu principal mostra no topo o cenário e a estratégia atual, mantivemos o budget no footer por
+curtimos.
 
 Tarefa 2:
 - Criamos 3 produtos novos, com nomes baseados no que tem no Mercadinho Ideal: Copo de vidro,
