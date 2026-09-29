@@ -49,6 +49,7 @@ permanecem sendo os menus. Assim o gerenciador não fica cheio de print.
 	(qualidade * 0.15 + risco acumulado, vezes o multiplicador do cenário) se concretizar.
 - Adicionamos números de lote ligados a demandas fabricadas e todos os produtos feitos naquela demanda recebem
  esse lote.
+- Adicionamos o menu "Velocidade da produção" pra quem quer ver o resultado da fabricação mais rápido.
 
 Tarefa 2:
 - Criamos 3 produtos novos, com nomes baseados no que tem no Mercadinho Ideal: Copo de vidro,

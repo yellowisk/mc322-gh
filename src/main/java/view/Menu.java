@@ -117,7 +117,8 @@ public class Menu {
                 strategyMenu,
                 new RepairMenu(this, productionManager),
                 new AuditMenu(this, productionManager),
-                new RawMaterialStorageMenu(this, productionManager)
+                new RawMaterialStorageMenu(this, productionManager),
+                new SpeedMenu(this, productionManager)
         );
 
         productionManager.setStrategy(strategyMenu.defaultStrategy());
