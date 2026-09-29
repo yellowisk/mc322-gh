@@ -36,7 +36,7 @@ public class InspectionMachine extends Machine {
 
     @Override
     public Product processAux(Product product) {
-        if (willProductGetRejected(product)) {
+        if (product.exceedsDiscardLimit() || willProductGetRejected(product)) {
             product.setStatus(ProductStatus.FAILED);
             return product;
         }

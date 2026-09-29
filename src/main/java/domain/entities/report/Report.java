@@ -12,7 +12,7 @@ public class Report {
     private int totalRejectedProducts;
 
     public void calcProdSuccessRate() {
-        this.productionSuccessRate = (double) getTotalApprovedProducts() / getTotalProducts();
+        this.productionSuccessRate = getTotalProducts() == 0 ? 0 : (double) getTotalApprovedProducts() / getTotalProducts();
     }
 
     public double getProductionSuccessRate() {

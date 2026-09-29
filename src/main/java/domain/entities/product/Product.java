@@ -18,8 +18,10 @@ public abstract class Product implements Auditable {
     private int batch; /* 0 = ainda não fabricado (modelos do catálogo) */
     private static int productsCounter;
 
-    private final static double approvedLimit = 0.8;
-    private final static double rejectedLimit = 0.6;
+    /* Abaixo de REPAIR_RISK_LIMIT é aprovado, entre os dois precisa
+    de manutenção e acima de DISCARD_RISK_LIMIT é descartado */
+    private final static double REPAIR_RISK_LIMIT = 0.25;
+    private final static double DISCARD_RISK_LIMIT = 0.45;
 
     public Product(String name, double rawMaterialPerUnit, double quality,
                    double cumulativeFailureOdd) {
@@ -97,7 +99,12 @@ public abstract class Product implements Auditable {
 
     @Override
     public boolean needsMaintenance() {
-        return (0.6 <= getRejectionRisk() && getRejectionRisk() <= 0.8);
+        return REPAIR_RISK_LIMIT <= getRejectionRisk() && getRejectionRisk() <= DISCARD_RISK_LIMIT;
+    }
+
+    /** Risco alto demais: o produto é descartado na inspeção e nem vai pro armazém */
+    public boolean exceedsDiscardLimit() {
+        return getRejectionRisk() > DISCARD_RISK_LIMIT;
     }
 
     @Override

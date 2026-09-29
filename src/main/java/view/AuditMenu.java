@@ -3,6 +3,7 @@ package view;
 import domain.entities.machine.Machine;
 import domain.entities.product.Product;
 import domain.entities.productionmanager.ProductionManager;
+import domain.entities.report.Report;
 import domain.interfaces.Auditable;
 
 import java.util.ArrayList;
@@ -50,6 +51,23 @@ public class AuditMenu extends Submenu {
         }
     }
 
+    /** Números acumulados de todas as produções da sessão */
+    private void printProductionReport() {
+        Report report = productionManager.getReport();
+        String unit = productionManager.getRawMaterial().getUnit();
+
+        System.out.println(ConsolePrinter.BOLD + " Relatório da Produção" + ConsolePrinter.RESET);
+        System.out.printf(" - Produtos fabricados: %d\n", report.getTotalProducts());
+        System.out.printf("   %s✓ %d aprovados%s | %s! %d precisam de manutenção%s | %s✗ %d rejeitados%s\n",
+                ConsolePrinter.GREEN, report.getTotalApprovedProducts(), ConsolePrinter.RESET,
+                ConsolePrinter.YELLOW, report.getTotalNeedsMaintenanceProducts(), ConsolePrinter.RESET,
+                ConsolePrinter.RED, report.getTotalRejectedProducts(), ConsolePrinter.RESET);
+        System.out.printf(" - Taxa de sucesso: %.0f%%\n", report.getProductionSuccessRate() * 100);
+        System.out.printf(" - Tempo total de produção: %.2f s\n", report.getTotalProductionTime());
+        System.out.printf(" - Matéria-prima gasta: %.2f %s\n", report.getTotalRawMaterialSpent(), unit);
+        System.out.printf(" - Dinheiro gasto com operação das máquinas: R$ %.2f\n\n", report.getMoneySpent());
+    }
+
     /**
      * Submenu do relatório geral.
      */
@@ -60,6 +78,8 @@ public class AuditMenu extends Submenu {
             printHeader();
 
             System.out.println(ConsolePrinter.color(color," Relatório geral\n"));
+
+            printProductionReport();
 
             // Lista com todas as entidade auditáveis
             List<Auditable> auditables = new ArrayList<>();
