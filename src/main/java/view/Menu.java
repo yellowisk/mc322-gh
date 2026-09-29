@@ -52,7 +52,8 @@ public class Menu {
             ConsolePrinter.clearScreen();
             ConsolePrinter.card(ConsolePrinter.color(ConsolePrinter.GRAY, "⌂") + " FÁBRICA IDEAL");
             System.out.println();
-            System.out.println(" Cenário atual: " + currScenario.getDisplayName() + "\n");
+            System.out.println(" Cenário atual:    " + currScenario.getDisplayName());
+            System.out.println(" Estratégia atual: " + productionManager.getCurrentStrategy().getStrategyName() + "\n");
 
             ConsolePrinter.optionsList(options);
 
