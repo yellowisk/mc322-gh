@@ -21,13 +21,16 @@ Tarefa 3:
 - Criamos as estratégias de produção:
 	- Fila do Caixa: FIFO.
 	- Ferrari: Demanda com maior quantidade de produtos sem checar orçamento.
-	- Joãozinho: Demanda com maior quantidad de produtos checando orçamento.
+	- Joãozinho: Demanda com maior quantidade de produtos checando orçamento.
 - Dividimos os submenus em subclasses de `Submenu` ao invés de deixá-los como métodos da classe Menu.
-- Adicionamos a classe ConfiguracaoCenario com 3 instanciações de cenários:
+- Adicionamos a classe ScenarioConfig com 3 instanciações de cenários:
 	- Mercadinho Ideal: budget farto, chance de falha reduzida e desgaste reduzido.
 	- Mercadinho Razoável: budget médio, chance de falha normal e desgaste normal.
 	- Mercadinho Precário: budget reduzido, chance de falha aumentada e desgaste maior.
-- Traduzimos tudo para português
+	- No menu, cada cenário aparece com o rótulo do pdf do lado: Mercadinho Ideal (Ideal),
+	Mercadinho Razoável (Intermediário) e Mercadinho Precário (Apocalíptico). O Mercadinho Razoável
+	(Cenário Intermediário) foi um cenário bônus que criamos para que desse pra ver o funcionamento
+	do mercadinho em um cenário comum, sem muitas vantagens ou desvantagens.
 
 Tarefa 2:
 - Criamos 3 produtos novos, com nomes baseados no que tem no Mercadinho Ideal: Copo de vidro,

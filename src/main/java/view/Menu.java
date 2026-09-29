@@ -1,6 +1,6 @@
 package view;
 
-import domain.utils.ScenarioConfiguration;
+import domain.utils.ScenarioConfig;
 import domain.entities.conveyor.Conveyor;
 import domain.entities.machine.InspectionMachine;
 import domain.entities.machine.PackingMachine;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
-    private ScenarioConfiguration currScenario;
+    private ScenarioConfig currScenario;
     private ProductionManager productionManager;
 
     private final Scanner scanner = new Scanner(System.in);
@@ -52,7 +52,7 @@ public class Menu {
             ConsolePrinter.clearScreen();
             ConsolePrinter.card(ConsolePrinter.color(ConsolePrinter.GRAY, "⌂") + " FÁBRICA IDEAL");
             System.out.println();
-            System.out.println(" Cenário atual: " + currScenario.getName() + "\n");
+            System.out.println(" Cenário atual: " + currScenario.getDisplayName() + "\n");
 
             ConsolePrinter.optionsList(options);
 
@@ -145,17 +145,18 @@ public class Menu {
     }
 
     private void scenarioChooserMenu() {
-        ScenarioConfiguration[] scenariosList = {
-                new ScenarioConfiguration("Mercadinho Ideal", 1000, 0.5, 1),
-                new ScenarioConfiguration("Mercadinho Razoável", 500, 1, 2),
-                new ScenarioConfiguration("Mercadinho Precário", 250, 1.5, 4)
+
+        ScenarioConfig[] scenariosList = {
+                new ScenarioConfig("Mercadinho Ideal", "Ideal", 1000, 0.5, 1),
+                new ScenarioConfig("Mercadinho Razoável", "Intermediário", 500, 1, 2),
+                new ScenarioConfig("Mercadinho Precário", "Apocalíptico", 250, 1.5, 4)
         };
 
         // Lista de strings para o ConsolePrinter.optionsList
         String[] scenariosStringList = {
-                scenariosList[0].getName(),
-                scenariosList[1].getName(),
-                scenariosList[2].getName(),
+                scenariosList[0].getDisplayName(),
+                scenariosList[1].getDisplayName(),
+                scenariosList[2].getDisplayName(),
                 "Sair"
         };
 
