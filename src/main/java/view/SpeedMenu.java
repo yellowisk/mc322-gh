@@ -11,7 +11,7 @@ public class SpeedMenu extends Submenu {
 
     @Override
     public String icon() {
-        return ConsolePrinter.color(color, "⏩");
+        return ConsolePrinter.color(color, "⭍");
     }
 
     @Override
