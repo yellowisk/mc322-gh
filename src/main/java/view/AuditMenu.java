@@ -89,11 +89,8 @@ public class AuditMenu extends Submenu {
             for (Auditable auditable : auditables) {
                 if (auditable.needsMaintenance()) {
                     foundIssues = true;
-                    if (auditable instanceof Machine m) {
-                        System.out.printf(ConsolePrinter.RED + " ✗ [Máquina]" + ConsolePrinter.RESET + " %s (Saúde: %d/%d)\n", m.getName(), m.getSaude(), m.getSaudeMaxima());
-                    } else if (auditable instanceof Product p) {
-                        System.out.printf(ConsolePrinter.RED + " ✗ [Produto]" + ConsolePrinter.RESET + " %s #%d (Risco de Rejeição: %.0f%%)\n", p.getName(), p.getId(), p.getRejectionRisk() * 100);
-                    }
+                    /* Cada Auditable sabe se descrever, então não precisamos saber se é máquina ou produto */
+                    System.out.println(ConsolePrinter.RED + " ✗ " + ConsolePrinter.RESET + auditable.generateIssueSummary());
                 }
             }
 

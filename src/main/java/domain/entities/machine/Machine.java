@@ -28,7 +28,7 @@ public abstract class Machine implements Auditable {
         this.maxCapacity = maxCapacity;
         this.failureOdd = failureOdd;
         this.operationCost = operationCost;
-        this.scenarioMultiplier = scenarioMultiplier;
+        Machine.scenarioMultiplier = scenarioMultiplier;
         this.desgasteMaximo = wearDamage;
     }
 
@@ -163,6 +163,11 @@ public abstract class Machine implements Auditable {
         return this.saude < this.saudeCritica;
     }
 
+    @Override
+    public String generateIssueSummary() {
+        return String.format("[Máquina] %s (Saúde: %d/%d)", getName(), getSaude(), getSaudeMaxima());
+    }
+
     // ---- Getters e Setters ----
 
     public int getSaude() {
@@ -203,7 +208,7 @@ public abstract class Machine implements Auditable {
      * @return A chance de falha da máquina.
      */
     public double getFailureOdd() {
-        return this.failureOdd * (1 + (double) (this.getSaudeMaxima() - this.saude) / this.getSaudeMaxima()) * this.scenarioMultiplier;
+        return this.failureOdd * (1 + (double) (this.getSaudeMaxima() - this.saude) / this.getSaudeMaxima()) * Machine.scenarioMultiplier;
     }
 
     public double getRawChanceFalha() {

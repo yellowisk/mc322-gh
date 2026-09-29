@@ -33,6 +33,11 @@ Tarefa 3:
 	do mercadinho em um cenário comum, sem muitas vantagens ou desvantagens.
 - O menu principal mostra no topo o cenário e a estratégia atual, mantivemos o budget no footer por
 curtimos.
+- Deixamos a auditoria geral e a visualização do armazém nos menus (AuditMenu e StorageMenu), e não
+no ProductionManager como o pdf sugere (gerarAuditoriaGeral e exibirArmazem). Fizemos isso para tentar
+manter SRP (Single Responsability Principle), tendo o ProductionManager como responsável pela produção
+e só entregando as listas de máquinas e produtos, enquanto quem decide como mostrar isso no terminal
+permanecem sendo os menus. Assim o gerenciador não fica cheio de print.
 
 Tarefa 2:
 - Criamos 3 produtos novos, com nomes baseados no que tem no Mercadinho Ideal: Copo de vidro,
