@@ -1,5 +1,6 @@
 package view;
 
+import domain.entities.report.Report;
 import domain.utils.ScenarioConfig;
 import domain.entities.conveyor.Conveyor;
 import domain.entities.machine.InspectionMachine;
@@ -19,6 +20,7 @@ import java.util.Scanner;
 public class Menu {
     private ScenarioConfig currScenario;
     private ProductionManager productionManager;
+    private Report report = new Report();
 
     private final Scanner scanner = new Scanner(System.in);
     private String lastBuffer; // last message, shows up in the next footer
@@ -34,7 +36,8 @@ public class Menu {
 
         productionManager = new ProductionManager(
                 new RawMaterial("Vidro", 50, "kg", 5, 1),
-                currScenario.getBudget()
+                currScenario.getBudget(),
+                report
         );
 
         initProductionManager();

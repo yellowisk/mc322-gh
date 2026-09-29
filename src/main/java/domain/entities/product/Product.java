@@ -18,6 +18,9 @@ public abstract class Product implements Auditable {
     private int batch; /* 0 = ainda não fabricado (modelos do catálogo) */
     private static int productsCounter;
 
+    private final static double approvedLimit = 0.8;
+    private final static double rejectedLimit = 0.6;
+
     public Product(String name, double rawMaterialPerUnit, double quality,
                    double cumulativeFailureOdd) {
         this.id = globalUniqueId++;
@@ -94,7 +97,7 @@ public abstract class Product implements Auditable {
 
     @Override
     public boolean needsMaintenance() {
-        return this.status == ProductStatus.FAILED;
+        return (0.6 <= getRejectionRisk() && getRejectionRisk() <= 0.8);
     }
 
     @Override

@@ -7,6 +7,7 @@ import domain.entities.machine.Machine;
 import domain.entities.product.Product;
 import domain.entities.product.ProductStatus;
 import domain.entities.rawmaterial.RawMaterial;
+import domain.entities.report.Report;
 import domain.exceptions.InsufficientBudgetException;
 import domain.exceptions.MachineNeedsRepairException;
 import domain.interfaces.ProductionStrategy;
@@ -27,6 +28,7 @@ public class ProductionManager {
     private ProductionStrategy currentStrategy;
     private int batchCounter = 0;
     private boolean temMaquinaQuebrada = false;
+    private Report report;
 
     /**
      * Lista das etapas de produção instanciada para evitar laço 'for' otimizado
@@ -34,9 +36,10 @@ public class ProductionManager {
      */
     private static final ProductionStages[] etapasProducao = ProductionStages.values();
 
-    public ProductionManager(RawMaterial rawMaterial, float budget) {
+    public ProductionManager(RawMaterial rawMaterial, float budget, Report rp) {
         this.rawMaterial = rawMaterial;
         this.budget = budget;
+        this.report = rp;
     }
 
     public void addNewProduct(Product newProduct) {
@@ -194,18 +197,26 @@ public class ProductionManager {
         ConsolePrinter.pause(1500);
 
         int productsRemaining = demand.getRemainingAmount();
-        int fabricatedAmount = 0;
-        int approvedAmount = 0;
-        double totalProductionTime = 0;
+        int sectionFabricatedAmount = 0;
+
+        // Variáveis de auditoria
+        int sectionApprovedAmount = 0;
+        int sectionNeedsMaintenanceAmount = 0;
+        int sectionRejectedAmount = 0;
+        double sectionProductionTime = 0;
+        double sectionMoneySpent = 0;
+        int sectionRawMaterialSpent = 0;
 
         Product currentProduct = null;
 
-        while (fabricatedAmount < productsRemaining) {
-            System.out.printf("(%d/%d) %s " + "─".repeat(24) + "\n", (alreadyProduced + fabricatedAmount + 1), demand.getAmount(), chosenProduct.getName());
+        while (sectionFabricatedAmount < productsRemaining) {
+            System.out.printf("(%d/%d) %s " + "─".repeat(24) + "\n", (alreadyProduced + sectionFabricatedAmount + 1), demand.getAmount(), chosenProduct.getName());
 
             try {
                 for (ProductionStages etapaAtual : etapasProducao) {
                     Machine currentMachine = this.machines.get(etapaAtual.getCode());
+
+                    sectionMoneySpent += currentMachine.getOperationCost(); // Auditoria
 
                     ConsolePrinter.stageHeader(currentMachine, "%s", etapaAtual.getNome());
 
@@ -216,6 +227,7 @@ public class ProductionManager {
 
                     if (etapaAtual == ProductionStages.PROCESSING) {
                         conveyor.addRawMaterial(chosenProduct.getRawMaterialPerUnit());
+                        report.increaseRawMaterialSpent(chosenProduct.getRawMaterialPerUnit()); // Auditoria
                         ConsolePrinter.treeInfo(false, "%s carregado para a esteira.", this.rawMaterial.getName());
 
                         this.rawMaterial.consume(conveyor.removeRawMaterial());
@@ -240,19 +252,29 @@ public class ProductionManager {
                 }
 
                 // Validação final
-                if (currentProduct != null && currentProduct.getStatus() == ProductStatus.APPROVED) {
+                if (currentProduct.getStatus() == ProductStatus.APPROVED) {
                     this.fabricatedProducts.add(this.conveyor.removeProduct());
                     ConsolePrinter.treeOk(true, "Eitcha, como ele tem força! O produto %s #%d" + ConsolePrinter.GREEN + " foi aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getName(), currentProduct.getId());
-                    approvedAmount++;
-                } else if (currentProduct != null) {
-                    ConsolePrinter.treeFail(true, "Cade a força? O produto %s #%d" + ConsolePrinter.RED + " foi rejeitado" + ConsolePrinter.RESET + " na inspeção e descartado.", currentProduct.getName(), currentProduct.getId());
-                    this.conveyor.removeProduct();
+                    sectionApprovedAmount++;
+                    report.increaseTotalApprovedProducts();
+                } else if (currentProduct.getStatus() == ProductStatus.TO_REPAIR) {
+                    this.fabricatedProducts.add(this.conveyor.removeProduct());
+                    ConsolePrinter.treeOk(true, "Cade a força? O produto %s #%d" + ConsolePrinter.YELLOW + " foi parcialmente aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getName(), currentProduct.getId());
+                    sectionNeedsMaintenanceAmount++;
+                    report.increaseTotalNeedsMaintenanceProducts();
                 } else {
-
+                    this.conveyor.removeProduct();
+                    ConsolePrinter.treeFail(true, "Cade a força? O produto %s #%d" + ConsolePrinter.RED + " foi rejeitado" + ConsolePrinter.RESET + " na inspeção e descartado.", currentProduct.getName(), currentProduct.getId());
+                    report.increaseTotalRejectedProducts();
+                    sectionRejectedAmount++;
                 }
 
-                totalProductionTime += chosenProduct.countProductionTime();
-                fabricatedAmount++;
+                sectionProductionTime += chosenProduct.countProductionTime();
+                sectionFabricatedAmount++;
+
+                report.increaseMoneySpent(sectionMoneySpent);
+                report.increaseRawMaterialSpent(sectionRawMaterialSpent);
+                report.increaseTotalProductionTime(sectionProductionTime);
 
             } catch (MachineNeedsRepairException e) {
                 setTemMaquinaQuebrada(true);
@@ -264,20 +286,25 @@ public class ProductionManager {
             }
         }
 
+        report.calcProdSuccessRate();
+
         String infoText;
 
-        if (fabricatedAmount == productsRemaining) {
-            demand.fulfill(fabricatedAmount, totalProductionTime);
+        if (sectionFabricatedAmount == productsRemaining) {
+            demand.fulfill(sectionFabricatedAmount, sectionProductionTime);
             infoText = String.format(" Demanda de %s concluída em %.2f segundos de produção.",
                     demand.getProductName(), demand.getTotalProductionTime());
         } else {
-            demand.cancel(fabricatedAmount, totalProductionTime);
+            demand.cancel(sectionFabricatedAmount, sectionProductionTime);
             infoText = String.format(" Demanda de %s cancelada (%d/%d). Fabrique de novo para continuar de onde parou.",
                     demand.getProductName(), demand.getProducedAmount(), demand.getAmount());
         }
 
-        ConsolePrinter.card("%d produtos fabricados e %d aprovados." + (infoText.isEmpty() ? "\n" : "\n" + infoText), fabricatedAmount, approvedAmount);
+        ConsolePrinter.card("%d produtos fabricados: %d aprovados, %d precisam de manutenção e %d rejeitados." + "\n" + infoText,
+                sectionFabricatedAmount, sectionApprovedAmount,
+                sectionNeedsMaintenanceAmount, sectionRejectedAmount);
 
+        // Desliga as máquinas
         this.getConveyor().turnOff();
         for (Machine m: this.getMachines()) {
             m.turnOff();

@@ -41,6 +41,11 @@ public class InspectionMachine extends Machine {
             return product;
         }
 
+        if (product.needsMaintenance()) {
+            product.setStatus(ProductStatus.TO_REPAIR);
+            return product;
+        }
+
         product.setStatus(ProductStatus.APPROVED);
         return product;
     }
