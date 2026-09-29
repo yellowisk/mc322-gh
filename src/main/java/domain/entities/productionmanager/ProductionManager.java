@@ -205,7 +205,6 @@ public class ProductionManager {
         int sectionRejectedAmount = 0;
         double sectionProductionTime = 0;
         double sectionMoneySpent = 0;
-        int sectionRawMaterialSpent = 0;
 
         Product currentProduct = null;
 
@@ -216,14 +215,13 @@ public class ProductionManager {
                 for (ProductionStages etapaAtual : etapasProducao) {
                     Machine currentMachine = this.machines.get(etapaAtual.getCode());
 
-                    sectionMoneySpent += currentMachine.getOperationCost(); // Auditoria
-
                     ConsolePrinter.stageHeader(currentMachine, "%s", etapaAtual.getNome());
 
                     if (!calcProductionCost(currentMachine)) {
                         String mensagem = String.format("Dessa vez não é! Orçamento insuficiente para operar a máquina de %s!", currentMachine.getType());
                         throw new InsufficientBudgetException(mensagem);
                     }
+                    sectionMoneySpent += currentMachine.getOperationCost(); // Auditoria
 
                     if (etapaAtual == ProductionStages.PROCESSING) {
                         conveyor.addRawMaterial(chosenProduct.getRawMaterialPerUnit());
@@ -271,10 +269,6 @@ public class ProductionManager {
                 sectionProductionTime += chosenProduct.countProductionTime();
                 sectionFabricatedAmount++;
 
-                report.increaseMoneySpent(sectionMoneySpent);
-                report.increaseRawMaterialSpent(sectionRawMaterialSpent);
-                report.increaseTotalProductionTime(sectionProductionTime);
-
             } catch (MachineNeedsRepairException e) {
                 setTemMaquinaQuebrada(true);
                 ConsolePrinter.treeFail(true, e.getMessage());
@@ -285,6 +279,8 @@ public class ProductionManager {
             }
         }
 
+        report.increaseMoneySpent(sectionMoneySpent);
+        report.increaseTotalProductionTime(sectionProductionTime);
         report.calcProdSuccessRate();
 
         String infoText;
@@ -362,6 +358,10 @@ public class ProductionManager {
 
     public List<Machine> getMachines() {
         return this.machines;
+    }
+
+    public Report getReport() {
+        return this.report;
     }
 
     public RawMaterial getRawMaterial() {
