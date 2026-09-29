@@ -13,7 +13,7 @@ public class PackingMachine extends Machine {
 
     @Override
     public Product processAux(Product product) {
-        tryIncreaseFailureOdd(product, getFailureOdd());
+        tryIncreaseFailureOdd(product);
 
         product.setStatus(ProductStatus.PACKED);
         return product;

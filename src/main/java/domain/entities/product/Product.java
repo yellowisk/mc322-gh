@@ -8,7 +8,6 @@ import java.math.RoundingMode;
 
 public abstract class Product implements Auditable {
     private static int globalUniqueId = 1;
-    private static final double RISK_THRESHOLD = 0.5;
 
     private final int id;
     private final String name;
@@ -90,12 +89,12 @@ public abstract class Product implements Auditable {
     }
 
     public double getRejectionRisk() {
-        return this.quality * 0.3 + this.cumulativeFailureOdd;
+        return this.quality * 0.15 + this.cumulativeFailureOdd;
     }
 
     @Override
     public boolean needsMaintenance() {
-        return getRejectionRisk() >= RISK_THRESHOLD;
+        return this.status == ProductStatus.FAILED;
     }
 
     @Override
