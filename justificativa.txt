@@ -38,6 +38,17 @@ no ProductionManager como o pdf sugere (gerarAuditoriaGeral e exibirArmazem). Fi
 manter SRP (Single Responsability Principle), tendo o ProductionManager como responsável pela produção
 e só entregando as listas de máquinas e produtos, enquanto quem decide como mostrar isso no terminal
 permanecem sendo os menus. Assim o gerenciador não fica cheio de print.
+- Desgaste das máquinas:
+	- Cada máquina tem uma saúde de 0 a 100. A cada uso ela perde entre 1 e o desgaste máximo do
+	cenário (1 no Ideal, 2 no Razoável e 4 no Precário).
+	- Quando a saúde fica abaixo de 15, a máquina quebra.
+	- A chance de falha da máquina baseia-se em: falhaBase * (1 + (100 - saúde) / 100) * multiplicadorCenario
+	A falha base é 0.25 na processadora, 0.15 na empacotadora e 0.10 na inspeção, e o multiplicador do cenário
+	é 0.5 no Ideal, 1 no Razoável e 1.5 no Precário.
+	- Na inspeção o produto é reprovado se a própria máquina falhar ou se o risco de rejeição dele
+	(qualidade * 0.15 + risco acumulado, vezes o multiplicador do cenário) se concretizar.
+- Adicionamos números de lote ligados a demandas fabricadas e todos os produtos feitos naquela demanda recebem
+ esse lote.
 
 Tarefa 2:
 - Criamos 3 produtos novos, com nomes baseados no que tem no Mercadinho Ideal: Copo de vidro,
