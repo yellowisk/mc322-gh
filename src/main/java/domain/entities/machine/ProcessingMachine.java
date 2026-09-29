@@ -14,7 +14,7 @@ public class ProcessingMachine extends Machine {
     @Override
     public Product processAux(Product product) {
         Product newProduct = product.process(product, ProductStatus.PROCESSED);
-        tryIncreaseFailureOdd(newProduct, getFailureOdd());
+        tryIncreaseFailureOdd(newProduct);
         return newProduct;
     }
 

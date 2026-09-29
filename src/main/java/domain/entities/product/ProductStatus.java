@@ -5,5 +5,6 @@ public enum ProductStatus {
     PACKED,
     APPROVED,
     UNDERGOING,
+    TO_REPAIR,
     FAILED
 }

@@ -1,6 +1,7 @@
 package view;
 
-import domain.utils.ScenarioConfiguration;
+import domain.entities.report.Report;
+import domain.utils.ScenarioConfig;
 import domain.entities.conveyor.Conveyor;
 import domain.entities.machine.InspectionMachine;
 import domain.entities.machine.PackingMachine;
@@ -17,8 +18,9 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
-    private ScenarioConfiguration currScenario;
+    private ScenarioConfig currScenario;
     private ProductionManager productionManager;
+    private Report report = new Report();
 
     private final Scanner scanner = new Scanner(System.in);
     private String lastBuffer; // last message, shows up in the next footer
@@ -34,7 +36,8 @@ public class Menu {
 
         productionManager = new ProductionManager(
                 new RawMaterial("Vidro", 50, "kg", 5, 1),
-                currScenario.getBudget()
+                currScenario.getBudget(),
+                report
         );
 
         initProductionManager();
@@ -52,7 +55,8 @@ public class Menu {
             ConsolePrinter.clearScreen();
             ConsolePrinter.card(ConsolePrinter.color(ConsolePrinter.GRAY, "⌂") + " FÁBRICA IDEAL");
             System.out.println();
-            System.out.println(" Cenário atual: " + currScenario.getName() + "\n");
+            System.out.println(" Cenário atual:    " + currScenario.getDisplayName());
+            System.out.println(" Estratégia atual: " + productionManager.getCurrentStrategy().getStrategyName() + "\n");
 
             ConsolePrinter.optionsList(options);
 
@@ -113,7 +117,8 @@ public class Menu {
                 strategyMenu,
                 new RepairMenu(this, productionManager),
                 new AuditMenu(this, productionManager),
-                new RawMaterialStorageMenu(this, productionManager)
+                new RawMaterialStorageMenu(this, productionManager),
+                new SpeedMenu(this, productionManager)
         );
 
         productionManager.setStrategy(strategyMenu.defaultStrategy());
@@ -145,17 +150,18 @@ public class Menu {
     }
 
     private void scenarioChooserMenu() {
-        ScenarioConfiguration[] scenariosList = {
-                new ScenarioConfiguration("Mercadinho Ideal", 1000, 0.6, 1),
-                new ScenarioConfiguration("Mercadinho Razoável", 500, 1, 3),
-                new ScenarioConfiguration("Mercadinho Precário", 100, 1.25, 10)
+
+        ScenarioConfig[] scenariosList = {
+                new ScenarioConfig("Mercadinho Ideal", "Ideal", 1000, 0.5, 1),
+                new ScenarioConfig("Mercadinho Razoável", "Intermediário", 500, 1, 2),
+                new ScenarioConfig("Mercadinho Precário", "Apocalíptico", 250, 1.5, 4)
         };
 
         // Lista de strings para o ConsolePrinter.optionsList
         String[] scenariosStringList = {
-                scenariosList[0].getName(),
-                scenariosList[1].getName(),
-                scenariosList[2].getName(),
+                scenariosList[0].getDisplayName(),
+                scenariosList[1].getDisplayName(),
+                scenariosList[2].getDisplayName(),
                 "Sair"
         };
 

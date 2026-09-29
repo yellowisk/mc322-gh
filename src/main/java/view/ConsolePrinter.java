@@ -18,6 +18,7 @@ public class ConsolePrinter {
     public static final String GRAY = "\u001B[38;5;246m";
     public static final String RED = "\033[38;2;234;67;53m";
     private static final int TREE_LINE_DELAY_MS = 125;
+    private static ProductionSpeed productionSpeed = ProductionSpeed.NORMAL;
 
     private static final String DEMAND_ROW_FORMAT = "%-16s  %-12s  %-16s  %-16s  %-18s  %-10s";
     private static final int DEMAND_TABLE_WIDTH = 16 + 12 + 16 + 16 + 18 + 10 + 2 * 5;
@@ -66,7 +67,7 @@ public class ConsolePrinter {
     private static void treeLine(String icon, String color, boolean isLast, String format, Object... args) {
         String connector = isLast ? "└─" : "├─";
         System.out.printf("  %s " + color + "%s" + RESET + " %s\n", connector, icon, String.format(format, args));
-        pause(TREE_LINE_DELAY_MS);
+        productionPause(TREE_LINE_DELAY_MS);
     }
 
     /* Segura o terminal por um instante pro usuário conseguir ler a mensagem */
@@ -76,6 +77,22 @@ public class ConsolePrinter {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    /** Pausa da animação da produção, ajustada pela velocidade escolhida no menu */
+    public static void productionPause(int millis) {
+        int adjusted = (int) Math.round(millis * productionSpeed.getDelayFactor());
+        if (adjusted > 0) {
+            pause(adjusted);
+        }
+    }
+
+    public static ProductionSpeed getProductionSpeed() {
+        return productionSpeed;
+    }
+
+    public static void setProductionSpeed(ProductionSpeed speed) {
+        productionSpeed = speed;
     }
 
     public static void treeOk(boolean isLast, String format, Object... args) {

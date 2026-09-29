@@ -8,7 +8,6 @@ import java.math.RoundingMode;
 
 public abstract class Product implements Auditable {
     private static int globalUniqueId = 1;
-    private static final double RISK_THRESHOLD = 0.5;
 
     private final int id;
     private final String name;
@@ -18,6 +17,11 @@ public abstract class Product implements Auditable {
     private double cumulativeFailureOdd;
     private int batch; /* 0 = ainda não fabricado (modelos do catálogo) */
     private static int productsCounter;
+
+    /* Abaixo de REPAIR_RISK_LIMIT é aprovado, entre os dois precisa
+    de manutenção e acima de DISCARD_RISK_LIMIT é descartado */
+    private final static double REPAIR_RISK_LIMIT = 0.25;
+    private final static double DISCARD_RISK_LIMIT = 0.45;
 
     public Product(String name, double rawMaterialPerUnit, double quality,
                    double cumulativeFailureOdd) {
@@ -90,12 +94,22 @@ public abstract class Product implements Auditable {
     }
 
     public double getRejectionRisk() {
-        return this.quality * 0.3 + this.cumulativeFailureOdd;
+        return this.quality * 0.15 + this.cumulativeFailureOdd;
     }
 
     @Override
     public boolean needsMaintenance() {
-        return getRejectionRisk() >= RISK_THRESHOLD;
+        return REPAIR_RISK_LIMIT <= getRejectionRisk() && getRejectionRisk() <= DISCARD_RISK_LIMIT;
+    }
+
+    /** Risco alto demais: o produto é descartado na inspeção e nem vai pro armazém */
+    public boolean exceedsDiscardLimit() {
+        return getRejectionRisk() > DISCARD_RISK_LIMIT;
+    }
+
+    @Override
+    public String generateIssueSummary() {
+        return String.format("[Produto] %s #%d (Risco de Rejeição: %.0f%%)", getName(), getId(), getRejectionRisk() * 100);
     }
 
     @Override

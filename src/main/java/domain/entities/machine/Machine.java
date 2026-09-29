@@ -13,7 +13,7 @@ public abstract class Machine implements Auditable {
     private final int maxCapacity;
     private final double failureOdd; /** Chance base de falha. */
     private final double operationCost;
-    private final double scenarioMultiplier; // Multiplicador de falha do cenário atual
+    private static double scenarioMultiplier; // Multiplicador de falha do cenário atual
     // Saúde
     private StatusDeMaquina status = StatusDeMaquina.FUNCIONAL;
     private static final int saudeMaxima = 100; /** Saúde máxima. */
@@ -28,7 +28,7 @@ public abstract class Machine implements Auditable {
         this.maxCapacity = maxCapacity;
         this.failureOdd = failureOdd;
         this.operationCost = operationCost;
-        this.scenarioMultiplier = scenarioMultiplier;
+        Machine.scenarioMultiplier = scenarioMultiplier;
         this.desgasteMaximo = wearDamage;
     }
 
@@ -72,18 +72,9 @@ public abstract class Machine implements Auditable {
 
     /* ====== Concrete ======*/
 
-    protected boolean isProcessFailure(Product product) {
-        boolean failureFloor = isMachineFailure();
-
-        /* The greate the quality, thej gratear the rejection odds.
-        The greater tcheckFailurehe cumulativeFailureOdd, the greater the rejection odds */
-        double rejectionOdds = product.getRejectionRisk();
-
-        return failureFloor || (RandomProvider.chance(rejectionOdds));
-    }
-
-    protected void tryIncreaseFailureOdd(Product product, double increment) {
-        if (isMachineFailure()) {
+    protected void tryIncreaseFailureOdd(Product product) {
+        if (willRollFailureOdd()) {
+            double increment = 0.12 * scenarioMultiplier;
             product.increaseCumulativeFailureOdd(increment);
         }
     }
@@ -172,6 +163,11 @@ public abstract class Machine implements Auditable {
         return this.saude < this.saudeCritica;
     }
 
+    @Override
+    public String generateIssueSummary() {
+        return String.format("[Máquina] %s (Saúde: %d/%d)", getName(), getSaude(), getSaudeMaxima());
+    }
+
     // ---- Getters e Setters ----
 
     public int getSaude() {
@@ -207,20 +203,20 @@ public abstract class Machine implements Auditable {
     /**
      * Calcula e retorna a chance de falha atual baseando-se na saúde atual da
      * máquina.
-     * falhaEfetiva = falhaBase * (1 + (100 - saúde)/100)
+     * falhaEfetiva = falhaBase * (1 + (saudeMaxima - saúde)/saudeMaxima)
      *
      * @return A chance de falha da máquina.
      */
     public double getFailureOdd() {
-        return this.failureOdd * (1 + (double) (this.getSaudeMaxima() - this.saude) / this.getSaudeMaxima()) * this.scenarioMultiplier;
+        return this.failureOdd * (1 + (double) (this.getSaudeMaxima() - this.saude) / this.getSaudeMaxima()) * Machine.scenarioMultiplier;
     }
 
     public double getRawChanceFalha() {
         return this.failureOdd;
     }
 
-    protected boolean isMachineFailure() {
-        return RandomProvider.chance(failureOdd);
+    protected boolean willRollFailureOdd() {
+        return RandomProvider.chance(getFailureOdd());
     }
 
     public double getOperationCost() {
@@ -229,5 +225,9 @@ public abstract class Machine implements Auditable {
 
     public int getSaudeMaxima() {
         return saudeMaxima;
+    }
+
+    public static double getScenarioMultiplier() {
+        return scenarioMultiplier;
     }
 }

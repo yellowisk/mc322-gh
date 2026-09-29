@@ -21,13 +21,41 @@ Tarefa 3:
 - Criamos as estratégias de produção:
 	- Fila do Caixa: FIFO.
 	- Ferrari: Demanda com maior quantidade de produtos sem checar orçamento.
-	- Joãozinho: Demanda com maior quantidad de produtos checando orçamento.
+	- Joãozinho: Demanda com maior quantidade de produtos checando orçamento.
 - Dividimos os submenus em subclasses de `Submenu` ao invés de deixá-los como métodos da classe Menu.
-- Adicionamos a classe ConfiguracaoCenario com 3 instanciações de cenários:
+- Adicionamos a classe ScenarioConfig com 3 instanciações de cenários:
 	- Mercadinho Ideal: budget farto, chance de falha reduzida e desgaste reduzido.
 	- Mercadinho Razoável: budget médio, chance de falha normal e desgaste normal.
 	- Mercadinho Precário: budget reduzido, chance de falha aumentada e desgaste maior.
-- Traduzimos tudo para português
+	- No menu, cada cenário aparece com o rótulo do pdf do lado: Mercadinho Ideal (Ideal),
+	Mercadinho Razoável (Intermediário) e Mercadinho Precário (Apocalíptico). O Mercadinho Razoável
+	(Cenário Intermediário) foi um cenário bônus que criamos para que desse pra ver o funcionamento
+	do mercadinho em um cenário comum, sem muitas vantagens ou desvantagens.
+- O menu principal mostra no topo o cenário e a estratégia atual, mantivemos o budget no footer por
+curtimos.
+- Deixamos a auditoria geral e a visualização do armazém nos menus (AuditMenu e StorageMenu), e não
+no ProductionManager como o pdf sugere (gerarAuditoriaGeral e exibirArmazem). Fizemos isso para tentar
+manter SRP (Single Responsability Principle), tendo o ProductionManager como responsável pela produção
+e só entregando as listas de máquinas e produtos, enquanto quem decide como mostrar isso no terminal
+permanecem sendo os menus. Assim o gerenciador não fica cheio de print.
+- Desgaste das máquinas:
+	- Cada máquina tem uma saúde de 0 a 100. A cada uso ela perde entre 1 e o desgaste máximo do
+	cenário (1 no Ideal, 2 no Razoável e 4 no Precário).
+	- Quando a saúde fica abaixo de 15, a máquina quebra.
+	- A chance de falha da máquina baseia-se em: falhaBase * (1 + (100 - saúde) / 100) * multiplicadorCenario
+	A falha base é 0.25 na processadora, 0.15 na empacotadora e 0.10 na inspeção, e o multiplicador do cenário
+	é 0.5 no Ideal, 1 no Razoável e 1.5 no Precário.
+	- Na inspeção o produto é reprovado se a própria máquina falhar ou se o risco de rejeição dele
+	(qualidade * 0.15 + risco acumulado, vezes o multiplicador do cenário) se concretizar.
+- Níveis de aceitação dos produtos na inspeção, pelo risco de rejeição:
+	- Abaixo de 0.25: aprovado e vai pro armazém.
+	- Entre 0.25 e 0.45: precisa de manutenção. Vai pro armazém, mas fica marcado e aparece na auditoria.
+	- Acima de 0.45: descartado na hora, nem entra no armazém.
+	Escolhemos esses valores porque o risco máximo que um produto chega é 0.27 no Ideal, 0.39 no Razoável
+	e 0.51 no Precário, então a manutenção aparece mais nos cenários difíceis e quase nunca no Ideal.
+- Adicionamos números de lote ligados a demandas fabricadas e todos os produtos feitos naquela demanda recebem
+ esse lote.
+- Adicionamos o menu "Velocidade da produção" pra quem quer ver o resultado da fabricação mais rápido.
 
 Tarefa 2:
 - Criamos 3 produtos novos, com nomes baseados no que tem no Mercadinho Ideal: Copo de vidro,
