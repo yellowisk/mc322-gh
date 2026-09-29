@@ -245,8 +245,7 @@ public class ProductionManager {
                         ConsolePrinter.treeInfo(false, "Máquina %s o produto %s #%d...", etapaAtual.getGerundio(), currentProduct.getName(), currentProduct.getId());
                         currentProduct = currentMachine.process(this.conveyor.removeProduct());
 
-                        // TODO: Adicionar verbo conjugado no particípio.
-                        ConsolePrinter.treeOk(true, "Produto %s #%d passou pela etapa.", currentProduct.getName(), currentProduct.getId());
+                        ConsolePrinter.treeOk(true, "Produto %s #%d foi %s com sucesso.", currentProduct.getName(), currentProduct.getId(), etapaAtual.getVerboParticipio());
                         this.conveyor.addProduct(currentProduct);
                     }
                 }
@@ -344,13 +343,8 @@ public class ProductionManager {
      * @param m A máquina a ser reparada
      */
     public void repairMachine(Machine m) {
-        // TODO: personalizar log
-        if (m == null) {
-            throw new IllegalArgumentException("Máquina nula");
-        }
-
         if (!(m.getSaude() < m.getSaudeMaxima())) {
-            throw new IllegalStateException("A " + m.getName() + " não precisa de reparo");
+            throw new IllegalStateException("Não foi dessa vez! A " + m.getName() + " não precisa de reparo");
         }
         m.reparar();
         setTemMaquinaQuebrada(false);
