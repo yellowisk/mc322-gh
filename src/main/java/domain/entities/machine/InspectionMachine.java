@@ -29,7 +29,7 @@ public class InspectionMachine extends Machine {
     private boolean willProductGetRejected(Product product) {
         boolean failureFloor = willRollFailureOdd();
 
-        double rejectionOdds = product.getRejectionRisk();
+        double rejectionOdds = product.getRejectionRisk() * getScenarioMultiplier();
 
         return failureFloor || (RandomProvider.chance(rejectionOdds));
     }

@@ -89,7 +89,7 @@ public abstract class Product implements Auditable {
     }
 
     public double getRejectionRisk() {
-        return this.quality * 0.3 + this.cumulativeFailureOdd;
+        return this.quality * 0.15 + this.cumulativeFailureOdd;
     }
 
     @Override

@@ -13,7 +13,7 @@ public abstract class Machine implements Auditable {
     private final int maxCapacity;
     private final double failureOdd; /** Chance base de falha. */
     private final double operationCost;
-    private final double scenarioMultiplier; // Multiplicador de falha do cenário atual
+    private static double scenarioMultiplier; // Multiplicador de falha do cenário atual
     // Saúde
     private StatusDeMaquina status = StatusDeMaquina.FUNCIONAL;
     private static final int saudeMaxima = 100; /** Saúde máxima. */
@@ -72,14 +72,11 @@ public abstract class Machine implements Auditable {
 
     /* ====== Concrete ======*/
 
-    protected void tryIncreaseFailureOdd(Product product, double increment) {
+    protected void tryIncreaseFailureOdd(Product product) {
         if (willRollFailureOdd()) {
-            product.increaseCumulativeFailureOdd(createProductCumulativeFailureOddIncrement());
+            double increment = 0.12 * scenarioMultiplier;
+            product.increaseCumulativeFailureOdd(increment);
         }
-    }
-
-    protected double createProductCumulativeFailureOddIncrement() {
-        return 0.3 * this.scenarioMultiplier;
     }
 
     // === SAÚDE DA MÁQUINA ===
@@ -223,5 +220,9 @@ public abstract class Machine implements Auditable {
 
     public int getSaudeMaxima() {
         return saudeMaxima;
+    }
+
+    public static double getScenarioMultiplier() {
+        return scenarioMultiplier;
     }
 }
