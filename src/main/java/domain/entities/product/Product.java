@@ -98,6 +98,11 @@ public abstract class Product implements Auditable {
     }
 
     @Override
+    public String generateIssueSummary() {
+        return String.format("[Produto] %s #%d (Risco de Rejeição: %.0f%%)", getName(), getId(), getRejectionRisk() * 100);
+    }
+
+    @Override
     public String generateDiagnosticReport() {
         String reset = view.ConsolePrinter.RESET;
         String blue = view.ConsolePrinter.BLUE;
