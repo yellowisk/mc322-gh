@@ -30,11 +30,11 @@ public class RepairMenu extends Submenu {
             List<Machine> machines = productionManager.getMachines();
             for (int i = 0; i < machines.size(); i++) {
                 Machine m = machines.get(i);
-                if (m.needsMaintenance()) {
-                    System.out.printf(" %d. %s " + ConsolePrinter.color(ConsolePrinter.RED, "(quebrada)") + "\n", i + 1, m.getName());
-                } else {
-                    System.out.printf(" %d. %s\n", i + 1, m.getName());
-                }
+                String healthColor = m.needsMaintenance() ? ConsolePrinter.RED : ConsolePrinter.GREEN;
+                String health = ConsolePrinter.color(healthColor, String.format("❤ %d/%d", m.getSaude(), m.getSaudeMaxima()));
+                String broken = m.needsMaintenance() ? " " + ConsolePrinter.color(ConsolePrinter.RED, "(quebrada)") : "";
+
+                System.out.printf(" %d. %-26s %s%s\n", i + 1, m.getName(), health, broken);
             }
             System.out.println();
             ConsolePrinter.printBackOption();
