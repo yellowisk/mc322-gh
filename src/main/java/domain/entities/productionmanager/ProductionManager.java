@@ -191,7 +191,7 @@ public class ProductionManager {
         }
 
         System.out.printf("Eitcha!!! Iniciando produção de: %s (lote %d)\n", chosenProduct.getName(), batch);
-        ConsolePrinter.pause(1500);
+        ConsolePrinter.productionPause(1500);
 
         int productsRemaining = demand.getRemainingAmount();
         int fabricatedAmount = 0;
