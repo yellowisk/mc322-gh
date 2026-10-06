@@ -15,6 +15,18 @@ produtos reais do mercadinho.
 HISTÓRICO
 =========
 
+Tarefa 4:
+- Migramos o build para Gradle (build.gradle, settings.gradle e Gradle Wrapper). Removemos o
+Makefile e o pom.xml.
+- Queremos deixar claro que a falha no meio da fabricação de uma demanda é uma regra de
+negócio nossa e não um estado inconsistente:
+	- A fabricação acontece unidade por unidade. Se no meio dela faltar orçamento, faltar
+	matéria-prima ou uma máquina quebrar, a produção é pausada e seus efeitos mantém no sistema
+	(matéria-prima e dinheiro continuam gastos).
+	- A demanda é marcada como CANCELADO, guardando quantas unidades já foram feitas. Ao fabricar
+	de novo, ela retoma de onde parou, e as novas unidades recebem um novo lote.
+	- Nada é marcado como concluído sem ter sido totalmente produzido (todas as unidades da demanda
+	terem sido executadas (com sucesso ou não)).
 Tarefa 3:
 - Adicionamos seed configurável para Random.
 - Os status de demanda são: EM_PRODUÇÃO, PENDENTE, CONCLUIDO e CANCELADO.
