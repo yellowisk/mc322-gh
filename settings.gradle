@@ -1,0 +1,6 @@
+plugins {
+    // Foojay downloads the JDK set in the toolchain (build.gradle) if the machine doesn't have it
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'mc322-gh-fabrica-ideal'

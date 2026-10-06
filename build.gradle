@@ -1,0 +1,35 @@
+plugins {
+    id 'application'
+}
+
+group = 'br.unicamp'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+application {
+    mainClass = 'Main'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('javadoc') {
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    options.docEncoding = 'UTF-8'
+}
+
+tasks.named('run') {
+    // So that the menu reads from the terminal through Scanner
+    standardInput = System.in
+}
