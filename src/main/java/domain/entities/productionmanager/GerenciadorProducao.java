@@ -232,6 +232,7 @@ public class GerenciadorProducao {
      * @throws DemandaInvalidaException se o produto da demanda não existir ou se ela não tiver unidades pedidas
      * @throws TransicaoDemandaInvalidaException se o status da demanda não permitir fabricar
      * @throws OrcamentoInsuficienteException se o orçamento não cobrir o custo estimado
+     * @throws MateriaPrimaInsuficienteException se o estoque não cobrir a matéria-prima das unidades que faltam
      */
     public void produzirDemanda(Demanda demanda) {
         // VERIFICAÇÕES
@@ -262,6 +263,18 @@ public class GerenciadorProducao {
             throw new OrcamentoInsuficienteException(String.format(
                     "Dessa vez não é! Orçamento insuficiente para fabricar %s: custo R$ %.2f, orçamento R$ %.2f.",
                     produtoAtual.getNome(), demanda.getCustoEstimado(), this.verba));
+        }
+
+        // Confere a matéria-prima de todas as unidades que faltam, p/ não parar no meio c/ estoque e verba já gastos
+        double materiaPrimaNecessaria = demanda.getQuantidadeRestante() * produtoAtual.getQuantidadeMateriaPrimaPorUnidade();
+        if (!this.materiaPrima.estaDisponivel(materiaPrimaNecessaria)) {
+            throw new MateriaPrimaInsuficienteException(String.format(
+                    "Cadê a força? Estoque insuficiente para fabricar %d %s: precisa de %.2f %s, tem %.2f %s (mínimo %d %s). "
+                            + "Compre matéria-prima e fabrique de novo.",
+                    demanda.getQuantidadeRestante(), produtoAtual.getNome(),
+                    materiaPrimaNecessaria, this.materiaPrima.getUnidade(),
+                    this.materiaPrima.getQuantidade(), this.materiaPrima.getUnidade(),
+                    this.materiaPrima.getQuantidadeMinima(), this.materiaPrima.getUnidade()));
         }
 
         int jaProduzidas = demanda.getQuantidadeProduzida();
