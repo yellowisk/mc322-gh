@@ -14,6 +14,10 @@ import java.util.List;
  */
 public class FilaDoCaixa implements EstrategiaProducao {
 
+    /** Cria a estratégia Fila do Caixa. Não guarda estado */
+    public FilaDoCaixa() {
+    }
+
     /**
      * Pega a demanda elegível que chegou primeiro. Ignora o orçamento
      *

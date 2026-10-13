@@ -7,6 +7,9 @@ import view.Menu;
  * @author Heitor Almeida
  */
 public class Main {
+    /** Só tem o main, não é p/ instanciar */
+    private Main() {
+    }
 
     /**
      * Inicia o menu principal. Se vier uma seed, o aleatório fica reproduzível
