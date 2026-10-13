@@ -15,7 +15,7 @@ import java.util.List;
  * @author Heitor Almeida
  * @author Glayson Oliveira
  */
-public class StorageMenu extends Submenu {
+public class MenuArmazem extends Submenu {
 
     /**
      * Cria o submenu c/ a cor azul
@@ -23,7 +23,7 @@ public class StorageMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção
      */
-    public StorageMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
+    public MenuArmazem(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.AZUL);
     }
 
@@ -107,9 +107,9 @@ public class StorageMenu extends Submenu {
             }
 
             ConsolePrinter.imprimirOpcaoVoltar();
-            menu.printFooter();
+            menu.imprimirRodape();
 
-            int opcao = menu.readInt("Escolha: ");
+            int opcao = menu.lerInteiro("Escolha: ");
 
             if (opcao == 0) break;
 
@@ -125,7 +125,7 @@ public class StorageMenu extends Submenu {
                 Menu.validarOpcao(opcao, opcoesExpandidas.length, "Dessa vez não é! Opção de lote inválida!");
                 opcoesExpandidas[opcao - 1] ^= 1; // Inverte a flag usando bitwise XOR
             } catch (InvalidOptionException e) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }
     }

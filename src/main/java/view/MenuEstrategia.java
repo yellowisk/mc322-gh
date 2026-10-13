@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Heitor Almeida
  */
-public class StrategyMenu extends Submenu {
+public class MenuEstrategia extends Submenu {
     /** Estratégias disponíveis, na ordem do menu. */
     private final List<EstrategiaProducao> estrategias = List.of(
             new FilaDoCaixa(),
@@ -30,7 +30,7 @@ public class StrategyMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção
      */
-    public StrategyMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
+    public MenuEstrategia(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.LARANJA);
     }
 
@@ -74,20 +74,20 @@ public class StrategyMenu extends Submenu {
             System.out.println();
             ConsolePrinter.imprimirOpcaoVoltar();
 
-            menu.printFooter();
-            int escolha = menu.readInt("Qual estratégia deseja " + ConsolePrinter.colorir(cor, "USAR") + "? ");
+            menu.imprimirRodape();
+            int escolha = menu.lerInteiro("Qual estratégia deseja " + ConsolePrinter.colorir(cor, "USAR") + "? ");
 
             if (escolha == 0) break;
             try {
                 Menu.validarOpcao(escolha, estrategias.size(), "Dessa vez não é! Opção inválida!");
             } catch (InvalidOptionException e) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }
             EstrategiaProducao escolhida = estrategias.get(escolha - 1);
 
             gerenciadorProducao.setEstrategiaAtual(escolhida);
-            menu.setLastBuffer(ConsolePrinter.textoOk("Estratégia alterada para %s!", escolhida.getNomeEstrategia()));
+            menu.setUltimaMensagem(ConsolePrinter.textoOk("Estratégia alterada para %s!", escolhida.getNomeEstrategia()));
         }
     }
 

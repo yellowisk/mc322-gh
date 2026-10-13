@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author Heitor Almeida
  */
-public class FabricateDemandMenu extends Submenu {
+public class MenuFabricarDemandas extends Submenu {
 
     /**
      * Cria o submenu c/ a cor roxa
@@ -20,7 +20,7 @@ public class FabricateDemandMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção
      */
-    public FabricateDemandMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
+    public MenuFabricarDemandas(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.ROXO);
     }
 
@@ -64,8 +64,8 @@ public class FabricateDemandMenu extends Submenu {
                     proximaPelaEstrategia, gerenciadorProducao.getEstrategiaAtual().getNomeEstrategia(), previa);
             ConsolePrinter.imprimirOpcaoVoltar();
 
-            menu.printFooter();
-            int opcao = menu.readInt("Qual demanda deseja " + ConsolePrinter.colorir(cor, "FABRICAR") + "? ");
+            menu.imprimirRodape();
+            int opcao = menu.lerInteiro("Qual demanda deseja " + ConsolePrinter.colorir(cor, "FABRICAR") + "? ");
 
             if (opcao == 0) break;
 
@@ -77,11 +77,11 @@ public class FabricateDemandMenu extends Submenu {
                     gerenciadorProducao.produzirDemanda(demandas.get(opcao - 1));
                 }
             } catch (PlantaException e) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }
 
-            menu.waitEnter();
+            menu.esperarEnter();
             break;
         }
     }

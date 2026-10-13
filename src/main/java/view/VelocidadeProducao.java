@@ -5,7 +5,7 @@ package view;
  *
  * @author Heitor Almeida
  */
-public enum ProductionSpeed {
+public enum VelocidadeProducao {
     /** Pausas normais */
     NORMAL("Normal", 1.0),
     /** Pausas c/ 30% da duração normal */
@@ -23,7 +23,7 @@ public enum ProductionSpeed {
      * @param descricao nome que aparece no menu
      * @param fatorPausa quanto multiplica as pausas da produção
      */
-    ProductionSpeed(String descricao, double fatorPausa) {
+    VelocidadeProducao(String descricao, double fatorPausa) {
         this.descricao = descricao;
         this.fatorPausa = fatorPausa;
     }

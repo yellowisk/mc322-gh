@@ -11,7 +11,7 @@ import domain.exceptions.InvalidOptionException;
  *
  * @author Heitor Almeida
  */
-public class UpdateDemandMenu extends Submenu {
+public class MenuAtualizarDemandas extends Submenu {
 
     /**
      * Cria o submenu c/ a cor amarela
@@ -19,7 +19,7 @@ public class UpdateDemandMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção
      */
-    public UpdateDemandMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
+    public MenuAtualizarDemandas(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.AMARELO);
     }
 
@@ -43,25 +43,25 @@ public class UpdateDemandMenu extends Submenu {
             ConsolePrinter.listarDemandas(gerenciadorProducao);
             ConsolePrinter.imprimirOpcaoVoltar();
 
-            menu.printFooter();
-            int opcao = menu.readInt("Qual demanda deseja " + ConsolePrinter.colorir(cor, "ATUALIZAR") + "? ");
+            menu.imprimirRodape();
+            int opcao = menu.lerInteiro("Qual demanda deseja " + ConsolePrinter.colorir(cor, "ATUALIZAR") + "? ");
 
             if (opcao == 0) break;
 
             try {
                 Menu.validarOpcao(opcao, gerenciadorProducao.getDemandas().size(), "Dessa vez não é! Opção inválida!");
             } catch (InvalidOptionException e) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }
             Demanda demandaEscolhida = gerenciadorProducao.getDemandas().get(opcao - 1);
 
-            int novoValor = menu.readInt("Digite o novo valor da demanda: ");
+            int novoValor = menu.lerInteiro("Digite o novo valor da demanda: ");
             try {
                 gerenciadorProducao.atualizarDemanda(demandaEscolhida, novoValor);
-                menu.setLastBuffer(ConsolePrinter.textoOk("Demanda de %s atualizada para %d!", demandaEscolhida.getNomeProduto(), novoValor));
+                menu.setUltimaMensagem(ConsolePrinter.textoOk("Demanda de %s atualizada para %d!", demandaEscolhida.getNomeProduto(), novoValor));
             } catch (InvalidDemandAmountException e) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! %s", e.getMessage()));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("Dessa vez não é! %s", e.getMessage()));
             }
         }
     }

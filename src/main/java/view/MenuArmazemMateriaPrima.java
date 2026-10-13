@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author Glayson Oliveira
  */
-public class RawMaterialStorageMenu extends Submenu {
+public class MenuArmazemMateriaPrima extends Submenu {
 
     /**
      * Cria o submenu c/ a cor azul
@@ -21,7 +21,7 @@ public class RawMaterialStorageMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção, de onde vem a matéria-prima
      */
-    public RawMaterialStorageMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
+    public MenuArmazemMateriaPrima(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.AZUL);
     }
 
@@ -37,47 +37,47 @@ public class RawMaterialStorageMenu extends Submenu {
 
     @Override
     public void exibir() {
-        List<Produto> fabricatedProducts = gerenciadorProducao.getProdutosFabricados();
+        List<Produto> produtosFabricados = gerenciadorProducao.getProdutosFabricados();
 
         // Agrupamento de produtos por listas
-        List<Integer> batchNumbers = new ArrayList<>();
-        List<List<Produto>> batchLists = new ArrayList<>();
-        for (Produto p : fabricatedProducts) {
-            int batchNum = p.getLote();
-            int index = batchNumbers.indexOf(batchNum);
+        List<Integer> numerosLotes = new ArrayList<>();
+        List<List<Produto>> listasLotes = new ArrayList<>();
+        for (Produto p : produtosFabricados) {
+            int numeroLote = p.getLote();
+            int indice = numerosLotes.indexOf(numeroLote);
 
-            if (index == -1) {
+            if (indice == -1) {
                 // Se o lote ainda não existe nas listas, cria um novo
-                batchNumbers.add(batchNum);
-                List<Produto> newList = new ArrayList<>();
-                newList.add(p);
-                batchLists.add(newList);
+                numerosLotes.add(numeroLote);
+                List<Produto> novaLista = new ArrayList<>();
+                novaLista.add(p);
+                listasLotes.add(novaLista);
             } else {
                 // Se já existe, adiciona o produto na lista correspondente ao índice
-                batchLists.get(index).add(p);
+                listasLotes.get(indice).add(p);
             }
         }
 
         // Arrays de controle para expansão (1 ou 0)
-        int[] expandedOptions = new int[batchNumbers.size()];
-        boolean expandAll = true;
+        int[] opcoesExpandidas = new int[numerosLotes.size()];
+        boolean expandirTodos = true;
 
         while (true) {
             imprimirCabecalho();
             System.out.println(" Matérias-prima disponíveis: ");
 
             MateriaPrima rm = gerenciadorProducao.getMateriaPrima();
-            String line = String.format(cor + "%s" + ConsolePrinter.RESET + ": %.2f %s", rm.getNome(), rm.getQuantidade(), rm.getUnidade());
-            ConsolePrinter.listaOpcoes(line, "Voltar");
+            String linha = String.format(cor + "%s" + ConsolePrinter.RESET + ": %.2f %s", rm.getNome(), rm.getQuantidade(), rm.getUnidade());
+            ConsolePrinter.listaOpcoes(linha, "Voltar");
 
-            menu.printFooter();
+            menu.imprimirRodape();
 
-            int option = menu.readInt("Escolha: ");
+            int opcao = menu.lerInteiro("Escolha: ");
 
-            if (option == 0) {
+            if (opcao == 0) {
                 break;
             } else {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
             }
         }
     }

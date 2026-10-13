@@ -8,9 +8,9 @@ import domain.exceptions.InvalidOptionException;
  *
  * @author Heitor Almeida
  */
-public class SpeedMenu extends Submenu {
+public class MenuVelocidade extends Submenu {
     /** Velocidades na ordem do enum */
-    private final ProductionSpeed[] velocidades = ProductionSpeed.values();
+    private final VelocidadeProducao[] velocidades = VelocidadeProducao.values();
 
     /**
      * Cria o submenu c/ a cor roxa
@@ -18,7 +18,7 @@ public class SpeedMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção
      */
-    public SpeedMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
+    public MenuVelocidade(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.ROXO);
     }
 
@@ -51,20 +51,20 @@ public class SpeedMenu extends Submenu {
             System.out.println();
             ConsolePrinter.imprimirOpcaoVoltar();
 
-            menu.printFooter();
-            int escolha = menu.readInt("Qual velocidade deseja " + ConsolePrinter.colorir(cor, "USAR") + "? ");
+            menu.imprimirRodape();
+            int escolha = menu.lerInteiro("Qual velocidade deseja " + ConsolePrinter.colorir(cor, "USAR") + "? ");
 
             if (escolha == 0) break;
             try {
                 Menu.validarOpcao(escolha, velocidades.length, "Dessa vez não é! Opção inválida!");
             } catch (InvalidOptionException e) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }
-            ProductionSpeed escolhida = velocidades[escolha - 1];
+            VelocidadeProducao escolhida = velocidades[escolha - 1];
 
             ConsolePrinter.setVelocidadeProducao(escolhida);
-            menu.setLastBuffer(ConsolePrinter.textoOk("Eitcha, como é ligeiro! Velocidade da produção alterada para %s!", escolhida.getDescricao()));
+            menu.setUltimaMensagem(ConsolePrinter.textoOk("Eitcha, como é ligeiro! Velocidade da produção alterada para %s!", escolhida.getDescricao()));
         }
     }
 }
