@@ -146,7 +146,7 @@ public class ConsolePrinter {
      * @param milis tempo de pausa na velocidade normal, em milissegundos
      */
     public static void pausarProducao(int milis) {
-        int ajustado = (int) Math.round(milis * velocidadeProducao.getDelayFactor());
+        int ajustado = (int) Math.round(milis * velocidadeProducao.getFatorPausa());
         if (ajustado > 0) {
             pausar(ajustado);
         }

@@ -121,7 +121,7 @@ public class Menu {
                 new SpeedMenu(this, productionManager)
         );
 
-        productionManager.setStrategy(strategyMenu.defaultStrategy());
+        productionManager.setStrategy(strategyMenu.estrategiaPadrao());
     }
 
     private void printIntroScreen() {

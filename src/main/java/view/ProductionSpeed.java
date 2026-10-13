@@ -1,25 +1,48 @@
 package view;
 
-/** Velocidade da animação da produção, escolhida no menu e mantida pela sessão toda */
+/**
+ * Velocidade da animação da produção, escolhida no menu e mantida pela sessão toda
+ *
+ * @author Heitor Almeida
+ */
 public enum ProductionSpeed {
+    /** Pausas normais */
     NORMAL("Normal", 1.0),
+    /** Pausas c/ 30% da duração normal */
     RAPIDA("Rápida", 0.3),
+    /** Sem pausa nenhuma */
     INSTANTANEA("Instantânea", 0.0);
 
-    private final String description;
-    /* multiplica as pausas da produção, se for 0 = sem pausa) */
-    private final double delayFactor;
+    private final String descricao;
+    /* multiplica as pausas da produção, 0 = sem pausa */
+    private final double fatorPausa;
 
-    ProductionSpeed(String description, double delayFactor) {
-        this.description = description;
-        this.delayFactor = delayFactor;
+    /**
+     * Associa a velocidade ao nome no menu e ao fator das pausas
+     *
+     * @param descricao nome que aparece no menu
+     * @param fatorPausa quanto multiplica as pausas da produção
+     */
+    ProductionSpeed(String descricao, double fatorPausa) {
+        this.descricao = descricao;
+        this.fatorPausa = fatorPausa;
     }
 
-    public String getDescription() {
-        return description;
+    /**
+     * Nome da velocidade
+     *
+     * @return nome que aparece no menu, ex.: "Rápida"
+     */
+    public String getDescricao() {
+        return descricao;
     }
 
-    public double getDelayFactor() {
-        return delayFactor;
+    /**
+     * Quanto as pausas da produção são multiplicadas, ver {@link ConsolePrinter#pausarProducao(int)}
+     *
+     * @return fator, 0 = sem pausa
+     */
+    public double getFatorPausa() {
+        return fatorPausa;
     }
 }
