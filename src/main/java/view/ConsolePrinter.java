@@ -2,246 +2,352 @@ package view;
 
 import domain.entities.demand.Demand;
 import domain.entities.machine.Machine;
-import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
 
 import java.util.List;
 
+/**
+ * Tudo que é impressão no terminal: cores ANSI, logs de sucesso/falha, linhas em árvore da produção,
+ * cabeçalhos, tabelas de demandas e de estoque, e as pausas da animação da produção
+ *
+ * @author Heitor Almeida
+ */
 public class ConsolePrinter {
+    /** Volta a cor e o estilo pro padrão do terminal */
     public static final String RESET = "\u001B[0m";
-    public static final String BOLD = "\u001B[1m";
-    public static final String ORANGE = "\u001B[38;5;208m";
-    public static final String BLUE = "\u001B[38;5;75m";
-    public static final String PURPLE = "\u001B[38;5;141m";
-    public static final String GREEN = "\u001B[38;5;114m";
-    public static final String YELLOW = "\u001B[38;5;221m";
-    public static final String GRAY = "\u001B[38;5;246m";
-    public static final String RED = "\033[38;2;234;67;53m";
-    private static final int TREE_LINE_DELAY_MS = 125;
-    private static ProductionSpeed productionSpeed = ProductionSpeed.NORMAL;
+    public static final String NEGRITO = "\u001B[1m";
+    public static final String LARANJA = "\u001B[38;5;208m";
+    public static final String AZUL = "\u001B[38;5;75m";
+    public static final String ROXO = "\u001B[38;5;141m";
+    public static final String VERDE = "\u001B[38;5;114m";
+    public static final String AMARELO = "\u001B[38;5;221m";
+    public static final String CINZA = "\u001B[38;5;246m";
+    public static final String VERMELHO = "\033[38;2;234;67;53m";
+    private static final int ATRASO_LINHA_ARVORE_MS = 125;
+    private static ProductionSpeed velocidadeProducao = ProductionSpeed.NORMAL;
 
-    private static final String DEMAND_ROW_FORMAT = "%-16s  %-12s  %-16s  %-16s  %-18s  %-10s";
-    private static final int DEMAND_TABLE_WIDTH = 16 + 12 + 16 + 16 + 18 + 10 + 2 * 5;
+    private static final String FORMATO_LINHA_DEMANDA = "%-16s  %-12s  %-16s  %-16s  %-18s  %-10s";
+    private static final int LARGURA_TABELA_DEMANDA = 16 + 12 + 16 + 16 + 18 + 10 + 2 * 5;
 
-    public static void clearScreen() {
+    /** Limpa o terminal e põe o cursor no topo */
+    public static void limparTela() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
 
-    public static String color(String color, String text) {
-        return color + text + RESET;
+    /**
+     * Colore um texto e volta pra cor padrão no final
+     *
+     * @param cor cor, uma das constantes desta classe
+     * @param texto texto a pintar
+     * @return texto colrido
+     */
+    public static String colorir(String cor, String texto) {
+        return cor + texto + RESET;
     }
 
-    /** Success log, returned instead of printed (for the lastBuffer) */
-    public static String okText(String format, Object... args) {
-        return color(GREEN, "✓") + " " + String.format(format, args) + RESET;
+    /**
+     * Log de sucesso c/ um ✓ verde, retornado p/ o lastBuffer do {@link Menu}
+     *
+     * @param formato formato, igual ao do {@link String#format}
+     * @param argumentos argumentos do formato
+     * @return mensagem formatada
+     */
+    public static String textoOk(String formato, Object... argumentos) {
+        return colorir(VERDE, "✓") + " " + String.format(formato, argumentos) + RESET;
     }
 
-    /** Fail log , returned instead of printed (for the lastBuffer) */
-    public static String failText(String format, Object... args) {
-        return color(RED, "✗") + " " + String.format(format, args) + RESET;
+    /**
+     * Log de falha c/ um ✗ vermelho, retornado p/ o lastBuffer do {@link Menu}
+     *
+     * @param formato formato, igual ao do {@link String#format}
+     * @param argumentos argumentos do formato
+     * @return mensagem formatada
+     */
+    public static String textoFalha(String formato, Object... argumentos) {
+        return colorir(VERMELHO, "✗") + " " + String.format(formato, argumentos) + RESET;
     }
 
-    public static void ok(String format, Object... args) {
-        System.out.print(okText(format, args));
+    /**
+     * Imprime um log de sucesso, sem quebra de linha
+     *
+     * @param formato formato, igual ao do {@link String#format}
+     * @param argumentos argumentos do formato
+     */
+    public static void imprimirOk(String formato, Object... argumentos) {
+        System.out.print(textoOk(formato, argumentos));
     }
 
-    public static void fail(String format, Object... args) {
-        System.out.print(failText(format, args));
+    /**
+     * Imprime um log de falha, sem quebra de linha
+     *
+     * @param formato formato, igual ao do {@link String#format}
+     * @param argumentos argumentos do formato
+     */
+    public static void imprimirFalha(String formato, Object... argumentos) {
+        System.out.print(textoFalha(formato, argumentos));
     }
 
-    /** Stage header w/ the machine's health and failure odds */
-    public static void stageHeader(Machine machine, String format, Object... args) {
-        String title = PURPLE + "▸ " + String.format(format.toUpperCase(), args) + RESET;
-        String saude = String.format("%d/%d", machine.getSaude(), machine.getSaudeMaxima());
+    /**
+     * Cabeçalho de uma etapa da produção c/ a saúde e a chance de falha da máquina.
+     * Se a chance atual for diferente da base, mostra a diferença entre parênteses
+     *
+     * @param maquina máquina da etapa
+     * @param formato nome da etapa, sai em caixa alta
+     * @param argumentos argumentos do formato
+     */
+    public static void cabecalhoEtapa(Machine maquina, String formato, Object... argumentos) {
+        String titulo = ROXO + "▸ " + String.format(formato.toUpperCase(), argumentos) + RESET;
+        String saude = String.format("%d/%d", maquina.getSaude(), maquina.getSaudeMaxima());
         String chanceFalha = "";
-        if (machine.getRawChanceFalha() == machine.getFailureOdd()) {
-            chanceFalha = String.format("%.2f", machine.getFailureOdd());
+        if (maquina.getChanceFalhaBase() == maquina.getChanceFalha()) {
+            chanceFalha = String.format("%.2f", maquina.getChanceFalha());
         } else {
-            double diffChanceFalha = machine.getFailureOdd() - machine.getRawChanceFalha();
-            chanceFalha = String.format("%.2f " + GRAY +"(▴ %.2f)", machine.getFailureOdd(), diffChanceFalha);
+            double diffChanceFalha = maquina.getChanceFalha() - maquina.getChanceFalhaBase();
+            String simboloTriangulo = diffChanceFalha < 0 ? "▾" : "▴";
+            chanceFalha = String.format("%.2f " + CINZA + "(%s %.2f)", maquina.getChanceFalha(), simboloTriangulo, diffChanceFalha);
         }
-        System.out.printf(title + " [ " + RED + "❤ %s"+ RESET + " | " + BLUE + "⚂ %s" + RESET + " ]\n", saude, chanceFalha);
+        System.out.printf(titulo + " [ " + VERMELHO + "❤ %s"+ RESET + " | " + AZUL + "⚂ %s" + RESET + " ]\n", saude, chanceFalha);
     }
 
-    private static void treeLine(String icon, String color, boolean isLast, String format, Object... args) {
-        String connector = isLast ? "└─" : "├─";
-        System.out.printf("  %s " + color + "%s" + RESET + " %s\n", connector, icon, String.format(format, args));
-        productionPause(TREE_LINE_DELAY_MS);
+    /**
+     * Imprime uma linha da árvore de logs da produção e retarda a animação
+     *
+     * @param icone ícone da linha, ex.: "✓"
+     * @param cor cor do ícone
+     * @param ehUltima true se for a última linha do ramo ({@code └─}), senão usa {@code ├─}
+     * @param formato formato, igual ao do {@link String#format}
+     * @param argumentos argumentos do formato
+     */
+    private static void linhaArvore(String icone, String cor, boolean ehUltima, String formato, Object... argumentos) {
+        String conector = ehUltima ? "└─" : "├─";
+        System.out.printf("  %s " + cor + "%s" + RESET + " %s\n", conector, icone, String.format(formato, argumentos));
+        pausarProducao(ATRASO_LINHA_ARVORE_MS);
     }
 
-    /* Segura o terminal por um instante pro usuário conseguir ler a mensagem */
-    public static void pause(int millis) {
+    /**
+     * Segura o terminal por um instante pro usuário conseguir ler a mensagem.
+     * Não depende da velocidade da produção ({@link #pausarProducao(int)})
+     *
+     * @param milis tempo de pausa, em milissegundos
+     */
+    public static void pausar(int milis) {
         try {
-            Thread.sleep(millis);
+            Thread.sleep(milis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
 
-    /** Pausa da animação da produção, ajustada pela velocidade escolhida no menu */
-    public static void productionPause(int millis) {
-        int adjusted = (int) Math.round(millis * productionSpeed.getDelayFactor());
-        if (adjusted > 0) {
-            pause(adjusted);
+    /**
+     * Pausa da animação da produção, ajustada pela velocidade escolhida no menu.
+     * Na velocidade instantânea não pausa nada
+     *
+     * @param milis tempo de pausa na velocidade normal, em milissegundos
+     */
+    public static void pausarProducao(int milis) {
+        int ajustado = (int) Math.round(milis * velocidadeProducao.getFatorPausa());
+        if (ajustado > 0) {
+            pausar(ajustado);
         }
-    }
-
-    public static ProductionSpeed getProductionSpeed() {
-        return productionSpeed;
-    }
-
-    public static void setProductionSpeed(ProductionSpeed speed) {
-        productionSpeed = speed;
-    }
-
-    public static void treeOk(boolean isLast, String format, Object... args) {
-        treeLine("✓", GREEN, isLast, format, args);
-    }
-
-    public static void treeFail(boolean isLast, String format, Object... args) {
-        treeLine("✗", RED, isLast, format, args);
-    }
-
-    public static void treeInfo(boolean isLast, String format, Object... args) {
-        treeLine("ℹ", GRAY, isLast, format, args);
-    }
-
-    public static String centerString(int width, String text) {
-        if (text == null || text.length() >= width) return text;
-        int leftPadding = (width - text.length()) / 2;
-        int rightPadding = width - text.length() - leftPadding;
-        return " ".repeat(leftPadding) + text + " ".repeat(rightPadding);
-    }
-
-    public static void card(String format, Object... args) {
-        line();
-        System.out.printf(ConsolePrinter.BOLD + " %s\n", String.format(format, args));
-        line();
-    }
-
-    public static void line() {
-        System.out.println(GRAY + "─".repeat(65) + RESET);
-    }
-
-    /** Indented line, goes right under the table headers */
-    public static void indentedLine(int size) {
-        System.out.println(GRAY + "    " + "─".repeat(size) + RESET);
-    }
-
-    public static void printBackOption() {
-        System.out.println(GRAY + " 0. ↩ Voltar" + RESET + "\n");
     }
 
     /**
-     * Imprime uma lista de opções de menu. O último item da lista é tratado como botão de "Voltar/Sair".4
-     * @param options lista de opções de menu.
+     * Velocidade da animação da produção
+     *
+     * @return velocidade atual
      */
-    public static void optionsList(String... options) {
-        for (int i = 0; i < options.length - 1; i++) {
-            System.out.printf(GRAY + " %d." + RESET + " %s\n", (i + 1), options[i]);
-        }
-        System.out.println();
-        System.out.printf(GRAY + " 0. ↩ %s\n\n" + RESET, options[options.length - 1]);
+    public static ProductionSpeed getVelocidadeProducao() {
+        return velocidadeProducao;
     }
 
-    public static void printOneLineStats(double budget, double rawMaterialQuantity, int fabricatedCount) {
-        System.out.printf(GRAY + "[ "
-                        + GREEN + "Orçamento: R$ %.2f" + GRAY
+    /**
+     * Troca a velocidade da animação da produção, vale p/ o resto da sessão
+     *
+     * @param velocidade nova velocidade
+     */
+    public static void setVelocidadeProducao(ProductionSpeed velocidade) {
+        velocidadeProducao = velocidade;
+    }
+
+    /**
+     * Linha de sucesso na árvore de logs da produção
+     *
+     * @param ehUltima true se for a última linha do ramo
+     * @param formato formato, igual ao do {@link String#format}
+     * @param argumentos argumentos do formato
+     */
+    public static void arvoreOk(boolean ehUltima, String formato, Object... argumentos) {
+        linhaArvore("✓", VERDE, ehUltima, formato, argumentos);
+    }
+
+    /**
+     * Linha de falha na árvore de logs da produção
+     *
+     * @param ehUltima true se for a última linha do ramo
+     * @param formato formato, igual ao do {@link String#format}
+     * @param argumentos argumentos do formato
+     */
+    public static void arvoreFalha(boolean ehUltima, String formato, Object... argumentos) {
+        linhaArvore("✗", VERMELHO, ehUltima, formato, argumentos);
+    }
+
+    /**
+     * Linha informativa na árvore de logs da produção
+     *
+     * @param ehUltima true se for a última linha do ramo
+     * @param formato formato, igual ao do {@link String#format}
+     * @param argumentos argumentos do formato
+     */
+    public static void arvoreInfo(boolean ehUltima, String formato, Object... argumentos) {
+        linhaArvore("ℹ", CINZA, ehUltima, formato, argumentos);
+    }
+
+    /**
+     * Centraliza um texto preenchendo c/ espaços dos dois lados
+     *
+     * @param largura largura total
+     * @param texto texto a centralizar
+     * @return texto centralizado, ou o próprio texto se ele for null ou não couber
+     */
+    public static String centralizar(int largura, String texto) {
+        if (texto == null || texto.length() >= largura) return texto;
+        int espacosEsquerda = (largura - texto.length()) / 2;
+        int espacosDireita = largura - texto.length() - espacosEsquerda;
+        return " ".repeat(espacosEsquerda) + texto + " ".repeat(espacosDireita);
+    }
+
+    /**
+     * Imprime um texto em negrito entre duas linhas, usado em cabeçalhos e no rodapé
+     *
+     * @param formato formato, igual ao do {@link String#format}
+     * @param argumentos argumentos do formato
+     */
+    public static void cartao(String formato, Object... argumentos) {
+        linha();
+        System.out.printf(ConsolePrinter.NEGRITO + " %s\n", String.format(formato, argumentos));
+        linha();
+    }
+
+    /** Linha horizontal cinza da largura do menu (65) */
+    public static void linha() {
+        System.out.println(CINZA + "─".repeat(65) + RESET);
+    }
+
+    /**
+     * Linha recuada, vai logo embaixo do cabeçalho das tabelas
+     *
+     * @param tamanho largura da linha
+     */
+    public static void linhaRecuada(int tamanho) {
+        System.out.println(CINZA + "    " + "─".repeat(tamanho) + RESET);
+    }
+
+    /** Imprime a opção "0. Voltar" dos submenus */
+    public static void imprimirOpcaoVoltar() {
+        System.out.println(CINZA + " 0. ↩ Voltar" + RESET + "\n");
+    }
+
+    /**
+     * Imprime uma lista numerada de opções de menu.
+     *
+     * @param opcoes opções do menu, c/ a de voltar/sair por último
+     */
+    public static void listaOpcoes(String... opcoes) {
+        for (int i = 0; i < opcoes.length - 1; i++) {
+            System.out.printf(CINZA + " %d." + RESET + " %s\n", (i + 1), opcoes[i]);
+        }
+        System.out.println();
+        System.out.printf(CINZA + " 0. ↩ %s\n\n" + RESET, opcoes[opcoes.length - 1]);
+    }
+
+    /**
+     * Linha de resumo da fábrica, mostrada no rodapé dos menus
+     *
+     * @param orcamento orçamento, em R$
+     * @param quantidadeMateriaPrima matéria-prima em estoque, em kg
+     * @param quantidadeFabricada quantas unidades estão no armazém
+     */
+    public static void imprimirResumo(double orcamento, double quantidadeMateriaPrima, int quantidadeFabricada) {
+        System.out.printf(CINZA + "[ "
+                        + VERDE + "Orçamento: R$ %.2f" + CINZA
                         + " | "
-                        + BLUE + "Mat. Prima: %.2f kg"  + GRAY
+                        + AZUL + "Mat. Prima: %.2f kg"  + CINZA
                         + " | "
-                        + PURPLE + "Produtos: %d un" + GRAY
+                        + ROXO + "Produtos: %d un" + CINZA
                         + " ]\n" + RESET,
-                budget,
-                rawMaterialQuantity,
-                fabricatedCount
+                orcamento,
+                quantidadeMateriaPrima,
+                quantidadeFabricada
         );
     }
 
-    public static void listDemands(ProductionManager pm) {
-        List<Demand> demands = pm.getDemandas();
-        double totalProjectedCost = pm.getProjectedCost(); // also refreshes each demand's cost btw
+    /**
+     * Tabela de demandas c/ produto, quantidade, matéria-prima, custo, status e tempo, seguida da
+     * projeção do orçamento depois de fabricar todas as pendentes. Avisa se o orçamento não dá
+     *
+     * @param gerenciador gerenciador da produção, de onde vêm as demandas e o orçamento
+     */
+    public static void listarDemandas(ProductionManager gerenciador) {
+        List<Demand> demandas = gerenciador.getDemandas();
+        double custoProjetadoTotal = gerenciador.getProjectedCost(); // also refreshes each demand's cost btw
 
-        System.out.printf("    " + GRAY + DEMAND_ROW_FORMAT + RESET + "\n",
+        System.out.printf("    " + CINZA + FORMATO_LINHA_DEMANDA + RESET + "\n",
                 "Produto", "Demanda", "MP", "Custo", "Status", "Tempo");
-        indentedLine(DEMAND_TABLE_WIDTH);
+        linhaRecuada(LARGURA_TABELA_DEMANDA);
 
-        for (int i = 0; i < demands.size(); i++) {
-            Demand demand = demands.get(i);
-            double demandCost = demand.getEstimatedCost();
+        for (int i = 0; i < demandas.size(); i++) {
+            Demand demanda = demandas.get(i);
+            double custoDemanda = demanda.getEstimatedCost();
 
             /* Padding the plain text to the Status column's visible width yah */
-            String statusLabel;
-            String statusColor;
-            switch (demand.getStatus()) {
+            String rotuloStatus;
+            String corStatus;
+            switch (demanda.getStatus()) {
                 case COMPLETED -> {
-                    statusLabel = "Concluída";
-                    statusColor = GREEN;
+                    rotuloStatus = "Concluída";
+                    corStatus = VERDE;
                 }
                 case CANCELLED -> {
                     // shows the progress when it got somewhere before stopping
-                    statusLabel = demand.getProducedAmount() > 0
-                            ? String.format("Cancelada (%d/%d)", demand.getProducedAmount(), demand.getAmount())
+                    rotuloStatus = demanda.getProducedAmount() > 0
+                            ? String.format("Cancelada (%d/%d)", demanda.getProducedAmount(), demanda.getAmount())
                             : "Cancelada";
-                    statusColor = RED;
+                    corStatus = VERMELHO;
                 }
                 default -> {
-                    statusLabel = "Pendente";
-                    statusColor = GRAY;
+                    rotuloStatus = "Pendente";
+                    corStatus = CINZA;
                 }
             }
-            String status = statusColor + String.format("%-18s", statusLabel) + RESET;
-            String time = demand.getProducedAmount() == 0
+            String status = corStatus + String.format("%-18s", rotuloStatus) + RESET;
+            String tempo = demanda.getProducedAmount() == 0
                     ? "-"
-                    : String.format("%.2fs", demand.getTotalProductionTime());
+                    : String.format("%.2fs", demanda.getTotalProductionTime());
 
             // status already comes colored + padded, so it goes in as a plain %s instead of %-18s
-            System.out.printf(GRAY + " %-1s." + RESET + " " + DEMAND_ROW_FORMAT.replace("%-18s", "%s") + RESET + "\n",
+            System.out.printf(CINZA + " %-1s." + RESET + " " + FORMATO_LINHA_DEMANDA.replace("%-18s", "%s") + RESET + "\n",
                     (i + 1),
-                    demand.getProductName(),
-                    demand.getAmount() + " un",
-                    String.format("%.2f kg", demand.getTotalRawMaterial()),
-                    String.format("R$ %.2f", demandCost),
+                    demanda.getProductName(),
+                    demanda.getAmount() + " un",
+                    String.format("%.2f kg", demanda.getTotalRawMaterial()),
+                    String.format("R$ %.2f", custoDemanda),
                     status,
-                    time
+                    tempo
             );
         }
 
         System.out.println();
-        if (totalProjectedCost > 0) {
-            double projectedBudget = pm.getVerba() - totalProjectedCost;
-            System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f " + RED + "(▾ R$ -%.2f)" + RESET + "\n",
-                    projectedBudget, totalProjectedCost);
-            if (projectedBudget < 0) {
-                System.out.println("\n" + color(RED, " ⚠ Orçamento insuficiente para fabricar todas as demandas pendentes!"));
+        if (custoProjetadoTotal > 0) {
+            double orcamentoProjetado = gerenciador.getVerba() - custoProjetadoTotal;
+            System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f " + VERMELHO + "(▾ R$ -%.2f)" + RESET + "\n",
+                    orcamentoProjetado, custoProjetadoTotal);
+            if (orcamentoProjetado < 0) {
+                System.out.println("\n" + colorir(VERMELHO, " ⚠ Orçamento insuficiente para fabricar todas as demandas pendentes!"));
             }
         } else {
-            System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f\n" + RESET, pm.getVerba());
+            System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f\n" + RESET, gerenciador.getVerba());
         }
-        System.out.println();
-    }
-
-    public static void listStorage(List<Demand> demands, List<Produto> storage) {
-        System.out.printf("    " + GRAY + "%-16s   %-10s" + RESET + "\n", "Produto", "Estoque");
-        indentedLine(44);
-
-        for (int i = 0; i < demands.size(); i++) {
-            String productName = demands.get(i).getProductName();
-            int count = 0;
-            for (Produto p : storage) {
-                if (p.getName().equals(productName)) {
-                    count++;
-                }
-            }
-
-            System.out.printf(GRAY + " %-1s." + RESET + " %-16s   %-7s\n" + RESET,
-                    (i + 1),
-                    productName,
-                    count + " un"
-            );
-        }
-
         System.out.println();
     }
 }

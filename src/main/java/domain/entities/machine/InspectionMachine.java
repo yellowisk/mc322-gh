@@ -4,54 +4,74 @@ import domain.entities.product.Produto;
 import domain.entities.product.ProductStatus;
 import domain.utils.RandomProvider;
 
+/**
+ * Última etapa da linha: decide se o produto vai pro armazém, vai c/ ressalva ou é descartado
+ *
+ * @author Heitor Almeida
+ */
 public class InspectionMachine extends Machine {
 
-    public InspectionMachine(String name, int maxCapacity, double failureOdd,
-                             double operationCost, double scenarioMultiplier,
-                             int wearDamage) {
-        super(name, maxCapacity, failureOdd, operationCost, scenarioMultiplier, wearDamage);
+    /**
+     * Cria a máquina de inspeção
+     *
+     * @param nome nome que aparece nos menus
+     * @param capacidadeMaxima unidades por ciclo
+     * @param chanceFalhaBase chance base de falha, entre 0 e 1
+     * @param custoOperacao custo p/ processar uma unidade, em R$
+     * @param multiplicadorCenario multiplicador de falha do cenário
+     * @param desgasteMaximo desgaste máximo por uso
+     */
+    public InspectionMachine(String nome, int capacidadeMaxima, double chanceFalhaBase,
+                             double custoOperacao, double multiplicadorCenario,
+                             int desgasteMaximo) {
+        super(nome, capacidadeMaxima, chanceFalhaBase, custoOperacao, multiplicadorCenario, desgasteMaximo);
     }
 
     /**
-     * Decide se o produto é reprovado na etapa. Usado pela máquina de inspeção.
-     * O produto é reprovado em dois casos (sorteios independentes):
+     * Decide se o produto é rejeitado na inspeção. São dois sorteios independentes, basta um dar certo:
      * <ul>
-     *   <li>a própria máquina falha, com chance {@link #getFailureOdd()}
-     *   (que já considera a saúde e o cenário);</li>
-     *   <li>o risco do produto se concretiza, com chance
-     *   {@link Produto#getRejectionRisk()}. Quanto maior a qualidade e o
-     *   risco acumulado nas etapas anteriores, maior a chance de reprovação.</li>
+     *   <li>a própria máquina falha, c/ chance {@link #getChanceFalha()} (já considera a saúde e o cenário).
+     *   Funciona como um piso: mesmo um produto sem risco nenhum é rejeitado pelo menos c/ essa chance;</li>
+     *   <li>o risco do produto se concretiza, c/ chance {@link Produto#getRiscoRejeicao()} vezes o multiplicador
+     *   do cenário. Quanto maior a qualidade e o risco acumulado nas etapas anteriores, maior a chance.</li>
      * </ul>
      *
-     * @param product O produto sendo inspecionado.
-     * @return true se o produto deve ser reprovado.
+     * @param produto O produto sendo inspecionado.
+     * @return true se o produto deve ser rejeitado
      */
-    private boolean willProductGetRejected(Produto product) {
-        boolean failureFloor = willRollFailureOdd();
+    private boolean vaiSerRejeitado(Produto produto) {
+        boolean maquinaFalhou = sorteiaFalha();
 
-        double rejectionOdds = product.getRejectionRisk() * getScenarioMultiplier();
+        double chanceRejeicao = produto.getRiscoRejeicao() * getMultiplicadorCenario();
 
-        return failureFloor || (RandomProvider.chance(rejectionOdds));
+        return maquinaFalhou || (RandomProvider.chance(chanceRejeicao));
+    }
+
+    /**
+     * Dá o veredito do produto: {@link ProductStatus#FAILED} se passou do limite de descarte ou foi rejeitado,
+     * {@link ProductStatus#TO_REPAIR} se precisa de manutenção e {@link ProductStatus#APPROVED} se tá tudo certo
+     *
+     * @param produto produto vindo do empacotamento
+     * @return o mesmo produto, c/ o status do veredito
+     */
+    @Override
+    public Produto processarEtapa(Produto produto) {
+        if (produto.passouLimiteDescarte() || vaiSerRejeitado(produto)) {
+            produto.setStatus(ProductStatus.FAILED);
+            return produto;
+        }
+
+        if (produto.precisaManutencao()) {
+            produto.setStatus(ProductStatus.TO_REPAIR);
+            return produto;
+        }
+
+        produto.setStatus(ProductStatus.APPROVED);
+        return produto;
     }
 
     @Override
-    public Produto processAux(Produto product) {
-        if (product.exceedsDiscardLimit() || willProductGetRejected(product)) {
-            product.setStatus(ProductStatus.FAILED);
-            return product;
-        }
-
-        if (product.needsMaintenance()) {
-            product.setStatus(ProductStatus.TO_REPAIR);
-            return product;
-        }
-
-        product.setStatus(ProductStatus.APPROVED);
-        return product;
-    }
-
-    @Override
-    public String getType() {
-        return "Inspection";
+    public String getTipo() {
+        return "Inspeção";
     }
 }

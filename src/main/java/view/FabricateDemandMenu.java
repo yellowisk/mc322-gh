@@ -2,69 +2,91 @@ package view;
 
 import domain.entities.demand.Demand;
 import domain.entities.productionmanager.ProductionManager;
+import domain.exceptions.InsufficientBudgetException;
+import domain.exceptions.MachineNeedsRepairException;
+import domain.exceptions.NoStrategySelectedException;
+import domain.exceptions.NullDemandException;
 
 import java.util.List;
 
+/**
+ * Submenu de fabricação. Lista as demandas e deixa escolher uma p/ fabricar, ou fabricar a próxima
+ * que a estratégia atual escolher
+ *
+ * @author Heitor Almeida
+ */
 public class FabricateDemandMenu extends Submenu {
 
-    public FabricateDemandMenu(Menu menu, ProductionManager productionManager) {
-        super(menu, productionManager, ConsolePrinter.PURPLE);
+    /**
+     * Cria o submenu c/ a cor roxa
+     *
+     * @param menu menu principal
+     * @param gerenciadorProducao gerenciador da produção
+     */
+    public FabricateDemandMenu(Menu menu, ProductionManager gerenciadorProducao) {
+        super(menu, gerenciadorProducao, ConsolePrinter.ROXO);
     }
 
     @Override
-    public String icon() {
-        return ConsolePrinter.color(color, "⚙");
+    public String icone() {
+        return ConsolePrinter.colorir(cor, "⚙");
     }
 
     @Override
-    public String label() {
+    public String rotulo() {
         return "Fabricar demandas";
     }
 
+    /**
+     * Loop do submenu. Depois de uma fabricação espera o ENTER e volta pro menu principal. Opção inválida,
+     * orçamento insuficiente, máquina quebrada, nenhuma estratégia ou nenhuma demanda elegível voltam pra
+     * lista c/ a mensagem no rodapé
+     */
     @Override
-    public void show() {
+    public void exibir() {
         while (true) {
-            printHeader();
-            List<Demand> demands = productionManager.getDemandas();
-            ConsolePrinter.listDemands(productionManager);
+            imprimirCabecalho();
+            List<Demand> demandas = gerenciadorProducao.getDemandas();
+            ConsolePrinter.listarDemandas(gerenciadorProducao);
 
-            // The option right after the demands fabricates whatever the active strategy picks
-            int nextByStrategy = demands.size() + 1;
-            Demand next = productionManager.espiarProximaDemanda();
-            String preview;
-            if (next == null) {
-                preview = ConsolePrinter.color(ConsolePrinter.GRAY, "nenhuma demanda elegível");
+            // A opção logo depois das demandas fabrica o que a estratégia atual escolher
+            int proximaPelaEstrategia = demandas.size() + 1;
+            Demand proxima = gerenciadorProducao.espiarProximaDemanda();
+            String previa;
+            if (proxima == null) {
+                previa = ConsolePrinter.colorir(ConsolePrinter.CINZA, "nenhuma demanda elegível");
             } else {
-                preview = next.getProductName() + " (" + next.getAmount() + " un)";
-                if (!next.isViable(productionManager.getVerba())) {
-                    preview += " " + ConsolePrinter.color(ConsolePrinter.RED, "(orçamento insuficiente)");
+                previa = proxima.getProductName() + " (" + proxima.getAmount() + " un)";
+                if (!proxima.isViable(gerenciadorProducao.getVerba())) {
+                    previa += " " + ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "(orçamento insuficiente)");
                 }
             }
-            System.out.printf(ConsolePrinter.GRAY + " %d." + ConsolePrinter.RESET + " " + ConsolePrinter.color(color, "▶")
-                            + " Próxima pela estratégia " + ConsolePrinter.color(color, "%s") + ": %s\n\n",
-                    nextByStrategy, productionManager.getCurrEstrategia().getStrategyName(), preview);
-            ConsolePrinter.printBackOption();
+            System.out.printf(ConsolePrinter.CINZA + " %d." + ConsolePrinter.RESET + " " + ConsolePrinter.colorir(cor, "▶")
+                            + " Próxima pela estratégia " + ConsolePrinter.colorir(cor, "%s") + ": %s\n\n",
+                    proximaPelaEstrategia, gerenciadorProducao.getCurrEstrategia().getNomeEstrategia(), previa);
+            ConsolePrinter.imprimirOpcaoVoltar();
 
             menu.printFooter();
-            int option = menu.readInt("Qual demanda deseja " + ConsolePrinter.color(color, "FABRICAR") + "? ");
+            int opcao = menu.readInt("Qual demanda deseja " + ConsolePrinter.colorir(cor, "FABRICAR") + "? ");
 
-            if (option == 0) break;
+            if (opcao == 0) break;
 
             try {
-                if (option == nextByStrategy) {
-                    productionManager.iniciarProducao();
+                if (opcao == proximaPelaEstrategia) {
+                    gerenciadorProducao.iniciarProducao();
                 } else {
-                    Demand selectedDemand;
+                    Demand demandaEscolhida;
                     try {
-                        selectedDemand = demands.get(option - 1);
+                        demandaEscolhida = demandas.get(opcao - 1);
                     } catch (IndexOutOfBoundsException e) {
-                        menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Opção inválida!"));
+                        menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
                         continue;
                     }
-                    productionManager.produzirDemanda(selectedDemand);
+                    gerenciadorProducao.produzirDemanda(demandaEscolhida);
                 }
-            } catch (Exception e) {
-                menu.setLastBuffer(ConsolePrinter.failText("%s", e.getMessage()));
+            } catch (InsufficientBudgetException | MachineNeedsRepairException
+                     | NoStrategySelectedException | NullDemandException e) {
+                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }
 

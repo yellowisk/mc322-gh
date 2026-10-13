@@ -5,57 +5,72 @@ import domain.entities.productionmanager.ProductionManager;
 
 import java.util.List;
 
+/**
+ * Submenu de reparo. Lista as máquinas c/ a saúde de cada uma e repara a escolhida, deixando
+ * a saúde cheia de novo
+ *
+ * @author Heitor Almeida
+ */
 public class RepairMenu extends Submenu {
 
-    public RepairMenu(Menu menu, ProductionManager productionManager) {
-        super(menu, productionManager, ConsolePrinter.YELLOW);
+    /**
+     * Cria o submenu c/ a cor amarela
+     *
+     * @param menu menu principal
+     * @param gerenciadorProducao gerenciador da produção
+     */
+    public RepairMenu(Menu menu, ProductionManager gerenciadorProducao) {
+        super(menu, gerenciadorProducao, ConsolePrinter.AMARELO);
     }
 
     @Override
-    public String icon() {
-        return ConsolePrinter.color(color, "⚒");
+    public String icone() {
+        return ConsolePrinter.colorir(cor, "⚒");
     }
 
     @Override
-    public String label() {
+    public String rotulo() {
         return "Reparar máquinas";
     }
 
+    /**
+     * Loop do submenu. Máquina inválida ou que não precisa de reparo volta pra lista c/ a mensagem no rodapé
+     */
     @Override
-    public void show() {
+    public void exibir() {
         while (true) {
-            printHeader();
+            imprimirCabecalho();
 
             // Lista de Máquinas
-            List<Machine> machines = productionManager.getMaquinas();
-            for (int i = 0; i < machines.size(); i++) {
-                Machine m = machines.get(i);
-                String healthColor = m.needsMaintenance() ? ConsolePrinter.RED : ConsolePrinter.GREEN;
-                String health = ConsolePrinter.color(healthColor, String.format("❤ %d/%d", m.getSaude(), m.getSaudeMaxima()));
-                String broken = m.needsMaintenance() ? " " + ConsolePrinter.color(ConsolePrinter.RED, "(quebrada)") : "";
+            List<Machine> maquinas = gerenciadorProducao.getMaquinas();
+            for (int i = 0; i < maquinas.size(); i++) {
+                Machine m = maquinas.get(i);
+                String corSaude = m.precisaManutencao() ? ConsolePrinter.VERMELHO : ConsolePrinter.VERDE;
+                String saude = ConsolePrinter.colorir(corSaude, String.format("❤ %d/%d", m.getSaude(), m.getSaudeMaxima()));
+                String quebrada = m.precisaManutencao() ? " " + ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "(quebrada)") : "";
 
-                System.out.printf(" %d. %-26s %s%s\n", i + 1, m.getName(), health, broken);
+                System.out.printf(" %d. %-26s %s%s\n", i + 1, m.getNome(), saude, quebrada);
             }
             System.out.println();
-            ConsolePrinter.printBackOption();
+            ConsolePrinter.imprimirOpcaoVoltar();
             menu.printFooter();
 
-            int option = menu.readInt("Qual máquina você deseja " + ConsolePrinter.color(color, "REPARAR") + "? ");
+            int opcao = menu.readInt("Qual máquina você deseja " + ConsolePrinter.colorir(cor, "REPARAR") + "? ");
 
-            if (option == 0) break;
+            if (opcao == 0) break;
 
-            Machine chosenMachine;
+            Machine maquinaEscolhida;
 
             // Processo principal
             try {
-                chosenMachine = machines.get(option - 1);
-                productionManager.repairMachine(chosenMachine);
-                animateRepair(chosenMachine.getName()); // Animação
-                menu.setLastBuffer(ConsolePrinter.okText("%s reparada!", chosenMachine.getName().toUpperCase()));
+                maquinaEscolhida = maquinas.get(opcao - 1);
+                gerenciadorProducao.repairMachine(maquinaEscolhida);
+                animarReparo(maquinaEscolhida.getNome()); // Animação
+                menu.setLastBuffer(ConsolePrinter.textoOk("%s reparada!", maquinaEscolhida.getNome().toUpperCase()));
             } catch (IndexOutOfBoundsException e) { // Caso o índice seja inválido
-                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Máquina inválida!"));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Máquina inválida!"));
             } catch (IllegalArgumentException | IllegalStateException e) {
-                menu.setLastBuffer(ConsolePrinter.failText("%s", e.getMessage()));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }
     }
@@ -63,19 +78,21 @@ public class RepairMenu extends Submenu {
     /**
      * Imprime uma nova linha com uma animação de um bloco se mexendo
      * para simular o reparo em andamento.
+     *
+     * @param nomeMaquina nome da máquina, aparece do lado da animação
      */
-    private void animateRepair(String machineName) {
+    private void animarReparo(String nomeMaquina) {
         System.out.println();
-        int travelDistance = 5; // Distância que o bloco vai percorrer
-        int loops = 3;
+        int distancia = 5; // Distância que o bloco vai percorrer
+        int voltas = 3;
 
-        for (int loop = 0; loop < loops; loop++) {
-            for (int i = 0; i <= travelDistance; i++) {
-                String spaces = " ".repeat(i);
-                String trail = " ".repeat(travelDistance - i); // Serve para tampar os blocos das iterações anteriores
+        for (int volta = 0; volta < voltas; volta++) {
+            for (int i = 0; i <= distancia; i++) {
+                String espacos = " ".repeat(i);
+                String rastro = " ".repeat(distancia - i); // Serve para tampar os blocos das iterações anteriores
 
-                System.out.print("\rReparando " + machineName + " [" + ConsolePrinter.color(color, spaces + "█" + trail) + "]");
-                ConsolePrinter.pause(150);
+                System.out.print("\rReparando " + nomeMaquina + " [" + ConsolePrinter.colorir(cor, espacos + "█" + rastro) + "]");
+                ConsolePrinter.pausar(150);
             }
         }
     }

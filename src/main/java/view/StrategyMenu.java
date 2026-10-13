@@ -9,72 +9,94 @@ import domain.strategies.Joaozinho;
 
 import java.util.List;
 
+/**
+ * Submenu de estratégia de produção. Mostra a próxima demanda que seria fabricada e deixa trocar
+ * a estratégia atual entre as três disponíveis
+ *
+ * @author Heitor Almeida
+ */
 public class StrategyMenu extends Submenu {
-    private final List<ProductionStrategy> strategies = List.of(
+    /** Estratégias disponíveis, na ordem do menu. */
+    private final List<ProductionStrategy> estrategias = List.of(
             new FilaDoCaixa(),
             new Ferrari(),
             new Joaozinho()
     );
 
-    public StrategyMenu(Menu menu, ProductionManager productionManager) {
-        super(menu, productionManager, ConsolePrinter.ORANGE);
+    /**
+     * Cria o submenu c/ a cor laranja
+     *
+     * @param menu menu principal
+     * @param gerenciadorProducao gerenciador da produção
+     */
+    public StrategyMenu(Menu menu, ProductionManager gerenciadorProducao) {
+        super(menu, gerenciadorProducao, ConsolePrinter.LARANJA);
     }
 
     @Override
-    public String icon() {
-        return ConsolePrinter.color(color, "⇄");
+    public String icone() {
+        return ConsolePrinter.colorir(cor, "⇄");
     }
 
     @Override
-    public String label() {
+    public String rotulo() {
         return "Estratégia de produção";
     }
 
-    public ProductionStrategy defaultStrategy() {
-        return strategies.getFirst();
+    /**
+     * Estratégia usada quando o simulador começa
+     *
+     * @return a primeira da lista: {@link domain.strategies.FilaDoCaixa}
+     */
+    public ProductionStrategy estrategiaPadrao() {
+        return estrategias.getFirst();
     }
 
+    /**
+     * Loop do submenu. A estratégia ativa aparece marcada c/ ●, e a prévia da próxima demanda atualiza a cada troca
+     */
     @Override
-    public void show() {
+    public void exibir() {
         while (true) {
-            printHeader();
-            printNextDemandPreview();
+            imprimirCabecalho();
+            imprimirPreviaProximaDemanda();
 
-            for (int i = 0; i < strategies.size(); i++) {
-                ProductionStrategy strategy = strategies.get(i);
-                boolean active = strategy == productionManager.getCurrEstrategia();
-                System.out.printf(ConsolePrinter.GRAY + " %d." + ConsolePrinter.RESET + " %s %s " + ConsolePrinter.GRAY + "(%s)" + ConsolePrinter.RESET + "\n",
+            for (int i = 0; i < estrategias.size(); i++) {
+                ProductionStrategy estrategia = estrategias.get(i);
+                boolean ativa = estrategia == gerenciadorProducao.getCurrEstrategia();
+                System.out.printf(ConsolePrinter.CINZA + " %d." + ConsolePrinter.RESET + " %s %s " + ConsolePrinter.CINZA + "(%s)" + ConsolePrinter.RESET + "\n",
                         i + 1,
-                        active ? ConsolePrinter.color(ConsolePrinter.GREEN, "●") : "○",
-                        strategy.getStrategyName(),
-                        strategy.getStrategyRule());
+                        ativa ? ConsolePrinter.colorir(ConsolePrinter.VERDE, "●") : "○",
+                        estrategia.getNomeEstrategia(),
+                        estrategia.getRegraEstrategia());
             }
             System.out.println();
-            ConsolePrinter.printBackOption();
+            ConsolePrinter.imprimirOpcaoVoltar();
 
             menu.printFooter();
-            int choice = menu.readInt("Qual estratégia deseja " + ConsolePrinter.color(color, "USAR") + "? ");
+            int escolha = menu.readInt("Qual estratégia deseja " + ConsolePrinter.colorir(cor, "USAR") + "? ");
 
-            if (choice == 0) break;
+            if (escolha == 0) break;
 
-            ProductionStrategy chosen;
+            ProductionStrategy escolhida;
             try {
-                chosen = strategies.get(choice - 1);
+                escolhida = estrategias.get(escolha - 1);
             } catch (IndexOutOfBoundsException e) {
-                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Opção inválida!"));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
                 continue;
             }
 
-            productionManager.setCurrEstrategia(chosen);
-            menu.setLastBuffer(ConsolePrinter.okText("Estratégia alterada para %s!", chosen.getStrategyName()));
+            gerenciadorProducao.setCurrEstrategia(escolhida);
+            menu.setLastBuffer(ConsolePrinter.textoOk("Estratégia alterada para %s!", escolhida.getNomeEstrategia()));
         }
     }
 
-    private void printNextDemandPreview() {
-        Demand next = productionManager.espiarProximaDemanda();
-        String preview = (next == null)
-                ? ConsolePrinter.color(ConsolePrinter.GRAY, "nenhuma demanda elegível")
-                : ConsolePrinter.color(color, next.getProductName() + " (" + next.getAmount() + " un)");
-        System.out.println("   Próxima demanda a ser fabricada: " + preview + "\n");
+    /** Imprime qual demanda a estratégia atual fabricaria agora, ou avisa se nenhuma é elegível */
+    private void imprimirPreviaProximaDemanda() {
+        Demand proxima = gerenciadorProducao.espiarProximaDemanda();
+        String previa = (proxima == null)
+                ? ConsolePrinter.colorir(ConsolePrinter.CINZA, "nenhuma demanda elegível")
+                : ConsolePrinter.colorir(cor, proxima.getProductName() + " (" + proxima.getAmount() + " un)");
+        System.out.println("   Próxima demanda a ser fabricada: " + previa + "\n");
     }
 }

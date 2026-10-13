@@ -52,7 +52,7 @@ public class Menu {
         // Menu: lista de submenus
         List<String> optionsList = new ArrayList<>(
                 submenus.stream()
-                    .map(submenu -> submenu.icon() + " " + submenu.label())
+                    .map(submenu -> submenu.icone() + " " + submenu.rotulo())
                     .toList()
         );
         optionsList.add("Sair");
@@ -62,13 +62,13 @@ public class Menu {
          * Lppp principal
          */
         while (running) {
-            ConsolePrinter.clearScreen();
-            ConsolePrinter.card(ConsolePrinter.color(ConsolePrinter.GRAY, "⌂") + " FÁBRICA IDEAL");
+            ConsolePrinter.limparTela();
+            ConsolePrinter.cartao(ConsolePrinter.colorir(ConsolePrinter.CINZA, "⌂") + " FÁBRICA IDEAL");
             System.out.println();
             System.out.println(" Cenário atual:    " + currScenario.getDisplayName());
-            System.out.println(" Estratégia atual: " + productionManager.getCurrEstrategia().getStrategyName() + "\n");
+            System.out.println(" Estratégia atual: " + productionManager.getCurrEstrategia().getNomeEstrategia() + "\n");
 
-            ConsolePrinter.optionsList(options);
+            ConsolePrinter.listaOpcoes(options);
 
             printFooter();
             int option = readInt("Escolha: ");
@@ -79,10 +79,10 @@ public class Menu {
             try {
                 chosen = submenus.get(option - 1);
             } catch (IndexOutOfBoundsException e) {
-                setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Opção inválida!"));
+                setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
                 continue;
             }
-            chosen.show();
+            chosen.exibir();
         }
     }
 
@@ -95,7 +95,7 @@ public class Menu {
         productionManager.adicionarNovoProduto(new CopoDeVidro("Copo", 0.5));
         productionManager.adicionarNovoProduto(new PoteDeVidro("Pote", 1.2));
         productionManager.adicionarNovoProduto(new KitCopoDeVidro("Kit Copo", 3));
-        Produto.resetIdCounter();
+        Produto.resetarContadorId();
 
         // Esteira hardcoded
         productionManager.addNewConveyor(new Conveyor("Esteira Ligeira", 20));
@@ -135,34 +135,34 @@ public class Menu {
                 new SpeedMenu(this, productionManager)
         );
 
-        productionManager.setCurrEstrategia(strategyMenu.defaultStrategy());
+        productionManager.setCurrEstrategia(strategyMenu.estrategiaPadrao());
     }
 
     /**
      * Tela inicial
      */
     private void printIntroScreen() {
-        ConsolePrinter.clearScreen();
-        ConsolePrinter.line();
-        System.out.println(ConsolePrinter.BOLD + ConsolePrinter.ORANGE
-                + ConsolePrinter.centerString(65, "FÁBRICA IDEAL") + ConsolePrinter.RESET);
-        System.out.println(ConsolePrinter.GRAY
-                + ConsolePrinter.centerString(65, "\"E, sim, cliente ganhou um balão de presente! :D\"")
+        ConsolePrinter.limparTela();
+        ConsolePrinter.linha();
+        System.out.println(ConsolePrinter.NEGRITO + ConsolePrinter.LARANJA
+                + ConsolePrinter.centralizar(65, "FÁBRICA IDEAL") + ConsolePrinter.RESET);
+        System.out.println(ConsolePrinter.CINZA
+                + ConsolePrinter.centralizar(65, "\"E, sim, cliente ganhou um balão de presente! :D\"")
                 + ConsolePrinter.RESET);
-        ConsolePrinter.line();
+        ConsolePrinter.linha();
         System.out.println();
-        System.out.println("   Bem-vindos à " + ConsolePrinter.ORANGE + "Fábrica Ideal" + ConsolePrinter.RESET + "! Aqui cliente não pediu");
+        System.out.println("   Bem-vindos à " + ConsolePrinter.LARANJA + "Fábrica Ideal" + ConsolePrinter.RESET + "! Aqui cliente não pediu");
         System.out.println("   150 kg de vidro e, sim, ganha produtos ótimos de presente!");
-        System.out.println("   Os balões de presente ficam no " + ConsolePrinter.BLUE + "@merc.adinhoideall" + ConsolePrinter.RESET + ", nosso");
+        System.out.println("   Os balões de presente ficam no " + ConsolePrinter.AZUL + "@merc.adinhoideall" + ConsolePrinter.RESET + ", nosso");
         System.out.println("   fiel cliente!");
         System.out.println();
-        System.out.println("   " + ConsolePrinter.GREEN + "Desenvolvido por:" + ConsolePrinter.RESET);
-        System.out.println("     • Heitor Almeida    " + ConsolePrinter.GRAY + "RA: 245293" + ConsolePrinter.RESET);
-        System.out.println("     • Glayson Oliveira  " + ConsolePrinter.GRAY + "RA: 281213" + ConsolePrinter.RESET);
+        System.out.println("   " + ConsolePrinter.VERDE + "Desenvolvido por:" + ConsolePrinter.RESET);
+        System.out.println("     • Heitor Almeida    " + ConsolePrinter.CINZA + "RA: 245293" + ConsolePrinter.RESET);
+        System.out.println("     • Glayson Oliveira  " + ConsolePrinter.CINZA + "RA: 281213" + ConsolePrinter.RESET);
         System.out.println();
-        ConsolePrinter.line();
+        ConsolePrinter.linha();
         System.out.println();
-        System.out.println(ConsolePrinter.color(ConsolePrinter.YELLOW, "Pressione ENTER para começar..."));
+        System.out.println(ConsolePrinter.colorir(ConsolePrinter.AMARELO, "Pressione ENTER para começar..."));
         scanner.nextLine();
     }
 
@@ -177,7 +177,7 @@ public class Menu {
                 new ScenarioConfig("Mercadinho Precário", "Apocalíptico", 250, 1.5, 4)
         };
 
-        // Lista de strings para o ConsolePrinter.optionsList
+        // Lista de strings para o ConsolePrinter.listaOpcoes
         String[] scenariosStringList = {
                 scenariosList[0].getDisplayName(),
                 scenariosList[1].getDisplayName(),
@@ -186,10 +186,10 @@ public class Menu {
         };
 
         while (true) {
-            ConsolePrinter.clearScreen();
-            ConsolePrinter.card("SELECIONADOR DE CENÁRIO");
+            ConsolePrinter.limparTela();
+            ConsolePrinter.cartao("SELECIONADOR DE CENÁRIO");
 
-            ConsolePrinter.optionsList(scenariosStringList);
+            ConsolePrinter.listaOpcoes(scenariosStringList);
 
             int option = readInt("Escolha: ");
 
@@ -199,7 +199,7 @@ public class Menu {
                 currScenario = scenariosList[option - 1];
                 break;
             } catch (IndexOutOfBoundsException e) {
-                System.out.println("\n" + ConsolePrinter.failText("Dessa vez não é! Opção de cenário inválida!"));
+                System.out.println("\n" + ConsolePrinter.textoFalha("Dessa vez não é! Opção de cenário inválida!"));
                 waitEnter();
             }
         }
@@ -214,13 +214,13 @@ public class Menu {
                 return scanner.nextInt();
             }
             scanner.next();
-            System.out.println(ConsolePrinter.failText("Dessa vez não é! Digite um número."));
+            System.out.println(ConsolePrinter.textoFalha("Dessa vez não é! Digite um número."));
         }
     }
 
     /** Waits for ENTER, but first eats the leftover line nextInt() leaves behind */
     void waitEnter() {
-        System.out.println("\n" + ConsolePrinter.color(ConsolePrinter.YELLOW, "Pressione ENTER para voltar..."));
+        System.out.println("\n" + ConsolePrinter.colorir(ConsolePrinter.AMARELO, "Pressione ENTER para voltar..."));
         scanner.nextLine();
         scanner.nextLine();
     }
@@ -231,12 +231,12 @@ public class Menu {
 
     void printFooter() {
         if (this.lastBuffer != null) {
-            ConsolePrinter.card("%s", this.lastBuffer);
+            ConsolePrinter.cartao("%s", this.lastBuffer);
             this.lastBuffer = null;
         } else {
-            ConsolePrinter.line();
+            ConsolePrinter.linha();
         }
-        ConsolePrinter.printOneLineStats(productionManager.getVerba(),
+        ConsolePrinter.imprimirResumo(productionManager.getVerba(),
                 productionManager.getMateriaPrima().getQuantity(),
                 productionManager.getProdutosFabricados().size());
         System.out.println();

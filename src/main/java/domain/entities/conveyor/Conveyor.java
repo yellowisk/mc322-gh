@@ -1,6 +1,6 @@
 package domain.entities.conveyor;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.exceptions.MachineUnavailableException;
 
 public class Conveyor {
@@ -77,7 +77,7 @@ public class Conveyor {
      * @param product o produto a ser adicionado
      */
     public void addProduct(Produto product) {
-        checkCanCarry(product.getRawMaterialPerUnit());
+        checkCanCarry(product.getQuantidadeMateriaPrimaPorUnidade());
         this.product = product;
     }
 

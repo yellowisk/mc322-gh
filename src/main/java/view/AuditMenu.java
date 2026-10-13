@@ -15,29 +15,29 @@ import java.util.List;
  */
 public class AuditMenu extends Submenu {
 
-    public AuditMenu(Menu menu, ProductionManager productionManager) {
-        super(menu, productionManager, ConsolePrinter.PURPLE);
+    public AuditMenu(Menu menu, ProductionManager gerenciadorProducao) {
+        super(menu, gerenciadorProducao, ConsolePrinter.ROXO);
     }
 
     @Override
-    public String icon() {
-        return ConsolePrinter.color(color, "⌕");
+    public String icone() {
+        return ConsolePrinter.colorir(cor, "⌕");
     }
 
     @Override
-    public String label() {
+    public String rotulo() {
         return "Auditoria";
     }
 
     @Override
-    public void show() {
+    public void exibir() {
         boolean running = true;
         while (running) {
-            printHeader();
+            imprimirCabecalho();
 
             // Lista de opções
             String[] opcoes = {"Relatório geral", "Detalhar máquinas", "Detalhar produtos", "Voltar"};
-            ConsolePrinter.optionsList(opcoes);
+            ConsolePrinter.listaOpcoes(opcoes);
 
             menu.printFooter();
 
@@ -49,22 +49,22 @@ public class AuditMenu extends Submenu {
                 case 1 -> relatorioGeral();
                 case 2 -> detalharMaquinas();
                 case 3 -> detalharProdutos();
-                default -> menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Opção inválida!"));
+                default -> menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
             }
         }
     }
 
     /** Números acumulados de todas as produções da sessão */
     private void printProductionReport() {
-        Report report = productionManager.getRelatorio();
-        String unit = productionManager.getMateriaPrima().getUnit();
+        Report report = gerenciadorProducao.getRelatorio();
+        String unit = gerenciadorProducao.getMateriaPrima().getUnit();
 
-        System.out.println(ConsolePrinter.BOLD + " Relatório da Produção" + ConsolePrinter.RESET);
+        System.out.println(ConsolePrinter.NEGRITO + " Relatório da Produção" + ConsolePrinter.RESET);
         System.out.printf(" - Produtos fabricados: %d\n", report.getTotalProducts());
         System.out.printf("   %s✓ %d aprovados%s | %s! %d precisam de manutenção%s | %s✗ %d rejeitados%s\n",
-                ConsolePrinter.GREEN, report.getTotalApprovedProducts(), ConsolePrinter.RESET,
-                ConsolePrinter.YELLOW, report.getTotalNeedsMaintenanceProducts(), ConsolePrinter.RESET,
-                ConsolePrinter.RED, report.getTotalRejectedProducts(), ConsolePrinter.RESET);
+                ConsolePrinter.VERDE, report.getTotalApprovedProducts(), ConsolePrinter.RESET,
+                ConsolePrinter.AMARELO, report.getTotalNeedsMaintenanceProducts(), ConsolePrinter.RESET,
+                ConsolePrinter.VERMELHO, report.getTotalRejectedProducts(), ConsolePrinter.RESET);
         System.out.printf(" - Taxa de sucesso: %.0f%%\n", report.getProductionSuccessRate() * 100);
         System.out.printf(" - Tempo total de produção: %.2f s\n", report.getTotalProductionTime());
         System.out.printf(" - Matéria-prima gasta: %.2f %s\n", report.getTotalRawMaterialSpent(), unit);
@@ -78,58 +78,58 @@ public class AuditMenu extends Submenu {
         boolean running = true;
 
         while (running) {
-            printHeader();
+            imprimirCabecalho();
 
-            System.out.println(ConsolePrinter.color(color," Relatório geral\n"));
+            System.out.println(ConsolePrinter.colorir(cor," Relatório geral\n"));
 
             printProductionReport();
 
             // Lista com todas as entidade auditáveis
             List<Auditable> auditables = new ArrayList<>();
-            auditables.addAll(productionManager.getMaquinas());
-            auditables.addAll(productionManager.getProdutosFabricados());
+            auditables.addAll(gerenciadorProducao.getMaquinas());
+            auditables.addAll(gerenciadorProducao.getProdutosFabricados());
 
             int totalAuditables = auditables.size();
             int issuesCount = 0;
 
-            System.out.println(ConsolePrinter.BOLD + " Relatório da Fábrica" + ConsolePrinter.RESET);
+            System.out.println(ConsolePrinter.NEGRITO + " Relatório da Fábrica" + ConsolePrinter.RESET);
 
             for (Auditable auditable : auditables) {
-                if (auditable.needsMaintenance()) {
+                if (auditable.precisaManutencao()) {
                     issuesCount++;
                 }
             }
 
             System.out.printf(" - Total de itens auditados: %d\n", totalAuditables);
             System.out.printf(" - Itens precisando de intervenção: %s%d%s\n",
-                    issuesCount > 0 ? ConsolePrinter.RED : ConsolePrinter.GREEN,
+                    issuesCount > 0 ? ConsolePrinter.VERMELHO : ConsolePrinter.VERDE,
                     issuesCount,
                     ConsolePrinter.RESET);
 
-            System.out.println(ConsolePrinter.BOLD + " Lista de problemas:" + ConsolePrinter.RESET);
+            System.out.println(ConsolePrinter.NEGRITO + " Lista de problemas:" + ConsolePrinter.RESET);
 
             boolean foundIssues = false;
             for (Auditable auditable : auditables) {
-                if (auditable.needsMaintenance()) {
+                if (auditable.precisaManutencao()) {
                     foundIssues = true;
                     /* Cada Auditable sabe se descrever, então não precisamos saber se é máquina ou produto */
-                    System.out.println(ConsolePrinter.RED + " ✗ " + ConsolePrinter.RESET + auditable.generateIssueSummary());
+                    System.out.println(ConsolePrinter.VERMELHO + " ✗ " + ConsolePrinter.RESET + auditable.gerarResumoProblema());
                 }
             }
 
             if (!foundIssues) {
-                System.out.println(ConsolePrinter.GREEN + " ✓ Nenhum problema encontrado! Tudo operando perfeitamente." + ConsolePrinter.RESET);
+                System.out.println(ConsolePrinter.VERDE + " ✓ Nenhum problema encontrado! Tudo operando perfeitamente." + ConsolePrinter.RESET);
             }
 
             System.out.println();
-            ConsolePrinter.printBackOption();
+            ConsolePrinter.imprimirOpcaoVoltar();
             menu.printFooter();
 
             int option = menu.readInt("Escolha: ");
             if (option == 0) {
                 break;
             } else {
-                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Opção inválida!"));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
             }
         }
     }
@@ -141,16 +141,16 @@ public class AuditMenu extends Submenu {
         boolean running = true;
 
         // Array de máquinas
-        List<Machine> machineList = productionManager.getMaquinas();
+        List<Machine> machineList = gerenciadorProducao.getMaquinas();
         int[] expandedOptions = new int[machineList.size()]; // Flags de ativação (1 ou 0)
         boolean expandAll = true; // Controle de estado para a opção de Expandir/Recolher tudo
 
         while (running) {
-            printHeader();
-            System.out.println(ConsolePrinter.color(color," Auditoria de máquinas\n"));
+            imprimirCabecalho();
+            System.out.println(ConsolePrinter.colorir(cor," Auditoria de máquinas\n"));
 
             if (machineList.isEmpty()) {
-                System.out.println(ConsolePrinter.GRAY + " Não há nenhuma máquina cadastrada." + ConsolePrinter.RESET);
+                System.out.println(ConsolePrinter.CINZA + " Não há nenhuma máquina cadastrada." + ConsolePrinter.RESET);
             }
 
             // Menu: Lista expansível de máquinas
@@ -158,20 +158,20 @@ public class AuditMenu extends Submenu {
             int i = 0;
             for (Machine m : machineList) {
                 System.out.printf(
-                        ConsolePrinter.GRAY + "  %d." + ConsolePrinter.RESET + " %s " + ConsolePrinter.GRAY + "(%s)" + ConsolePrinter.RESET + "\n",
-                        (i + 1), m.getName(), m.getType());
+                        ConsolePrinter.CINZA + "  %d." + ConsolePrinter.RESET + " %s " + ConsolePrinter.CINZA + "(%s)" + ConsolePrinter.RESET + "\n",
+                        (i + 1), m.getNome(), m.getTipo());
 
                 if (expandedOptions[i] == 1) { // Expansão
-                    System.out.print(m.generateDiagnosticReport());
+                    System.out.print(m.gerarRelatorioDiagnostico());
                 }
                 i++;
             }
 
             System.out.println();
             if (!machineList.isEmpty()) {
-                System.out.printf(ConsolePrinter.GRAY + " 99." + ConsolePrinter.RESET + " Expandir/Recolher todos\n\n");
+                System.out.printf(ConsolePrinter.CINZA + " 99." + ConsolePrinter.RESET + " Expandir/Recolher todos\n\n");
             }
-            ConsolePrinter.printBackOption();
+            ConsolePrinter.imprimirOpcaoVoltar();
 
             menu.printFooter();
 
@@ -191,7 +191,7 @@ public class AuditMenu extends Submenu {
             try {
                 expandedOptions[option - 1] = expandedOptions[option - 1] ^ 1; // Inverte a flag usando bitwise XOR
             } catch (IndexOutOfBoundsException e) {
-                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Máquina inválida!"));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Máquina inválida!"));
             }
         }
     }
@@ -200,29 +200,29 @@ public class AuditMenu extends Submenu {
         boolean running = true;
 
         // Array de Produtos
-        List<Produto> productList = productionManager.getProdutosFabricados();
+        List<Produto> productList = gerenciadorProducao.getProdutosFabricados();
 
         while (running) {
-            printHeader();
-            System.out.println(ConsolePrinter.color(color," Auditoria de produtos\n"));
+            imprimirCabecalho();
+            System.out.println(ConsolePrinter.colorir(cor," Auditoria de produtos\n"));
 
             if (productList.isEmpty()) {
-                System.out.println(ConsolePrinter.GRAY + " Nenhum produto foi produzido ainda." + ConsolePrinter.RESET);
+                System.out.println(ConsolePrinter.CINZA + " Nenhum produto foi produzido ainda." + ConsolePrinter.RESET);
             } else {
                 // Ccabeçalho alinhado da tabela
                 System.out.println(" Produtos produzidos:\n");
-                System.out.printf("    " + ConsolePrinter.GRAY + "%-5s %-16s %-6s %-10s %-12s %-10s %-20s" + ConsolePrinter.RESET + "\n",
+                System.out.printf("    " + ConsolePrinter.CINZA + "%-5s %-16s %-6s %-10s %-12s %-10s %-20s" + ConsolePrinter.RESET + "\n",
                         "ID", "Nome", "Lote", "Qualidade", "Risco Acum.", "Rejeição", "Status");
-                ConsolePrinter.indentedLine(85);
+                ConsolePrinter.linhaRecuada(85);
 
                 // Imprime as linhas da tabela
                 for (Produto p : productList) {
-                    System.out.println(p.generateDiagnosticReport());
+                    System.out.println(p.gerarRelatorioDiagnostico());
                 }
             }
 
             System.out.println();
-            ConsolePrinter.printBackOption();
+            ConsolePrinter.imprimirOpcaoVoltar();
 
             menu.printFooter();
 
@@ -231,7 +231,7 @@ public class AuditMenu extends Submenu {
             if (option == 0) {
                 break;
             } else {
-                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Opção inválida!"));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
             }
         }
     }

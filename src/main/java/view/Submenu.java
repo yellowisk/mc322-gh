@@ -2,30 +2,54 @@ package view;
 
 import domain.entities.productionmanager.ProductionManager;
 
+/**
+ * Base de todo submenu do menu principal. Cada submenu tem um ícone, um nome e uma cor, e o {@link Menu}
+ * monta a lista de opções a partir deles.
+ *
+ * @author Heitor Almeida
+ */
 public abstract class Submenu {
+    /** Menu principal, p/ ler a entrada e mandar mensagens pro rodapé */
     protected final Menu menu;
-    protected final ProductionManager productionManager;
-    /** Submenu's main color: icon, actions, highlights and neutral messages */
-    protected final String color;
+    /** De onde o submenu lê e altera o estado da fábrica */
+    protected final ProductionManager gerenciadorProducao;
+    /** Cor principal do submenu: ícone, ações, destaques e mensagens neutras */
+    protected final String cor;
 
-    protected Submenu(Menu menu, ProductionManager productionManager, String color) {
+    /**
+     * Guarda as dependências do submenu
+     *
+     * @param menu menu principal
+     * @param gerenciadorProducao gerenciador da produção
+     * @param cor cor principal, uma das constantes do {@link ConsolePrinter}
+     */
+    protected Submenu(Menu menu, ProductionManager gerenciadorProducao, String cor) {
         this.menu = menu;
-        this.productionManager = productionManager;
-        this.color = color;
+        this.gerenciadorProducao = gerenciadorProducao;
+        this.cor = cor;
     }
 
-    /** Icon already painted w/ the submenu color */
-    public abstract String icon();
+    /**
+     * Ícone do submenu
+     *
+     * @return ícone já pintado c/ a cor do submenu
+     */
+    public abstract String icone();
 
-    /** Name on the main menu, e.g. "Ver armazém" */
-    public abstract String label();
+    /**
+     * Nome do submenu
+     *
+     * @return nome no menu principal, ex.: "Ver armazém"
+     */
+    public abstract String rotulo();
 
-    public abstract void show();
+    /** Abre o submenu e fica no loop dele até o usuário escolher voltar */
+    public abstract void exibir();
 
-    /** Clears the screen and prints the header w/ the icon + label in caps */
-    protected void printHeader() {
-        ConsolePrinter.clearScreen();
-        ConsolePrinter.card("%s", icon() + " " + label().toUpperCase());
+    /** Limpa a tela e imprime o cabeçalho c/ o ícone + nome em caixa alta */
+    protected void imprimirCabecalho() {
+        ConsolePrinter.limparTela();
+        ConsolePrinter.cartao("%s", icone() + " " + rotulo().toUpperCase());
         System.out.println();
     }
 }
