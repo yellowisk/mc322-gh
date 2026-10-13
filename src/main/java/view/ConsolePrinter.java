@@ -1,6 +1,6 @@
 package view;
 
-import domain.entities.demand.Demand;
+import domain.entities.demand.Demanda;
 import domain.entities.machine.Machine;
 import domain.entities.productionmanager.ProductionManager;
 
@@ -289,7 +289,7 @@ public class ConsolePrinter {
      * @param gerenciador gerenciador da produção, de onde vêm as demandas e o orçamento
      */
     public static void listarDemandas(ProductionManager gerenciador) {
-        List<Demand> demandas = gerenciador.getDemandas();
+        List<Demanda> demandas = gerenciador.getDemandas();
         double custoProjetadoTotal = gerenciador.getProjectedCost(); // also refreshes each demand's cost btw
 
         System.out.printf("    " + CINZA + FORMATO_LINHA_DEMANDA + RESET + "\n",
@@ -297,21 +297,21 @@ public class ConsolePrinter {
         linhaRecuada(LARGURA_TABELA_DEMANDA);
 
         for (int i = 0; i < demandas.size(); i++) {
-            Demand demanda = demandas.get(i);
-            double custoDemanda = demanda.getEstimatedCost();
+            Demanda demanda = demandas.get(i);
+            double custoDemanda = demanda.getCustoEstimado();
 
             /* Padding the plain text to the Status column's visible width yah */
             String rotuloStatus;
             String corStatus;
             switch (demanda.getStatus()) {
-                case COMPLETED -> {
+                case CONCLUIDA -> {
                     rotuloStatus = "Concluída";
                     corStatus = VERDE;
                 }
-                case CANCELLED -> {
+                case CANCELADA -> {
                     // shows the progress when it got somewhere before stopping
-                    rotuloStatus = demanda.getProducedAmount() > 0
-                            ? String.format("Cancelada (%d/%d)", demanda.getProducedAmount(), demanda.getAmount())
+                    rotuloStatus = demanda.getQuantidadeProduzida() > 0
+                            ? String.format("Cancelada (%d/%d)", demanda.getQuantidadeProduzida(), demanda.getQuantidade())
                             : "Cancelada";
                     corStatus = VERMELHO;
                 }
@@ -321,16 +321,16 @@ public class ConsolePrinter {
                 }
             }
             String status = corStatus + String.format("%-18s", rotuloStatus) + RESET;
-            String tempo = demanda.getProducedAmount() == 0
+            String tempo = demanda.getQuantidadeProduzida() == 0
                     ? "-"
-                    : String.format("%.2fs", demanda.getTotalProductionTime());
+                    : String.format("%.2fs", demanda.getTempoTotalProducao());
 
             // status already comes colored + padded, so it goes in as a plain %s instead of %-18s
             System.out.printf(CINZA + " %-1s." + RESET + " " + FORMATO_LINHA_DEMANDA.replace("%-18s", "%s") + RESET + "\n",
                     (i + 1),
-                    demanda.getProductName(),
-                    demanda.getAmount() + " un",
-                    String.format("%.2f kg", demanda.getTotalRawMaterial()),
+                    demanda.getNomeProduto(),
+                    demanda.getQuantidade() + " un",
+                    String.format("%.2f kg", demanda.getMateriaPrimaTotal()),
                     String.format("R$ %.2f", custoDemanda),
                     status,
                     tempo

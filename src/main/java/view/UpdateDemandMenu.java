@@ -1,6 +1,6 @@
 package view;
 
-import domain.entities.demand.Demand;
+import domain.entities.demand.Demanda;
 import domain.entities.productionmanager.ProductionManager;
 import domain.exceptions.InvalidDemandAmountException;
 import domain.exceptions.InvalidOptionException;
@@ -54,12 +54,12 @@ public class UpdateDemandMenu extends Submenu {
                 menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }
-            Demand demandaEscolhida = gerenciadorProducao.getDemandas().get(opcao - 1);
+            Demanda demandaEscolhida = gerenciadorProducao.getDemandas().get(opcao - 1);
 
             int novoValor = menu.readInt("Digite o novo valor da demanda: ");
             try {
                 gerenciadorProducao.atualizarDemanda(demandaEscolhida, novoValor);
-                menu.setLastBuffer(ConsolePrinter.textoOk("Demanda de %s atualizada para %d!", demandaEscolhida.getProductName(), novoValor));
+                menu.setLastBuffer(ConsolePrinter.textoOk("Demanda de %s atualizada para %d!", demandaEscolhida.getNomeProduto(), novoValor));
             } catch (InvalidDemandAmountException e) {
                 menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! %s", e.getMessage()));
             }

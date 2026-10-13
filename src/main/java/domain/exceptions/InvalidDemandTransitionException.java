@@ -1,8 +1,8 @@
 package domain.exceptions;
 
 /**
- * Lançada quando uma {@link domain.entities.demand.Demand} tenta ir pra um status que
- * {@link domain.entities.demand.DemandStatus#canTransitionTo} não permite, ex.: COMPLETED -> IN_PRODUCTION,
+ * Lançada quando uma {@link domain.entities.demand.Demanda} tenta ir pra um status que
+ * {@link domain.entities.demand.StatusDemanda#podeTransicionarPara} não permite, ex.: CONCLUIDA -> EM_PRODUCAO,
  * ou quando mandam fabricar uma demanda num status que não pode ser fabricado
  *
  * @author Heitor Almeida
