@@ -1,7 +1,8 @@
 package domain.entities.report;
 
-import domain.entities.productionmanager.ProductionManager;
-
+/**
+ * Classe para armazenar os dados de log da fábrica
+ */
 public class Report {
     private double productionSuccessRate;
     private double totalProductionTime;

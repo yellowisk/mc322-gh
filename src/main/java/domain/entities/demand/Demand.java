@@ -1,6 +1,6 @@
 package domain.entities.demand;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.exceptions.InvalidDemandTransitionException;
 
 public class Demand {
@@ -16,7 +16,7 @@ public class Demand {
     private double estimatedCost;
     private long arrivalOrder;
 
-    public Demand(Product product, int amount) {
+    public Demand(Produto product, int amount) {
         this.productName = product.getName();
         this.amount = amount;
         this.status = DemandStatus.PENDING;
@@ -26,7 +26,7 @@ public class Demand {
         this.arrivalOrder = nextArrival++;
     }
 
-    private double calcRawMaterialNeeded(Product product) {
+    private double calcRawMaterialNeeded(Produto product) {
         // for those who just joined the stream: "calc" is short for "calculate"
         return (product.getRawMaterialPerUnit() * this.amount);
     }
@@ -56,7 +56,7 @@ public class Demand {
         return this.amount - this.producedAmount;
     }
 
-    public void updateAmount(Product product, int newAmount) {
+    public void atualizarQuantidade(Produto product, int newAmount) {
         if (newAmount < 0) {
             throw new IllegalArgumentException("A demanda não pode ser negativa!");
         }
@@ -79,7 +79,7 @@ public class Demand {
     }
 
     /** Must be called with a fresh unitOperationCost */
-    public void updateEstimatedCost(double unitOperationCost) {
+    public void atualizarCustoEstimado(double unitOperationCost) {
         this.estimatedCost = getRemainingAmount() * unitOperationCost;
     }
 

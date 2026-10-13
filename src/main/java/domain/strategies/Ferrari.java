@@ -15,7 +15,7 @@ Ferrari is a rich influencer that once visited the mercadinho and bought a lotta
 public class Ferrari implements ProductionStrategy {
 
     @Override
-    public Demand selectDemand(List<Demand> demands, double availableBudget) {
+    public Demand escolherDemanda(List<Demand> demands, double availableBudget) {
         return selectable(demands).stream()
                 .max(Comparator.comparingInt(Demand::getAmount))
                 .orElse(null);

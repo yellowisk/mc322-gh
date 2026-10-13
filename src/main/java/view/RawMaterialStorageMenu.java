@@ -1,11 +1,10 @@
 package view;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
 import domain.entities.rawmaterial.RawMaterial;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class RawMaterialStorageMenu extends Submenu {
@@ -26,19 +25,19 @@ public class RawMaterialStorageMenu extends Submenu {
 
     @Override
     public void show() {
-        List<Product> fabricatedProducts = productionManager.getFabricatedProducts();
+        List<Produto> fabricatedProducts = productionManager.getProdutosFabricados();
 
         // Agrupamento de produtos por listas
         List<Integer> batchNumbers = new ArrayList<>();
-        List<List<Product>> batchLists = new ArrayList<>();
-        for (Product p : fabricatedProducts) {
+        List<List<Produto>> batchLists = new ArrayList<>();
+        for (Produto p : fabricatedProducts) {
             int batchNum = p.getBatch();
             int index = batchNumbers.indexOf(batchNum);
 
             if (index == -1) {
                 // Se o lote ainda não existe nas listas, cria um novo
                 batchNumbers.add(batchNum);
-                List<Product> newList = new ArrayList<>();
+                List<Produto> newList = new ArrayList<>();
                 newList.add(p);
                 batchLists.add(newList);
             } else {
@@ -55,7 +54,7 @@ public class RawMaterialStorageMenu extends Submenu {
             printHeader();
             System.out.println(" Matérias-prima disponíveis: ");
 
-            RawMaterial rm = productionManager.getRawMaterial();
+            RawMaterial rm = productionManager.getMateriaPrima();
             String line = String.format(color + "%s" + ConsolePrinter.RESET + ": %.2f %s", rm.getName(), rm.getQuantity(), rm.getUnit());
             ConsolePrinter.optionsList(line, "Voltar");
 

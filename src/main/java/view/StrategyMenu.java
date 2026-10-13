@@ -42,7 +42,7 @@ public class StrategyMenu extends Submenu {
 
             for (int i = 0; i < strategies.size(); i++) {
                 ProductionStrategy strategy = strategies.get(i);
-                boolean active = strategy == productionManager.getCurrentStrategy();
+                boolean active = strategy == productionManager.getCurrEstrategia();
                 System.out.printf(ConsolePrinter.GRAY + " %d." + ConsolePrinter.RESET + " %s %s " + ConsolePrinter.GRAY + "(%s)" + ConsolePrinter.RESET + "\n",
                         i + 1,
                         active ? ConsolePrinter.color(ConsolePrinter.GREEN, "●") : "○",
@@ -65,13 +65,13 @@ public class StrategyMenu extends Submenu {
                 continue;
             }
 
-            productionManager.setStrategy(chosen);
+            productionManager.setCurrEstrategia(chosen);
             menu.setLastBuffer(ConsolePrinter.okText("Estratégia alterada para %s!", chosen.getStrategyName()));
         }
     }
 
     private void printNextDemandPreview() {
-        Demand next = productionManager.peekNextDemand();
+        Demand next = productionManager.espiarProximaDemanda();
         String preview = (next == null)
                 ? ConsolePrinter.color(ConsolePrinter.GRAY, "nenhuma demanda elegível")
                 : ConsolePrinter.color(color, next.getProductName() + " (" + next.getAmount() + " un)");

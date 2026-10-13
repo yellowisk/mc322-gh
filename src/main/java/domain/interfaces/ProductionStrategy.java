@@ -4,7 +4,7 @@ import domain.entities.demand.Demand;
 import java.util.List;
 
 public interface ProductionStrategy {
-    Demand selectDemand(List<Demand> demands, double availableBudget);
+    Demand escolherDemanda(List<Demand> demands, double availableBudget);
 
     String getStrategyName();
 

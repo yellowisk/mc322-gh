@@ -1,6 +1,6 @@
 package domain.entities.machine;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.product.ProductStatus;
 
 public class ProcessingMachine extends Machine {
@@ -12,8 +12,8 @@ public class ProcessingMachine extends Machine {
     }
 
     @Override
-    public Product processAux(Product product) {
-        Product newProduct = product.process(product, ProductStatus.PROCESSED);
+    public Produto processAux(Produto product) {
+        Produto newProduct = product.process(product, ProductStatus.PROCESSED);
         tryIncreaseFailureOdd(newProduct);
         return newProduct;
     }

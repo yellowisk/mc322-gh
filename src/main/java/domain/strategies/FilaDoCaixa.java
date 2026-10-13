@@ -10,7 +10,7 @@ import java.util.List;
 public class FilaDoCaixa implements ProductionStrategy {
 
     @Override
-    public Demand selectDemand(List<Demand> demands, double availableBudget) {
+    public Demand escolherDemanda(List<Demand> demands, double availableBudget) {
         return selectable(demands).stream()
                 .min(Comparator.comparingLong(Demand::getArrivalOrder))
                 .orElse(null);
