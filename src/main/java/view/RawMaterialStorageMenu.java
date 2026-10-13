@@ -2,7 +2,7 @@ package view;
 
 import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
-import domain.entities.rawmaterial.RawMaterial;
+import domain.entities.rawmaterial.MateriaPrima;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +66,8 @@ public class RawMaterialStorageMenu extends Submenu {
             imprimirCabecalho();
             System.out.println(" Matérias-prima disponíveis: ");
 
-            RawMaterial rm = gerenciadorProducao.getMateriaPrima();
-            String line = String.format(cor + "%s" + ConsolePrinter.RESET + ": %.2f %s", rm.getName(), rm.getQuantity(), rm.getUnit());
+            MateriaPrima rm = gerenciadorProducao.getMateriaPrima();
+            String line = String.format(cor + "%s" + ConsolePrinter.RESET + ": %.2f %s", rm.getNome(), rm.getQuantidade(), rm.getUnidade());
             ConsolePrinter.listaOpcoes(line, "Voltar");
 
             menu.printFooter();

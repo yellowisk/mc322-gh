@@ -1,7 +1,7 @@
 package view;
 
 import domain.entities.productionmanager.ProductionManager;
-import domain.entities.rawmaterial.RawMaterial;
+import domain.entities.rawmaterial.MateriaPrima;
 import domain.exceptions.InsufficientBudgetException;
 
 /**
@@ -40,14 +40,14 @@ public class BuyRawMaterialMenu extends Submenu {
     public void exibir() {
         while (true) {
             imprimirCabecalho();
-            RawMaterial mp = gerenciadorProducao.getMateriaPrima();
-            System.out.printf("   Item: " + ConsolePrinter.colorir(cor, "%s") + "\n", mp.getName());
-            System.out.printf("   Estoque atual: " + ConsolePrinter.colorir(cor, "%.2f %s") + "\n", mp.getQuantity(), mp.getUnit());
-            System.out.printf("   Custo unitário: " + ConsolePrinter.colorir(cor, "R$ %.2f / %s") + "\n\n", mp.getPrice(), mp.getUnit());
+            MateriaPrima mp = gerenciadorProducao.getMateriaPrima();
+            System.out.printf("   Item: " + ConsolePrinter.colorir(cor, "%s") + "\n", mp.getNome());
+            System.out.printf("   Estoque atual: " + ConsolePrinter.colorir(cor, "%.2f %s") + "\n", mp.getQuantidade(), mp.getUnidade());
+            System.out.printf("   Custo unitário: " + ConsolePrinter.colorir(cor, "R$ %.2f / %s") + "\n\n", mp.getPreco(), mp.getUnidade());
             ConsolePrinter.imprimirOpcaoVoltar();
 
             menu.printFooter();
-            int quantidade = menu.readInt("Quantos " + mp.getUnit() + " deseja " + ConsolePrinter.colorir(cor, "COMPRAR") + "? ");
+            int quantidade = menu.readInt("Quantos " + mp.getUnidade() + " deseja " + ConsolePrinter.colorir(cor, "COMPRAR") + "? ");
 
             if (quantidade == 0) break;
 
@@ -56,7 +56,7 @@ public class BuyRawMaterialMenu extends Submenu {
                 continue;
             }
 
-            float custoTotal = quantidade * mp.getPrice();
+            float custoTotal = quantidade * mp.getPreco();
             if (custoTotal > gerenciadorProducao.getVerba()) {
                 menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Orçamento insuficiente: a compra custa R$ %.2f e o orçamento é R$ %.2f.",
                         custoTotal, gerenciadorProducao.getVerba()));

@@ -1,10 +1,10 @@
 package view;
 
-import domain.entities.report.Report;
+import domain.entities.report.Relatorio;
 import domain.exceptions.InvalidOptionException;
 import domain.exceptions.PlantaException;
-import domain.utils.ScenarioConfig;
-import domain.entities.conveyor.Conveyor;
+import domain.utils.ConfiguracaoCenario;
+import domain.entities.conveyor.Esteira;
 import domain.entities.machine.InspectionMachine;
 import domain.entities.machine.PackingMachine;
 import domain.entities.machine.ProcessingMachine;
@@ -13,7 +13,7 @@ import domain.entities.product.KitCopoDeVidro;
 import domain.entities.product.PoteDeVidro;
 import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
-import domain.entities.rawmaterial.RawMaterial;
+import domain.entities.rawmaterial.MateriaPrima;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +24,9 @@ import java.util.Scanner;
  * das telas da fábrica e é a partir daqui que os submenus são chamados
  */
 public class Menu {
-    private ScenarioConfig currScenario;
+    private ConfiguracaoCenario currScenario;
     private ProductionManager productionManager;
-    private Report report = new Report();
+    private Relatorio report = new Relatorio();
 
     private final Scanner scanner = new Scanner(System.in);
     private String lastBuffer; // last message, shows up in the next footer
@@ -44,8 +44,8 @@ public class Menu {
         scenarioChooserMenu();
 
         productionManager = new ProductionManager(
-                new RawMaterial("Vidro", 50, "kg", 5, 1),
-                currScenario.getBudget(),
+                new MateriaPrima("Vidro", 50, "kg", 5, 1),
+                currScenario.getVerba(),
                 report
         );
 
@@ -67,7 +67,7 @@ public class Menu {
             ConsolePrinter.limparTela();
             ConsolePrinter.cartao(ConsolePrinter.colorir(ConsolePrinter.CINZA, "⌂") + " FÁBRICA IDEAL");
             System.out.println();
-            System.out.println(" Cenário atual:    " + currScenario.getDisplayName());
+            System.out.println(" Cenário atual:    " + currScenario.getNomeExibicao());
             System.out.println(" Estratégia atual: " + productionManager.getCurrEstrategia().getNomeEstrategia() + "\n");
 
             ConsolePrinter.listaOpcoes(options);
@@ -99,25 +99,25 @@ public class Menu {
         Produto.resetarContadorId();
 
         // Esteira hardcoded
-        productionManager.addNewConveyor(new Conveyor("Esteira Ligeira", 20));
+        productionManager.addNewConveyor(new Esteira("Esteira Ligeira", 20));
 
         // Máquinas hardcoded
         productionManager.adicionarMaquina(new ProcessingMachine(
                         "Máquina de Processamento", 20, 0.25,
-                        0.78, currScenario.getScenarioMultiplier(),
-                        currScenario.getWearDamage()
+                        0.78, currScenario.getMultiplicadorCenario(),
+                        currScenario.getDesgasteMaximo()
                 )
         );
         productionManager.adicionarMaquina(new PackingMachine(
                         "Máquina de Empacotamento", 20, 0.15,
-                        0.5, currScenario.getScenarioMultiplier(),
-                        currScenario.getWearDamage()
+                        0.5, currScenario.getMultiplicadorCenario(),
+                        currScenario.getDesgasteMaximo()
                 )
         );
         productionManager.adicionarMaquina(new InspectionMachine(
                         "Máquina de Inspeção", 20, 0.10,
-                        0.43, currScenario.getScenarioMultiplier(),
-                        currScenario.getWearDamage()
+                        0.43, currScenario.getMultiplicadorCenario(),
+                        currScenario.getDesgasteMaximo()
                 )
         );
 
@@ -172,17 +172,17 @@ public class Menu {
      */
     private void scenarioChooserMenu() {
 
-        ScenarioConfig[] scenariosList = {
-                new ScenarioConfig("Mercadinho Ideal", "Ideal", 1000, 0.5, 1),
-                new ScenarioConfig("Mercadinho Razoável", "Intermediário", 500, 1, 2),
-                new ScenarioConfig("Mercadinho Precário", "Apocalíptico", 250, 1.5, 4)
+        ConfiguracaoCenario[] scenariosList = {
+                new ConfiguracaoCenario("Mercadinho Ideal", "Ideal", 1000, 0.5, 1),
+                new ConfiguracaoCenario("Mercadinho Razoável", "Intermediário", 500, 1, 2),
+                new ConfiguracaoCenario("Mercadinho Precário", "Apocalíptico", 250, 1.5, 4)
         };
 
         // Lista de strings para o ConsolePrinter.listaOpcoes
         String[] scenariosStringList = {
-                scenariosList[0].getDisplayName(),
-                scenariosList[1].getDisplayName(),
-                scenariosList[2].getDisplayName(),
+                scenariosList[0].getNomeExibicao(),
+                scenariosList[1].getNomeExibicao(),
+                scenariosList[2].getNomeExibicao(),
                 "Sair"
         };
 
@@ -268,7 +268,7 @@ public class Menu {
             ConsolePrinter.linha();
         }
         ConsolePrinter.imprimirResumo(productionManager.getVerba(),
-                productionManager.getMateriaPrima().getQuantity(),
+                productionManager.getMateriaPrima().getQuantidade(),
                 productionManager.getProdutosFabricados().size());
         System.out.println();
     }

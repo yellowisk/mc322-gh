@@ -3,7 +3,7 @@ package view;
 import domain.entities.machine.Machine;
 import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
-import domain.entities.report.Report;
+import domain.entities.report.Relatorio;
 import domain.exceptions.InvalidOptionException;
 import domain.interfaces.Auditable;
 
@@ -67,19 +67,19 @@ public class AuditMenu extends Submenu {
 
     /** Números acumulados de todas as produções da sessão */
     private void printProductionReport() {
-        Report report = gerenciadorProducao.getRelatorio();
-        String unit = gerenciadorProducao.getMateriaPrima().getUnit();
+        Relatorio report = gerenciadorProducao.getRelatorio();
+        String unit = gerenciadorProducao.getMateriaPrima().getUnidade();
 
         System.out.println(ConsolePrinter.NEGRITO + " Relatório da Produção" + ConsolePrinter.RESET);
-        System.out.printf(" - Produtos fabricados: %d\n", report.getTotalProducts());
+        System.out.printf(" - Produtos fabricados: %d\n", report.getTotalProdutos());
         System.out.printf("   %s✓ %d aprovados%s | %s! %d precisam de manutenção%s | %s✗ %d rejeitados%s\n",
-                ConsolePrinter.VERDE, report.getTotalApprovedProducts(), ConsolePrinter.RESET,
-                ConsolePrinter.AMARELO, report.getTotalNeedsMaintenanceProducts(), ConsolePrinter.RESET,
-                ConsolePrinter.VERMELHO, report.getTotalRejectedProducts(), ConsolePrinter.RESET);
-        System.out.printf(" - Taxa de sucesso: %.0f%%\n", report.getProductionSuccessRate() * 100);
-        System.out.printf(" - Tempo total de produção: %.2f s\n", report.getTotalProductionTime());
-        System.out.printf(" - Matéria-prima gasta: %.2f %s\n", report.getTotalRawMaterialSpent(), unit);
-        System.out.printf(" - Dinheiro gasto com operação das máquinas: R$ %.2f\n\n", report.getMoneySpent());
+                ConsolePrinter.VERDE, report.getTotalProdutosAprovados(), ConsolePrinter.RESET,
+                ConsolePrinter.AMARELO, report.getTotalProdutosPrecisamManutencao(), ConsolePrinter.RESET,
+                ConsolePrinter.VERMELHO, report.getTotalProdutosRejeitados(), ConsolePrinter.RESET);
+        System.out.printf(" - Taxa de sucesso: %.0f%%\n", report.getTaxaSucessoProducao() * 100);
+        System.out.printf(" - Tempo total de produção: %.2f s\n", report.getTempoTotalProducao());
+        System.out.printf(" - Matéria-prima gasta: %.2f %s\n", report.getMateriaPrimaGastaTotal(), unit);
+        System.out.printf(" - Dinheiro gasto com operação das máquinas: R$ %.2f\n\n", report.getDinheiroGasto());
     }
 
     /**

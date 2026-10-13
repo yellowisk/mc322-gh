@@ -11,76 +11,76 @@ import java.util.UUID;
  * @author Glayson Oliveira
  * @author Heitor Almeida
  */
-public class RawMaterial {
+public class MateriaPrima {
     // Mandatory attributes
     private final UUID id;
-    private final String name;
-    private final String unit;
-    private final int minQuantity;
-    private double quantity;
-    private final float price;
+    private final String nome;
+    private final String unidade;
+    private final int quantidadeMinima;
+    private double quantidade;
+    private final float preco;
 
     // My methods
     /**
      * Cria a matéria-prima c/ o estoque inicial
      *
-     * @param name nome, ex.: "Vidro"
-     * @param initialQuantity estoque inicial
-     * @param unit unidade de medida, ex.: "kg"
-     * @param minQuantity estoque mínimo, que não pode ser consumido
-     * @param price preço por unidade, em R$
+     * @param nome nome, ex.: "Vidro"
+     * @param quantidadeInicial estoque inicial
+     * @param unidade unidade de medida, ex.: "kg"
+     * @param quantidadeMinima estoque mínimo, que não pode ser consumido
+     * @param preco preço por unidade, em R$
      * @throws IllegalArgumentException se o estoque inicial ou o mínimo forem negativos
      */
-    public RawMaterial(String name, int initialQuantity, String unit, int minQuantity, float price) {
-        if (initialQuantity < 0 || minQuantity < 0) {
+    public MateriaPrima(String nome, int quantidadeInicial, String unidade, int quantidadeMinima, float preco) {
+        if (quantidadeInicial < 0 || quantidadeMinima < 0) {
             throw new IllegalArgumentException("Cadê a força? Quantidades iniciais e mínimas não podem ser negativas.");
         }
 
         this.id = UUID.randomUUID();
-        this.name = name;
-        this.unit = unit;
-        this.minQuantity = minQuantity;
-        this.quantity = initialQuantity;
-        this.price = price;
+        this.nome = nome;
+        this.unidade = unidade;
+        this.quantidadeMinima = quantidadeMinima;
+        this.quantidade = quantidadeInicial;
+        this.preco = preco;
     }
 
     // Mandatory methods
     /**
      * Tira a quantidade do estoque
      *
-     * @param demand quantidade a consumir, maior que 0
+     * @param quantidadePedida quantidade a consumir, maior que 0
      * @throws InvalidDemandException se a quantidade não for positiva
      * @throws InsufficientRawMaterialException se o consumo deixar o estoque abaixo do mínimo
      */
-    public void consume(double demand) {
-        if (demand <= 0) {
+    public void consumir(double quantidadePedida) {
+        if (quantidadePedida <= 0) {
             throw new InvalidDemandException("Cadê a força? A demanda para consumo deve ser maior que zero.");
         }
-        if (!isAvailable(demand)) {
-            throw new InsufficientRawMaterialException("Cadê a força? Estoque insuficiente para atender à demanda de " + demand + " " + unit + ".");
+        if (!estaDisponivel(quantidadePedida)) {
+            throw new InsufficientRawMaterialException("Cadê a força? Estoque insuficiente para atender à demanda de " + quantidadePedida + " " + unidade + ".");
         }
-        this.quantity -= demand;
+        this.quantidade -= quantidadePedida;
     }
 
     /**
      * Adiciona a quantidade especificada no estoque
-     * @param quantity quantidade a adicionar, maior que 0
+     * @param quantidade quantidade a adicionar, maior que 0
      * @throws IllegalArgumentException se a quantidade não for positiva
      */
-    public void addStock(int quantity) {
-        if (quantity <= 0) {
+    public void adicionarEstoque(int quantidade) {
+        if (quantidade <= 0) {
             throw new IllegalArgumentException("Cadê a força? A quantidade para adicionar ao estoque deve ser maior que zero.");
         }
-        this.quantity += quantity;
+        this.quantidade += quantidade;
     }
 
     /**
      * Verifica se dá p/ consumir a quantidade sem deixar o estoque abaixo do mínimo
-     * @param demand quantidade que se quer consumir
+     * @param quantidadePedida quantidade que se quer consumir
      * @return true se a quantidade for positiva e o estoque continuar acima do mínimo depois do consumo
      */
-    public boolean isAvailable(double demand) {
-        return demand > 0 && this.quantity >= demand && (this.quantity - demand) >= minQuantity;
+    public boolean estaDisponivel(double quantidadePedida) {
+        return quantidadePedida > 0 && this.quantidade >= quantidadePedida && (this.quantidade - quantidadePedida) >= quantidadeMinima;
     }
 
     /**
@@ -97,8 +97,8 @@ public class RawMaterial {
      *
      * @return nome, ex.: "Vidro"
      */
-    public String getName() {
-        return this.name;
+    public String getNome() {
+        return this.nome;
     }
 
     /**
@@ -106,8 +106,8 @@ public class RawMaterial {
      *
      * @return unidade, ex.: "kg"
      */
-    public String getUnit() {
-        return this.unit;
+    public String getUnidade() {
+        return this.unidade;
     }
 
     /**
@@ -115,8 +115,8 @@ public class RawMaterial {
      *
      * @return quantidade mínima
      */
-    public int getMinQuantity() {
-        return this.minQuantity;
+    public int getQuantidadeMinima() {
+        return this.quantidadeMinima;
     }
 
     /**
@@ -124,8 +124,8 @@ public class RawMaterial {
      *
      * @return preço, em R$
      */
-    public float getPrice() {
-        return this.price;
+    public float getPreco() {
+        return this.preco;
     }
 
     /**
@@ -133,17 +133,17 @@ public class RawMaterial {
      *
      * @return quantidade em estoque
      */
-    public double getQuantity() {
-        return this.quantity;
+    public double getQuantidade() {
+        return this.quantidade;
     }
 
     /**
      * Sobrescreve o estoque direto, sem validação
      *
-     * @param quantity novo estoque
+     * @param quantidade novo estoque
      */
-    public void setQuantity(double quantity) {
-        this.quantity = quantity;
+    public void setQuantidade(double quantidade) {
+        this.quantidade = quantidade;
     }
 
 }
