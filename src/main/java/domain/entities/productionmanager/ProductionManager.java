@@ -9,6 +9,7 @@ import domain.entities.product.ProductStatus;
 import domain.entities.rawmaterial.RawMaterial;
 import domain.entities.report.Report;
 import domain.exceptions.InsufficientBudgetException;
+import domain.exceptions.InvalidDemandException;
 import domain.exceptions.MachineNeedsRepairException;
 import domain.exceptions.NoStrategySelectedException;
 import domain.exceptions.NullDemandException;

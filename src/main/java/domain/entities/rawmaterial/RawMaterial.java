@@ -1,5 +1,8 @@
 package domain.entities.rawmaterial;
 
+import domain.exceptions.InsufficientRawMaterialException;
+import domain.exceptions.InvalidDemandException;
+
 import java.util.UUID;
 
 public class RawMaterial {
@@ -28,10 +31,10 @@ public class RawMaterial {
     // Mandatory methods
     public void consume(double demand) {
         if (demand <= 0) {
-            throw new IllegalArgumentException("Cadê a força? A demanda para consumo deve ser maior que zero.");
+            throw new InvalidDemandException("Cadê a força? A demanda para consumo deve ser maior que zero.");
         }
         if (!isAvailable(demand)) {
-            throw new IllegalStateException("Cadê a força? Estoque insuficiente para atender à demanda de " + demand + " " + unit + ".");
+            throw new InsufficientRawMaterialException("Cadê a força? Estoque insuficiente para atender à demanda de " + demand + " " + unit + ".");
         }
         this.quantity -= demand;
     }
