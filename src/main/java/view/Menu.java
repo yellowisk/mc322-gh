@@ -81,7 +81,7 @@ public class Menu {
         productionManager.addNewProduct(new CopoDeVidro("Copo", 0.5));
         productionManager.addNewProduct(new PoteDeVidro("Pote", 1.2));
         productionManager.addNewProduct(new KitCopoDeVidro("Kit Copo", 3));
-        Product.resetIdCounter();
+        Product.resetarContadorId();
 
         // Esteira hardcoded
         productionManager.addNewConveyor(new Conveyor("Esteira Ligeira", 20));

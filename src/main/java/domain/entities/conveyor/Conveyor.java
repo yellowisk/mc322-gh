@@ -61,7 +61,7 @@ public class Conveyor {
 
     // >>>>> PRODUTO
     public void addProduct(Product product) {
-        checkCanCarry(product.getRawMaterialPerUnit());
+        checkCanCarry(product.getQuantidadeMateriaPrimaPorUnidade());
         this.product = product;
     }
 

@@ -31,7 +31,7 @@ public class StorageMenu extends Submenu {
         List<Integer> batchNumbers = new ArrayList<>();
         List<List<Product>> batchLists = new ArrayList<>();
         for (Product p : fabricatedProducts) {
-            int batchNum = p.getBatch();
+            int batchNum = p.getLote();
             int index = batchNumbers.indexOf(batchNum);
 
             if (index == -1) {
@@ -64,8 +64,8 @@ public class StorageMenu extends Submenu {
                     // Linha principal do lote (não expansível)
                     System.out.printf(ConsolePrinter.GRAY + " %d." + ConsolePrinter.RESET + " Lote #%d: %s (★ %.2f) [Total: %d un]\n",
                             (i + 1), batchId,
-                            productsInBatch.getFirst().getName(),
-                            productsInBatch.getFirst().getQuality(),
+                            productsInBatch.getFirst().getNome(),
+                            productsInBatch.getFirst().getQualidade(),
                             productsInBatch.size());
 
                     // Forma expandida: lista os produtos internos do lote
@@ -74,7 +74,7 @@ public class StorageMenu extends Submenu {
                             String treeSymbol = (p == productsInBatch.getLast()) ? "└─" : "├─";
                             System.out.printf("    " + ConsolePrinter.GRAY + " %s %s #%d, Risco %s, %s\n" + ConsolePrinter.RESET,
                                     treeSymbol,
-                                    p.getName(), p.getId(), String.format("%.0f%%", p.getRejectionRisk() * 100),
+                                    p.getNome(), p.getId(), String.format("%.0f%%", p.getRiscoRejeicao() * 100),
                                     p.precisaManutencao()
                                             ? ConsolePrinter.color(ConsolePrinter.RED, "✗ Alto risco")
                                             : ConsolePrinter.color(ConsolePrinter.GREEN, "✓ OK")

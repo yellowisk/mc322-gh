@@ -33,7 +33,7 @@ public class Demand {
      * @param amount quantas unidades fabricar
      */
     public Demand(Product product, int amount) {
-        this.productName = product.getName();
+        this.productName = product.getNome();
         this.amount = amount;
         this.status = DemandStatus.PENDING;
         this.producedAmount = 0;
@@ -50,7 +50,7 @@ public class Demand {
      */
     private double calcRawMaterialNeeded(Product product) {
         // for those who just joined the stream: "calc" is short for "calculate"
-        return (product.getRawMaterialPerUnit() * this.amount);
+        return (product.getQuantidadeMateriaPrimaPorUnidade() * this.amount);
     }
 
     /**

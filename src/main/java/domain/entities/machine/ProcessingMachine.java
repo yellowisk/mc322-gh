@@ -35,7 +35,7 @@ public class ProcessingMachine extends Machine {
      */
     @Override
     public Product processarEtapa(Product produto) {
-        Product novoProduto = produto.process(produto, ProductStatus.PROCESSED);
+        Product novoProduto = produto.processar(produto, ProductStatus.PROCESSED);
         tentaAumentarRisco(novoProduto);
         return novoProduto;
     }

@@ -105,7 +105,7 @@ public abstract class Machine implements Auditable {
     protected void tentaAumentarRisco(Product produto) {
         if (sorteiaFalha()) {
             double incremento = 0.12 * multiplicadorCenario;
-            produto.increaseCumulativeFailureOdd(incremento);
+            produto.aumentarProbabilidadeFalha(incremento);
         }
     }
 

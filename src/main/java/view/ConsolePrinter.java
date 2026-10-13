@@ -230,7 +230,7 @@ public class ConsolePrinter {
             String productName = demands.get(i).getProductName();
             int count = 0;
             for (Product p : storage) {
-                if (p.getName().equals(productName)) {
+                if (p.getNome().equals(productName)) {
                     count++;
                 }
             }

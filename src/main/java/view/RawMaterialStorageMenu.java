@@ -32,7 +32,7 @@ public class RawMaterialStorageMenu extends Submenu {
         List<Integer> batchNumbers = new ArrayList<>();
         List<List<Product>> batchLists = new ArrayList<>();
         for (Product p : fabricatedProducts) {
-            int batchNum = p.getBatch();
+            int batchNum = p.getLote();
             int index = batchNumbers.indexOf(batchNum);
 
             if (index == -1) {

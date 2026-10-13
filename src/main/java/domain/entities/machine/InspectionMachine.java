@@ -32,7 +32,7 @@ public class InspectionMachine extends Machine {
      * <ul>
      *   <li>a própria máquina falha, c/ chance {@link #getChanceFalha()} (já considera a saúde e o cenário).
      *   Funciona como um piso: mesmo um produto sem risco nenhum é rejeitado pelo menos c/ essa chance;</li>
-     *   <li>o risco do produto se concretiza, c/ chance {@link Product#getRejectionRisk()} vezes o multiplicador
+     *   <li>o risco do produto se concretiza, c/ chance {@link Product#getRiscoRejeicao()} vezes o multiplicador
      *   do cenário. Quanto maior a qualidade e o risco acumulado nas etapas anteriores, maior a chance.</li>
      * </ul>
      *
@@ -42,7 +42,7 @@ public class InspectionMachine extends Machine {
     private boolean vaiSerRejeitado(Product produto) {
         boolean maquinaFalhou = sorteiaFalha();
 
-        double chanceRejeicao = produto.getRejectionRisk() * getMultiplicadorCenario();
+        double chanceRejeicao = produto.getRiscoRejeicao() * getMultiplicadorCenario();
 
         return maquinaFalhou || (RandomProvider.chance(chanceRejeicao));
     }
@@ -56,7 +56,7 @@ public class InspectionMachine extends Machine {
      */
     @Override
     public Product processarEtapa(Product produto) {
-        if (produto.exceedsDiscardLimit() || vaiSerRejeitado(produto)) {
+        if (produto.passouLimiteDescarte() || vaiSerRejeitado(produto)) {
             produto.setStatus(ProductStatus.FAILED);
             return produto;
         }
