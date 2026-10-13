@@ -1,6 +1,7 @@
 package domain.entities.conveyor;
 
 import domain.entities.product.Product;
+import domain.exceptions.MachineUnavailableException;
 
 public class Conveyor {
     // Mandatory attributes
@@ -47,7 +48,7 @@ public class Conveyor {
 
     public double removeRawMaterial() {
         if (!isOn()) {
-            throw new IllegalStateException("Dessa vez não é! The conveyor is off.");
+            throw new MachineUnavailableException("Dessa vez não é! The conveyor is off.");
         }
 
         if (this.rawMaterial == 0) {
@@ -67,7 +68,7 @@ public class Conveyor {
 
     public Product removeProduct() {
         if (!isOn()) {
-            throw new IllegalArgumentException("Não é mais ligeira... A esteira está desligada.");
+            throw new MachineUnavailableException("Não é mais ligeira... A esteira está desligada.");
         }
 
         if (this.product == null) {

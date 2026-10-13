@@ -9,6 +9,7 @@ import domain.entities.product.ProductStatus;
 import domain.entities.rawmaterial.RawMaterial;
 import domain.entities.report.Report;
 import domain.exceptions.InsufficientBudgetException;
+import domain.exceptions.InvalidDemandException;
 import domain.exceptions.MachineNeedsRepairException;
 import domain.interfaces.ProductionStrategy;
 import view.ConsolePrinter;
@@ -157,8 +158,7 @@ public class ProductionManager {
         this.chosenProduct = this.getProductByName(demand.getProductName());
 
         if (chosenProduct == null) {
-            ConsolePrinter.fail("Produto sem demanda cadastrada.\n");
-            return;
+            throw new InvalidDemandException("Demanda com produto inválido.\n");
         }
 
         if (demand.getAmount() <= 0) {
