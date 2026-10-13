@@ -27,7 +27,7 @@ public class RepairMenu extends Submenu {
             printHeader();
 
             // Lista de Máquinas
-            List<Machine> machines = productionManager.getMachines();
+            List<Machine> machines = productionManager.getMaquinas();
             for (int i = 0; i < machines.size(); i++) {
                 Machine m = machines.get(i);
                 String healthColor = m.needsMaintenance() ? ConsolePrinter.RED : ConsolePrinter.GREEN;

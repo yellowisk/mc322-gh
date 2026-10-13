@@ -1,6 +1,6 @@
 package domain.entities.machine;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.product.ProductStatus;
 import domain.utils.RandomProvider;
 
@@ -19,14 +19,14 @@ public class InspectionMachine extends Machine {
      *   <li>a própria máquina falha, com chance {@link #getFailureOdd()}
      *   (que já considera a saúde e o cenário);</li>
      *   <li>o risco do produto se concretiza, com chance
-     *   {@link Product#getRejectionRisk()}. Quanto maior a qualidade e o
+     *   {@link Produto#getRejectionRisk()}. Quanto maior a qualidade e o
      *   risco acumulado nas etapas anteriores, maior a chance de reprovação.</li>
      * </ul>
      *
      * @param product O produto sendo inspecionado.
      * @return true se o produto deve ser reprovado.
      */
-    private boolean willProductGetRejected(Product product) {
+    private boolean willProductGetRejected(Produto product) {
         boolean failureFloor = willRollFailureOdd();
 
         double rejectionOdds = product.getRejectionRisk() * getScenarioMultiplier();
@@ -35,7 +35,7 @@ public class InspectionMachine extends Machine {
     }
 
     @Override
-    public Product processAux(Product product) {
+    public Produto processAux(Produto product) {
         if (product.exceedsDiscardLimit() || willProductGetRejected(product)) {
             product.setStatus(ProductStatus.FAILED);
             return product;

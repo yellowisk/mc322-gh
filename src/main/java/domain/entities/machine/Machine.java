@@ -1,6 +1,6 @@
 package domain.entities.machine;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.exceptions.MachineNeedsRepairException;
 import domain.exceptions.MachineUnavailableException;
 import domain.interfaces.Auditable;
@@ -40,7 +40,7 @@ public abstract class Machine implements Auditable {
      * @param product O produto deverá ser fabricado.
      * @return Produto fabricado.
      */
-    public abstract Product processAux(Product product);
+    public abstract Produto processAux(Produto product);
 
     /**
      * Método 'process()' principal. Funciona como um Decorator.
@@ -50,7 +50,7 @@ public abstract class Machine implements Auditable {
      * @param product O produto deverá ser fabricado.
      * @return Produto fabricado.
      */
-    public Product process(Product product) {
+    public Produto process(Produto product) {
         if (!isOn()) {
             throw new MachineUnavailableException("Eitcha, João! The machine can't process anything, since it ain't on!");
         }
@@ -61,7 +61,7 @@ public abstract class Machine implements Auditable {
         }
 
         try {
-            Product produto = processAux(product);
+            Produto produto = processAux(product);
             desgastar(); // Trecho que será rodado sempre que o 'process()' for utilizado
             return produto;
         } catch (Exception e) {
@@ -73,7 +73,7 @@ public abstract class Machine implements Auditable {
 
     /* ====== Concrete ======*/
 
-    protected void tryIncreaseFailureOdd(Product product) {
+    protected void tryIncreaseFailureOdd(Produto product) {
         if (willRollFailureOdd()) {
             double increment = 0.12 * scenarioMultiplier;
             product.increaseCumulativeFailureOdd(increment);

@@ -1,13 +1,13 @@
 package domain.entities.product;
 
-public class PoteDeVidro extends Product {
+public class PoteDeVidro extends Produto {
     public PoteDeVidro(String name, double rawMaterialPerUnit) {
         super(name, rawMaterialPerUnit, 0.7, 0.0);
     }
 
     @Override
-    public Product process(Product model, ProductStatus newStatus) {
-        Product p = new PoteDeVidro(model.getName(), model.getRawMaterialPerUnit());
+    public Produto process(Produto model, ProductStatus newStatus) {
+        Produto p = new PoteDeVidro(model.getName(), model.getRawMaterialPerUnit());
         p.setStatus(newStatus);
         return p;
     }

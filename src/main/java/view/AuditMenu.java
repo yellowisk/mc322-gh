@@ -1,7 +1,7 @@
 package view;
 
 import domain.entities.machine.Machine;
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
 import domain.entities.report.Report;
 import domain.interfaces.Auditable;
@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Submenu de auditáveis
+ */
 public class AuditMenu extends Submenu {
 
     public AuditMenu(Menu menu, ProductionManager productionManager) {
@@ -53,8 +56,8 @@ public class AuditMenu extends Submenu {
 
     /** Números acumulados de todas as produções da sessão */
     private void printProductionReport() {
-        Report report = productionManager.getReport();
-        String unit = productionManager.getRawMaterial().getUnit();
+        Report report = productionManager.getRelatorio();
+        String unit = productionManager.getMateriaPrima().getUnit();
 
         System.out.println(ConsolePrinter.BOLD + " Relatório da Produção" + ConsolePrinter.RESET);
         System.out.printf(" - Produtos fabricados: %d\n", report.getTotalProducts());
@@ -83,8 +86,8 @@ public class AuditMenu extends Submenu {
 
             // Lista com todas as entidade auditáveis
             List<Auditable> auditables = new ArrayList<>();
-            auditables.addAll(productionManager.getMachines());
-            auditables.addAll(productionManager.getFabricatedProducts());
+            auditables.addAll(productionManager.getMaquinas());
+            auditables.addAll(productionManager.getProdutosFabricados());
 
             int totalAuditables = auditables.size();
             int issuesCount = 0;
@@ -138,7 +141,7 @@ public class AuditMenu extends Submenu {
         boolean running = true;
 
         // Array de máquinas
-        List<Machine> machineList = productionManager.getMachines();
+        List<Machine> machineList = productionManager.getMaquinas();
         int[] expandedOptions = new int[machineList.size()]; // Flags de ativação (1 ou 0)
         boolean expandAll = true; // Controle de estado para a opção de Expandir/Recolher tudo
 
@@ -197,7 +200,7 @@ public class AuditMenu extends Submenu {
         boolean running = true;
 
         // Array de Produtos
-        List<Product> productList = productionManager.getFabricatedProducts();
+        List<Produto> productList = productionManager.getProdutosFabricados();
 
         while (running) {
             printHeader();
@@ -213,7 +216,7 @@ public class AuditMenu extends Submenu {
                 ConsolePrinter.indentedLine(85);
 
                 // Imprime as linhas da tabela
-                for (Product p : productList) {
+                for (Produto p : productList) {
                     System.out.println(p.generateDiagnosticReport());
                 }
             }

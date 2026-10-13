@@ -1,6 +1,6 @@
 package view;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
 
 import java.util.ArrayList;
@@ -25,19 +25,19 @@ public class StorageMenu extends Submenu {
 
     @Override
     public void show() {
-        List<Product> fabricatedProducts = productionManager.getFabricatedProducts();
+        List<Produto> fabricatedProducts = productionManager.getProdutosFabricados();
 
         // Agrupamento de produtos por listas
         List<Integer> batchNumbers = new ArrayList<>();
-        List<List<Product>> batchLists = new ArrayList<>();
-        for (Product p : fabricatedProducts) {
+        List<List<Produto>> batchLists = new ArrayList<>();
+        for (Produto p : fabricatedProducts) {
             int batchNum = p.getBatch();
             int index = batchNumbers.indexOf(batchNum);
 
             if (index == -1) {
                 // Se o lote ainda não existe nas listas, cria um novo
                 batchNumbers.add(batchNum);
-                List<Product> newList = new ArrayList<>();
+                List<Produto> newList = new ArrayList<>();
                 newList.add(p);
                 batchLists.add(newList);
             } else {
@@ -59,7 +59,7 @@ public class StorageMenu extends Submenu {
             } else {
                 for (int i = 0; i < batchNumbers.size(); i++) {
                     int batchId = batchNumbers.get(i);
-                    List<Product> productsInBatch = batchLists.get(i);
+                    List<Produto> productsInBatch = batchLists.get(i);
 
                     // Linha principal do lote (não expansível)
                     System.out.printf(ConsolePrinter.GRAY + " %d." + ConsolePrinter.RESET + " Lote #%d: %s (★ %.2f) [Total: %d un]\n",
@@ -70,7 +70,7 @@ public class StorageMenu extends Submenu {
 
                     // Forma expandida: lista os produtos internos do lote
                     if (expandedOptions[i] == 1) {
-                        for (Product p : productsInBatch) {
+                        for (Produto p : productsInBatch) {
                             String treeSymbol = (p == productsInBatch.getLast()) ? "└─" : "├─";
                             System.out.printf("    " + ConsolePrinter.GRAY + " %s %s #%d, Risco %s, %s\n" + ConsolePrinter.RESET,
                                     treeSymbol,

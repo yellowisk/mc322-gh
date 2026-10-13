@@ -2,7 +2,7 @@ package view;
 
 import domain.entities.demand.Demand;
 import domain.entities.machine.Machine;
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
 
 import java.util.List;
@@ -160,7 +160,7 @@ public class ConsolePrinter {
     }
 
     public static void listDemands(ProductionManager pm) {
-        List<Demand> demands = pm.getDemands();
+        List<Demand> demands = pm.getDemandas();
         double totalProjectedCost = pm.getProjectedCost(); // also refreshes each demand's cost btw
 
         System.out.printf("    " + GRAY + DEMAND_ROW_FORMAT + RESET + "\n",
@@ -210,26 +210,26 @@ public class ConsolePrinter {
 
         System.out.println();
         if (totalProjectedCost > 0) {
-            double projectedBudget = pm.getBudget() - totalProjectedCost;
+            double projectedBudget = pm.getVerba() - totalProjectedCost;
             System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f " + RED + "(▾ R$ -%.2f)" + RESET + "\n",
                     projectedBudget, totalProjectedCost);
             if (projectedBudget < 0) {
                 System.out.println("\n" + color(RED, " ⚠ Orçamento insuficiente para fabricar todas as demandas pendentes!"));
             }
         } else {
-            System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f\n" + RESET, pm.getBudget());
+            System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f\n" + RESET, pm.getVerba());
         }
         System.out.println();
     }
 
-    public static void listStorage(List<Demand> demands, List<Product> storage) {
+    public static void listStorage(List<Demand> demands, List<Produto> storage) {
         System.out.printf("    " + GRAY + "%-16s   %-10s" + RESET + "\n", "Produto", "Estoque");
         indentedLine(44);
 
         for (int i = 0; i < demands.size(); i++) {
             String productName = demands.get(i).getProductName();
             int count = 0;
-            for (Product p : storage) {
+            for (Produto p : storage) {
                 if (p.getName().equals(productName)) {
                     count++;
                 }

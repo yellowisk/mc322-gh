@@ -39,6 +39,10 @@ public class RawMaterial {
         this.quantity -= demand;
     }
 
+    /**
+     * Adiciona a quantidade especificada no estoque
+     * @param quantity
+     */
     public void addStock(int quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Cadê a força? A quantidade para adicionar ao estoque deve ser maior que zero.");
@@ -46,6 +50,11 @@ public class RawMaterial {
         this.quantity += quantity;
     }
 
+    /**
+     * Verifica se há o valor mínimo de matéria prima no estoque
+     * @param demand
+     * @return true ou false
+     */
     public boolean isAvailable(double demand) {
         return demand > 0 && this.quantity >= demand && (this.quantity - demand) >= minQuantity;
     }

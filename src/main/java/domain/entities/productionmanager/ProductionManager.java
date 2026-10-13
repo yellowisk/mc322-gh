@@ -4,128 +4,177 @@ import domain.entities.demand.Demand;
 import domain.entities.demand.DemandStatus;
 import domain.entities.conveyor.Conveyor;
 import domain.entities.machine.Machine;
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.product.ProductStatus;
 import domain.entities.rawmaterial.RawMaterial;
 import domain.entities.report.Report;
 import domain.exceptions.InsufficientBudgetException;
 import domain.exceptions.InvalidDemandException;
 import domain.exceptions.MachineNeedsRepairException;
+import domain.exceptions.NoStrategySelectedException;
+import domain.exceptions.NullDemandException;
 import domain.interfaces.ProductionStrategy;
 import view.ConsolePrinter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Essa classe é o administrador da produção. Ele é
+ * responsável por guardar a lista de máquinas, verba atual,
+ * lista de demandas, produtos produzidos, matéria-prima, etc.
+ */
 public class ProductionManager {
-    private List<Demand> demands = new ArrayList<Demand>();
-    private List<Product> fabricatedProducts = new ArrayList<Product>();
-    private List<Product> availableProducts = new ArrayList<Product>();
-    private List<Machine> machines = new ArrayList<Machine>();
-    private Conveyor conveyor;
-    private Product chosenProduct;
-    private final RawMaterial rawMaterial;
-    private float budget;
-    private ProductionStrategy currentStrategy;
-    private int batchCounter = 0;
+    /// ArrayList de demandas. Haverá uma demanda por produtosDisponiveisFabricacao
+    private List<Demand> demandas = new ArrayList<Demand>();
+    /// ArrayList de produtos fabricados com sucesso e com necessidade de reparo
+    private List<Produto> produtosFabricados = new ArrayList<Produto>();
+    /// Arraylist de produtos que servirão de moldes/exemplo para o menu e para a produção nas máquinas
+    private List<Produto> produtosDisponiveisFabricacao = new ArrayList<Produto>();
+    /// ArrayList de máquinas existentes na fábrica
+    private List<Machine> maquinas = new ArrayList<Machine>();
+    /// esteira da fábrica
+    private Conveyor esteira;
+    /// produto selecionado atualmente
+    private Produto currProduto;
+    /// matéria-prima da fábrica
+    private final RawMaterial materiaPrima;
+    /// verba atual da fábrica
+    private float verba;
+    /// estratégia selecionada atualmente
+    private ProductionStrategy currEstrategia;
+    /// número de lotes produzidos
+    private int loteCount = 0;
+    /// booleano para se há máquina quebrada ou não. Essa flag impede a produção de
+    /// continuar caso true
     private boolean temMaquinaQuebrada = false;
-    private Report report;
-
-    /**
-     * Lista das etapas de produção instanciada para evitar laço 'for' otimizado
-     * direto no Enum.
-     */
+    /// objeto da classe Relatorio para salvar dados para log
+    private Report relatorio;
+    /// lista das etapas de produção instanciada para evitar laço 'for' otimizado direto no Enum.
     private static final ProductionStages[] etapasProducao = ProductionStages.values();
 
     public ProductionManager(RawMaterial rawMaterial, float budget, Report rp) {
-        this.rawMaterial = rawMaterial;
-        this.budget = budget;
-        this.report = rp;
+        this.materiaPrima = rawMaterial;
+        this.verba = budget;
+        this.relatorio = rp;
+    }
+    
+    /**
+     * Adicina novo produto na lista de produtos.
+     *
+     * @param p o produto a ser adicionado
+     */
+    public void adicionarNovoProduto(Produto p) {
+        this.produtosDisponiveisFabricacao.add(p);
+        registrarDemanda(p, 0); // inicializa a demanda zerada
     }
 
-    public void addNewProduct(Product newProduct) {
-        this.availableProducts.add(newProduct);
-        registerDemand(newProduct, 0); // init the product demand
+    /* === DEMANDAS === */
+
+    /**
+     * Adiciona uma nova demanda na lista de demandas
+     * @param p o produto associado à demanda
+     * @param num a quantidade de produtos solicitados
+     */
+    public void registrarDemanda(Produto p, int num) {
+        this.demandas.add(new Demand(p, num));
     }
 
-    public void registerDemand(Product product, int amount) {
-        this.demands.add(new Demand(product, amount));
+    /**
+     * Atualiza a demanda fornecida com uma nova quantidade de
+     * produtos
+     * @param d a demanda a ser alterada
+     * @param num a nova quantidade
+     */
+    public void atualizarDemanda(Demand d, int num) {
+        Produto p = getProdutoPeloNome(d.getProductName());
+        d.atualizarQuantidade(p, num);
     }
 
-    public void updateDemand(Demand demand, int newValue) {
-        Product product = getProductByName(demand.getProductName());
-        demand.updateAmount(product, newValue);
-    }
-
-    public Product getProductByName(String productName) {
-        for (Product p: availableProducts) {
-            if (p.getName().equalsIgnoreCase(productName)) {
+    /**
+     * Retorna o produto da lista de produtos disponíveis a partir
+     * do nome fornecido
+     * @param nome
+     * @return Produto
+     */
+    public Produto getProdutoPeloNome(String nome) {
+        for (Produto p: produtosDisponiveisFabricacao) {
+            if (p.getName().equalsIgnoreCase(nome)) {
                 return p;
             }
         }
         return null;
     }
 
-    public void addNewMachine(Machine machine) {
-        this.machines.add(machine);
+    /**
+     * Adiciona uma máquina na lista de máquinas
+     * @param m a máquina a ser adicionada
+     */
+    public void adicionarMaquina(Machine m) {
+        this.maquinas.add(m);
     }
-
-    public void setStrategy(ProductionStrategy newStrategy) {
-        this.currentStrategy = newStrategy;
+    
+    public void setCurrEstrategia(ProductionStrategy s) {
+        this.currEstrategia = s;
     }
-
-    public ProductionStrategy getCurrentStrategy() {
-        return this.currentStrategy;
+    
+    public ProductionStrategy getCurrEstrategia() {
+        return this.currEstrategia;
     }
 
     /**
-     * Asks the currrent strategy which demand should be fabricated and does so.
-     * Manager never knows the chosen strategy's concrete implementation
+     * Inicia a produção da próxima demanda. A demanda é escolhida pela estratégia atual.
      */
-    public void runNextProduction() {
-        if (this.currentStrategy == null) {
-            ConsolePrinter.fail("Nenhuma estratégia de produção selecionada.\n");
-            return;
+    public void iniciarProducao() {
+        if (this.currEstrategia == null) {
+            throw new NoStrategySelectedException("Nenhuma estratégia de produção selecionada.\n");
         }
 
-        Demand nextDemand = peekNextDemand();
+        Demand nextDemanda = espiarProximaDemanda();
 
-        if (nextDemand == null) {
-            ConsolePrinter.fail("Dessa vez não é! %s não encontrou nenhuma demanda elegível.\n",
-                    this.currentStrategy.getStrategyName());
-            return;
+        if (nextDemanda == null) {
+            String buffer = String.format("Dessa vez não é! %s não encontrou nenhuma demanda elegível.\n",
+                    this.currEstrategia.getStrategyName());
+            throw new NullDemandException(buffer);
         }
 
         System.out.printf("%s escolheu: %s (%d un)\n",
-                this.currentStrategy.getStrategyName(), nextDemand.getProductName(), nextDemand.getAmount());
-        fabricateDemand(nextDemand);
+                this.currEstrategia.getStrategyName(), nextDemanda.getProductName(), nextDemanda.getAmount());
+        produzirDemanda(nextDemanda);
     }
 
     /**
-     * Shows which demand the current strategy would pick rn, but without fabricating it.
-     * Returns null when there's no strategy or no eligible demand.
+     * Retorna a demanda que a estratégia escolheria, sem fabricá-la
+     * @return próxima demanda
      */
-    public Demand peekNextDemand() {
-        if (this.currentStrategy == null) {
+    public Demand espiarProximaDemanda() {
+        if (this.currEstrategia == null) {
             return null;
         }
         // isViable() and getEstimatedCost() read cached cost, so it's gotta be fresh beforehand
-        refreshEstimatedCosts();
-        return this.currentStrategy.selectDemand(this.demands, this.budget);
+        atualizarCustoEstimadoTodasDemandas();
+        return this.currEstrategia.escolherDemanda(this.demandas, this.verba);
     }
 
-    public double getUnitOperationCost() {
-        double unitOperationCost = 0;
-        for (Machine m : this.machines) {
-            unitOperationCost += m.getOperationCost();
+    /**
+     * Simula o custo total de um produto passando por todas as máquinas da fábrica
+     * @return custo total de operação
+     */
+    public double calcCustoTotalOperacao() {
+        double sum = 0;
+        for (Machine m : this.maquinas) {
+            sum += m.getOperationCost();
         }
-        return unitOperationCost;
+        return sum;
     }
 
-    public void refreshEstimatedCosts() {
-        double unitOperationCost = getUnitOperationCost();
-        for (Demand d : this.demands) {
-            d.updateEstimatedCost(unitOperationCost);
+    /**
+     * Atualiza o custo estimado de todas as demandas
+     */
+    public void atualizarCustoEstimadoTodasDemandas() {
+        double unitOperationCost = calcCustoTotalOperacao();
+        for (Demand d : this.demandas) {
+            d.atualizarCustoEstimado(unitOperationCost);
         }
     }
 
@@ -134,9 +183,9 @@ public class ProductionManager {
      * Completed and cancelled ones are outta the projection.
      */
     public double getProjectedCost() {
-        refreshEstimatedCosts();
+        atualizarCustoEstimadoTodasDemandas();
         double total = 0;
-        for (Demand d : this.demands) {
+        for (Demand d : this.demandas) {
             if (d.getStatus().isSelectable()) {
                 total += d.getEstimatedCost();
             }
@@ -150,50 +199,53 @@ public class ProductionManager {
      *
      * @param demand A demanda que será fabricada.
      */
-    public void fabricateDemand(Demand demand) {
+    public void produzirDemanda(Demand demand) {
+        // VERIFICAÇÕES
         if (temMaquinaQuebrada()) {
             throw new MachineNeedsRepairException("Não podemos iniciar a fabricação. Há máquinas precisando de reparo.");
         }
 
-        this.chosenProduct = this.getProductByName(demand.getProductName());
+        this.currProduto = this.getProdutoPeloNome(demand.getProductName());
 
-        if (chosenProduct == null) {
-            throw new InvalidDemandException("Demanda com produto inválido.\n");
+        if (currProduto == null) {
+            ConsolePrinter.fail("Produto sem demanda cadastrada.\n");
+            return;
         }
 
         if (demand.getAmount() <= 0) {
-            ConsolePrinter.fail("Nenhuma unidade de %s foi demandada. Atualize a demanda antes de fabricar.\n", chosenProduct.getName());
+            ConsolePrinter.fail("Nenhuma unidade de %s foi demandada. Atualize a demanda antes de fabricar.\n", currProduto.getName());
             return;
         }
 
         if (!demand.getStatus().canBeFabricated()) {
             ConsolePrinter.fail("Demanda de %s está %s e não pode ser fabricada. Atualize a demanda para reativá-la.\n",
-                    chosenProduct.getName(), demand.getStatus().getDescription());
+                    currProduto.getName(), demand.getStatus().getDescription());
             return;
         }
 
-        refreshEstimatedCosts();
-        if (!demand.isViable(this.budget)) {
+        atualizarCustoEstimadoTodasDemandas();
+        if (!demand.isViable(this.verba)) {
             throw new InsufficientBudgetException(String.format(
                     "Dessa vez não é! Orçamento insuficiente para fabricar %s: custo R$ %.2f, orçamento R$ %.2f.",
-                    chosenProduct.getName(), demand.getEstimatedCost(), this.budget));
+                    currProduto.getName(), demand.getEstimatedCost(), this.verba));
         }
 
         int alreadyProduced = demand.getProducedAmount();
         if (demand.getStatus() == DemandStatus.CANCELLED && alreadyProduced > 0) {
             ConsolePrinter.treeInfo(false, "Retomando demanda de %s de onde parou (%d/%d).",
-                    chosenProduct.getName(), alreadyProduced, demand.getAmount());
+                    currProduto.getName(), alreadyProduced, demand.getAmount());
         }
 
-        demand.startProduction();
-        int batch = ++this.batchCounter;
 
-        this.getConveyor().turnOn();
-        for (Machine m: this.getMachines()) {
+        demand.startProduction();
+        int batch = ++this.loteCount;
+
+        this.getEsteira().turnOn();
+        for (Machine m: this.getMaquinas()) {
             m.turnOn();
         }
 
-        System.out.printf("Eitcha!!! Iniciando produção de: %s (lote %d)\n", chosenProduct.getName(), batch);
+        System.out.printf("Eitcha!!! Iniciando produção de: %s (lote %d)\n", currProduto.getName(), batch);
         ConsolePrinter.productionPause(1500);
 
         int productsRemaining = demand.getRemainingAmount();
@@ -206,14 +258,14 @@ public class ProductionManager {
         double sectionProductionTime = 0;
         double sectionMoneySpent = 0;
 
-        Product currentProduct = null;
+        Produto currentProduct = null;
 
         while (sectionFabricatedAmount < productsRemaining) {
-            System.out.printf("(%d/%d) %s " + "─".repeat(24) + "\n", (alreadyProduced + sectionFabricatedAmount + 1), demand.getAmount(), chosenProduct.getName());
+            System.out.printf("(%d/%d) %s " + "─".repeat(24) + "\n", (alreadyProduced + sectionFabricatedAmount + 1), demand.getAmount(), currProduto.getName());
 
             try {
                 for (ProductionStages etapaAtual : etapasProducao) {
-                    Machine currentMachine = this.machines.get(etapaAtual.getCode());
+                    Machine currentMachine = this.maquinas.get(etapaAtual.getCode());
 
                     ConsolePrinter.stageHeader(currentMachine, "%s", etapaAtual.getNome());
 
@@ -224,49 +276,49 @@ public class ProductionManager {
                     sectionMoneySpent += currentMachine.getOperationCost(); // Auditoria
 
                     if (etapaAtual == ProductionStages.PROCESSING) {
-                        conveyor.addRawMaterial(chosenProduct.getRawMaterialPerUnit());
-                        report.increaseRawMaterialSpent(chosenProduct.getRawMaterialPerUnit()); // Auditoria
-                        ConsolePrinter.treeInfo(false, "%s carregado para a esteira.", this.rawMaterial.getName());
+                        esteira.addRawMaterial(currProduto.getRawMaterialPerUnit());
+                        relatorio.increaseRawMaterialSpent(currProduto.getRawMaterialPerUnit()); // Auditoria
+                        ConsolePrinter.treeInfo(false, "%s carregado para a esteira.", this.materiaPrima.getName());
 
-                        this.rawMaterial.consume(conveyor.removeRawMaterial());
-                        ConsolePrinter.treeInfo(false, "%s transportado até a máquina de %s. E é ligeiro!", this.rawMaterial.getName(), currentMachine.getType());
+                        this.materiaPrima.consume(esteira.removeRawMaterial());
+                        ConsolePrinter.treeInfo(false, "%s transportado até a máquina de %s. E é ligeiro!", this.materiaPrima.getName(), currentMachine.getType());
 
-                        ConsolePrinter.treeInfo(false, "Máquina %s %.2f %s de %s...", etapaAtual.getGerundio(), this.chosenProduct.getRawMaterialPerUnit(), this.rawMaterial.getUnit(), this.rawMaterial.getName());
-                        currentProduct = currentMachine.process(this.chosenProduct);
+                        ConsolePrinter.treeInfo(false, "Máquina %s %.2f %s de %s...", etapaAtual.getGerundio(), this.currProduto.getRawMaterialPerUnit(), this.materiaPrima.getUnit(), this.materiaPrima.getName());
+                        currentProduct = currentMachine.process(this.currProduto);
                         currentProduct.setBatch(batch);
 
                         ConsolePrinter.treeOk(true, "Tu não acredita! Sabe o que é? \"%s\" #%d criado.", currentProduct.getName(), currentProduct.getId());
-                        this.conveyor.addProduct(currentProduct);
+                        this.esteira.addProduct(currentProduct);
                     } else {
                         ConsolePrinter.treeInfo(false, "%s #%d transportado até a máquina de %s. E é ligeiro!", currentProduct.getName(), currentProduct.getId(), currentMachine.getType());
 
                         ConsolePrinter.treeInfo(false, "Máquina %s o produto %s #%d...", etapaAtual.getGerundio(), currentProduct.getName(), currentProduct.getId());
-                        currentProduct = currentMachine.process(this.conveyor.removeProduct());
+                        currentProduct = currentMachine.process(this.esteira.removeProduct());
 
                         ConsolePrinter.treeOk(true, "Produto %s #%d foi %s com sucesso.", currentProduct.getName(), currentProduct.getId(), etapaAtual.getVerboParticipio());
-                        this.conveyor.addProduct(currentProduct);
+                        this.esteira.addProduct(currentProduct);
                     }
                 }
 
                 // Validação final
                 if (currentProduct.getStatus() == ProductStatus.APPROVED) {
-                    this.fabricatedProducts.add(this.conveyor.removeProduct());
+                    this.produtosFabricados.add(this.esteira.removeProduct());
                     ConsolePrinter.treeOk(true, "Eitcha, como ele tem força! O produto %s #%d" + ConsolePrinter.GREEN + " foi aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getName(), currentProduct.getId());
                     sectionApprovedAmount++;
-                    report.increaseTotalApprovedProducts();
+                    relatorio.increaseTotalApprovedProducts();
                 } else if (currentProduct.getStatus() == ProductStatus.TO_REPAIR) {
-                    this.fabricatedProducts.add(this.conveyor.removeProduct());
+                    this.produtosFabricados.add(this.esteira.removeProduct());
                     ConsolePrinter.treeOk(true, "Cade a força? O produto %s #%d" + ConsolePrinter.YELLOW + " foi parcialmente aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getName(), currentProduct.getId());
                     sectionNeedsMaintenanceAmount++;
-                    report.increaseTotalNeedsMaintenanceProducts();
+                    relatorio.increaseTotalNeedsMaintenanceProducts();
                 } else {
-                    this.conveyor.removeProduct();
+                    this.esteira.removeProduct();
                     ConsolePrinter.treeFail(true, "Cade a força? O produto %s #%d" + ConsolePrinter.RED + " foi rejeitado" + ConsolePrinter.RESET + " na inspeção e descartado.", currentProduct.getName(), currentProduct.getId());
-                    report.increaseTotalRejectedProducts();
+                    relatorio.increaseTotalRejectedProducts();
                     sectionRejectedAmount++;
                 }
 
-                sectionProductionTime += chosenProduct.countProductionTime();
+                sectionProductionTime += currProduto.countProductionTime();
                 sectionFabricatedAmount++;
 
             } catch (MachineNeedsRepairException e) {
@@ -279,9 +331,9 @@ public class ProductionManager {
             }
         }
 
-        report.increaseMoneySpent(sectionMoneySpent);
-        report.increaseTotalProductionTime(sectionProductionTime);
-        report.calcProdSuccessRate();
+        relatorio.increaseMoneySpent(sectionMoneySpent);
+        relatorio.increaseTotalProductionTime(sectionProductionTime);
+        relatorio.calcProdSuccessRate();
 
         String infoText;
 
@@ -300,17 +352,22 @@ public class ProductionManager {
                 sectionNeedsMaintenanceAmount, sectionRejectedAmount);
 
         // Desliga as máquinas
-        this.getConveyor().turnOff();
-        for (Machine m: this.getMachines()) {
+        this.getEsteira().turnOff();
+        for (Machine m: this.getMaquinas()) {
             m.turnOff();
         }
     }
 
+    /**
+     * Desconta o valor da produção
+     * @param machine
+     * @return
+     */
     private boolean calcProductionCost(Machine machine) {
         // for those who just entered the stream: calc is short for _calculate_
         // yellowisk: lol, good one
-        if (this.budget >= machine.getOperationCost()) {
-            this.budget -= (float) machine.getOperationCost();
+        if (this.verba >= machine.getOperationCost()) {
+            this.verba -= (float) machine.getOperationCost();
             return true;
         }
         return false;
@@ -323,12 +380,12 @@ public class ProductionManager {
      * @throws InsufficientBudgetException when the budget can't cover it
      */
     public float buyRawMaterial(int amount) {
-        float totalCost = amount * this.rawMaterial.getPrice();
-        if (this.budget < totalCost) {
+        float totalCost = amount * this.materiaPrima.getPrice();
+        if (this.verba < totalCost) {
             throw new InsufficientBudgetException("Dessa vez não é! Orçamento insuficiente para comprar matéria-prima!");
         }
-        budget -= totalCost;
-        this.rawMaterial.addStock(amount);
+        verba -= totalCost;
+        this.materiaPrima.addStock(amount);
         return totalCost;
     }
 
@@ -348,36 +405,36 @@ public class ProductionManager {
 
     // === GETTERS and SETTERS
 
-    public List<Demand> getDemands() {
-        return this.demands;
+    public List<Demand> getDemandas() {
+        return this.demandas;
     }
 
-    public List<Product> getFabricatedProducts() {
-        return this.fabricatedProducts;
+    public List<Produto> getProdutosFabricados() {
+        return this.produtosFabricados;
     }
 
-    public List<Machine> getMachines() {
-        return this.machines;
+    public List<Machine> getMaquinas() {
+        return this.maquinas;
     }
 
-    public Report getReport() {
-        return this.report;
+    public Report getRelatorio() {
+        return this.relatorio;
     }
 
-    public RawMaterial getRawMaterial() {
-        return this.rawMaterial;
+    public RawMaterial getMateriaPrima() {
+        return this.materiaPrima;
     }
 
     public void addNewConveyor(Conveyor conveyor) {
-        this.conveyor = conveyor;
+        this.esteira = conveyor;
     }
 
-    public Conveyor getConveyor() {
-        return this.conveyor;
+    public Conveyor getEsteira() {
+        return this.esteira;
     }
 
-    public float getBudget() {
-        return budget;
+    public float getVerba() {
+        return verba;
     }
 
     public boolean temMaquinaQuebrada() {

@@ -1,14 +1,14 @@
 package domain.entities.product;
 
-public class CopoDeVidro extends Product {
+public class CopoDeVidro extends Produto {
 
     public CopoDeVidro(String name, double rawMaterialPerUnit) {
         super(name, rawMaterialPerUnit, 0.4, 0.0);
     }
 
     @Override
-    public Product process(Product model, ProductStatus newStatus) {
-        Product p = new CopoDeVidro(model.getName(), model.getRawMaterialPerUnit());
+    public Produto process(Produto model, ProductStatus newStatus) {
+        Produto p = new CopoDeVidro(model.getName(), model.getRawMaterialPerUnit());
         p.setStatus(newStatus);
         return p;
     }

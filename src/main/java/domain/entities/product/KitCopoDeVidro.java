@@ -1,14 +1,14 @@
 package domain.entities.product;
 
-public class KitCopoDeVidro extends Product {
+public class KitCopoDeVidro extends Produto {
 
     public KitCopoDeVidro(String name, double rawMaterialPerUnit) {
         super(name, rawMaterialPerUnit, 1.0, 0.0);
     }
 
     @Override
-    public Product process(Product model, ProductStatus newStatus) {
-        Product p = new KitCopoDeVidro(model.getName(), model.getRawMaterialPerUnit());
+    public Produto process(Produto model, ProductStatus newStatus) {
+        Produto p = new KitCopoDeVidro(model.getName(), model.getRawMaterialPerUnit());
         p.setStatus(newStatus);
         return p;
     }
