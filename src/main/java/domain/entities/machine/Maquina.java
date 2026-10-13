@@ -3,8 +3,8 @@ package domain.entities.machine;
 import domain.entities.product.Produto;
 import domain.exceptions.MachineNeedsRepairException;
 import domain.exceptions.MachineUnavailableException;
-import domain.interfaces.Auditable;
-import domain.utils.RandomProvider;
+import domain.interfaces.Auditavel;
+import domain.utils.GeradorAleatorio;
 import view.ConsolePrinter;
 
 /**
@@ -14,7 +14,7 @@ import view.ConsolePrinter;
  * @author Heitor Almeida
  * @author Glayson Oliveira
  */
-public abstract class Machine implements Auditable {
+public abstract class Maquina implements Auditavel {
     // === Atributos ===
     private final String nome;
     private boolean ligada;
@@ -42,20 +42,20 @@ public abstract class Machine implements Auditable {
      * @param multiplicadorCenario multiplicador de falha do cenário. É static, então vale p/ todas as máquinas
      * @param desgasteMaximo desgaste máximo por uso, cada uso tira de 1 a esse valor da saúde
      */
-    public Machine(String nome, int capacidadeMaxima, double chanceFalhaBase,
+    public Maquina(String nome, int capacidadeMaxima, double chanceFalhaBase,
                    double custoOperacao, double multiplicadorCenario,
                    int desgasteMaximo) {
         this.nome = nome;
         this.capacidadeMaxima = capacidadeMaxima;
         this.chanceFalhaBase = chanceFalhaBase;
         this.custoOperacao = custoOperacao;
-        Machine.multiplicadorCenario = multiplicadorCenario;
+        Maquina.multiplicadorCenario = multiplicadorCenario;
         this.desgasteMaximo = desgasteMaximo;
     }
 
     /**
      * Método auxiliar do método 'processar()'. Esse método será
-     * sobrescrito pelas subclasses de {@link Machine}.
+     * sobrescrito pelas subclasses de {@link Maquina}.
      *
      * @param produto O produto deverá ser fabricado.
      * @return Produto fabricado.
@@ -127,7 +127,7 @@ public abstract class Machine implements Auditable {
      * Se a saúde cair abaixo de saudeCritica, a máquina fica {@link StatusDeMaquina#QUEBRADA}
      */
     private void desgastar() {
-        this.saude -= RandomProvider.sortearInt(this.desgasteMaximo) + 1;
+        this.saude -= GeradorAleatorio.sortearInt(this.desgasteMaximo) + 1;
         if (this.saude < this.saudeCritica) {
             this.status = StatusDeMaquina.QUEBRADA;
         }
@@ -278,7 +278,7 @@ public abstract class Machine implements Auditable {
      */
     public double getChanceFalha() {
         double fatorDesgaste = 1 + (double) (this.getSaudeMaxima() - this.saude) / this.getSaudeMaxima();
-        return this.chanceFalhaBase * fatorDesgaste * Machine.multiplicadorCenario;
+        return this.chanceFalhaBase * fatorDesgaste * Maquina.multiplicadorCenario;
     }
 
     /**
@@ -296,7 +296,7 @@ public abstract class Machine implements Auditable {
      * @return true se a máquina falhou
      */
     protected boolean sorteiaFalha() {
-        return RandomProvider.chance(getChanceFalha());
+        return GeradorAleatorio.chance(getChanceFalha());
     }
 
     /**

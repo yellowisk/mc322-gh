@@ -1,6 +1,6 @@
 package view;
 
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.productionmanager.GerenciadorProducao;
 import domain.exceptions.InvalidOptionException;
 
 /**
@@ -18,7 +18,7 @@ public class SpeedMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção
      */
-    public SpeedMenu(Menu menu, ProductionManager gerenciadorProducao) {
+    public SpeedMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.ROXO);
     }
 

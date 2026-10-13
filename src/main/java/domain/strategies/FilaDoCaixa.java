@@ -1,7 +1,7 @@
 package domain.strategies;
 
 import domain.entities.demand.Demanda;
-import domain.interfaces.ProductionStrategy;
+import domain.interfaces.EstrategiaProducao;
 
 import java.util.Comparator;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author Heitor Almeida
  */
-public class FilaDoCaixa implements ProductionStrategy {
+public class FilaDoCaixa implements EstrategiaProducao {
 
     /**
      * Pega a demanda elegível que chegou primeiro. Ignora o orçamento

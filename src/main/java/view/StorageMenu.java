@@ -1,7 +1,7 @@
 package view;
 
 import domain.entities.product.Produto;
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.productionmanager.GerenciadorProducao;
 import domain.exceptions.InvalidOptionException;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class StorageMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção
      */
-    public StorageMenu(Menu menu, ProductionManager gerenciadorProducao) {
+    public StorageMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.AZUL);
     }
 

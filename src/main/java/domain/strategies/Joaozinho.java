@@ -1,7 +1,7 @@
 package domain.strategies;
 
 import domain.entities.demand.Demanda;
-import domain.interfaces.ProductionStrategy;
+import domain.interfaces.EstrategiaProducao;
 
 import java.util.Comparator;
 import java.util.List;
@@ -15,12 +15,12 @@ import java.util.List;
  *
  * @author Glayson Oliveira
  */
-public class Joaozinho implements ProductionStrategy {
+public class Joaozinho implements EstrategiaProducao {
     private final String nome = "Joãozinho";
 
     /**
      * Pega a demanda elegível c/ a maior quantidade entre as que cabem no orçamento.
-     * Usa o custo estimado de cada demanda, que o ProductionManager atualiza antes de chamar
+     * Usa o custo estimado de cada demanda, que o GerenciadorProducao atualiza antes de chamar
      *
      * @param demandas todas as demandas cadastradas
      * @param orcamentoDisponivel orçamento disponível, em R$

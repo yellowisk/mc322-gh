@@ -1,11 +1,11 @@
 package view;
 
-import domain.entities.machine.Machine;
+import domain.entities.machine.Maquina;
 import domain.entities.product.Produto;
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.productionmanager.GerenciadorProducao;
 import domain.entities.report.Relatorio;
 import domain.exceptions.InvalidOptionException;
-import domain.interfaces.Auditable;
+import domain.interfaces.Auditavel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ public class AuditMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção, de onde vêm as máquinas, os produtos e o relatório
      */
-    public AuditMenu(Menu menu, ProductionManager gerenciadorProducao) {
+    public AuditMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.ROXO);
     }
 
@@ -96,7 +96,7 @@ public class AuditMenu extends Submenu {
             printProductionReport();
 
             // Lista com todas as entidade auditáveis
-            List<Auditable> auditables = new ArrayList<>();
+            List<Auditavel> auditables = new ArrayList<>();
             auditables.addAll(gerenciadorProducao.getMaquinas());
             auditables.addAll(gerenciadorProducao.getProdutosFabricados());
 
@@ -105,7 +105,7 @@ public class AuditMenu extends Submenu {
 
             System.out.println(ConsolePrinter.NEGRITO + " Relatório da Fábrica" + ConsolePrinter.RESET);
 
-            for (Auditable auditable : auditables) {
+            for (Auditavel auditable : auditables) {
                 if (auditable.precisaManutencao()) {
                     issuesCount++;
                 }
@@ -120,10 +120,10 @@ public class AuditMenu extends Submenu {
             System.out.println(ConsolePrinter.NEGRITO + " Lista de problemas:" + ConsolePrinter.RESET);
 
             boolean foundIssues = false;
-            for (Auditable auditable : auditables) {
+            for (Auditavel auditable : auditables) {
                 if (auditable.precisaManutencao()) {
                     foundIssues = true;
-                    /* Cada Auditable sabe se descrever, então não precisamos saber se é máquina ou produto */
+                    /* Cada Auditavel sabe se descrever, então não precisamos saber se é máquina ou produto */
                     System.out.println(ConsolePrinter.VERMELHO + " ✗ " + ConsolePrinter.RESET + auditable.gerarResumoProblema());
                 }
             }
@@ -152,7 +152,7 @@ public class AuditMenu extends Submenu {
         boolean running = true;
 
         // Array de máquinas
-        List<Machine> machineList = gerenciadorProducao.getMaquinas();
+        List<Maquina> machineList = gerenciadorProducao.getMaquinas();
         int[] expandedOptions = new int[machineList.size()]; // Flags de ativação (1 ou 0)
         boolean expandAll = true; // Controle de estado para a opção de Expandir/Recolher tudo
 
@@ -167,7 +167,7 @@ public class AuditMenu extends Submenu {
             // Menu: Lista expansível de máquinas
             System.out.println(" Máquinas disponíveis:\n");
             int i = 0;
-            for (Machine m : machineList) {
+            for (Maquina m : machineList) {
                 System.out.printf(
                         ConsolePrinter.CINZA + "  %d." + ConsolePrinter.RESET + " %s " + ConsolePrinter.CINZA + "(%s)" + ConsolePrinter.RESET + "\n",
                         (i + 1), m.getNome(), m.getTipo());

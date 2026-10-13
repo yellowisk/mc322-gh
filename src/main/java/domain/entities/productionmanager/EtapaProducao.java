@@ -2,7 +2,7 @@ package domain.entities.productionmanager;
 
 /**
  * Etapas de produção. Esse enum foi criado para generalizar o processo de fabricação
- * em ProductionManager.
+ * em GerenciadorProducao.
  *
  * @author Glayson Oliveira
  */
@@ -22,7 +22,7 @@ public enum EtapaProducao {
     /**
      * Associa a etapa à máquina e aos textos dos logs
      *
-     * @param codigo posição da máquina da etapa na lista de máquinas do ProductionManager
+     * @param codigo posição da máquina da etapa na lista de máquinas do GerenciadorProducao
      * @param nome nome da etapa, ex.: "empacotamento"
      * @param verboGerundio verbo no gerúndio, ex.: "empacotando"
      * @param verboParticipio verbo no particípio, ex.: "empacotado"
@@ -35,7 +35,7 @@ public enum EtapaProducao {
     }
 
     /**
-     * Posição da máquina dessa etapa na lista de máquinas do ProductionManager
+     * Posição da máquina dessa etapa na lista de máquinas do GerenciadorProducao
      *
      * @return índice da máquina
      */

@@ -2,21 +2,21 @@ package domain.entities.product;
 
 /**
  * Em que ponto da linha de produção um {@link Produto} está. A ordem na linha é
- * UNDERGOING, PROCESSED, PACKED e depois da inspeção é APPROVED, TO_REPAIR ou FAILED
+ * EM_PRODUCAO, PROCESSADO, EMPACOTADO e depois da inspeção é APROVADO, PRECISA_MANUTENCAO ou REJEITADO
  *
  * @author Heitor Almeida
  */
-public enum ProductStatus {
+public enum StatusProduto {
     /** Status inicial, de todo produto recém-criado (inclusive os modelos do catálogo) */
-    UNDERGOING,
+    EM_PRODUCAO,
     /** Saiu da máquina de processamento */
-    PROCESSED,
+    PROCESSADO,
     /** Saiu da máquina de empacotamento */
-    PACKED,
+    EMPACOTADO,
     /** Passou na inspeção e foi pro armazém */
-    APPROVED,
+    APROVADO,
     /** Passou na inspeção c/ ressalva: tá no armazém, mas precisa de manutenção */
-    TO_REPAIR,
+    PRECISA_MANUTENCAO,
     /** Rejeitado na inspeção e descartado */
-    FAILED
+    REJEITADO
 }

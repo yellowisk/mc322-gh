@@ -1,7 +1,7 @@
 package view;
 
 import domain.entities.demand.Demanda;
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.productionmanager.GerenciadorProducao;
 import domain.exceptions.InvalidDemandAmountException;
 import domain.exceptions.InvalidOptionException;
 
@@ -19,7 +19,7 @@ public class UpdateDemandMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção
      */
-    public UpdateDemandMenu(Menu menu, ProductionManager gerenciadorProducao) {
+    public UpdateDemandMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.AMARELO);
     }
 

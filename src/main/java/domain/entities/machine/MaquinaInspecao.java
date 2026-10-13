@@ -1,15 +1,15 @@
 package domain.entities.machine;
 
 import domain.entities.product.Produto;
-import domain.entities.product.ProductStatus;
-import domain.utils.RandomProvider;
+import domain.entities.product.StatusProduto;
+import domain.utils.GeradorAleatorio;
 
 /**
  * Última etapa da linha: decide se o produto vai pro armazém, vai c/ ressalva ou é descartado
  *
  * @author Heitor Almeida
  */
-public class InspectionMachine extends Machine {
+public class MaquinaInspecao extends Maquina {
 
     /**
      * Cria a máquina de inspeção
@@ -21,7 +21,7 @@ public class InspectionMachine extends Machine {
      * @param multiplicadorCenario multiplicador de falha do cenário
      * @param desgasteMaximo desgaste máximo por uso
      */
-    public InspectionMachine(String nome, int capacidadeMaxima, double chanceFalhaBase,
+    public MaquinaInspecao(String nome, int capacidadeMaxima, double chanceFalhaBase,
                              double custoOperacao, double multiplicadorCenario,
                              int desgasteMaximo) {
         super(nome, capacidadeMaxima, chanceFalhaBase, custoOperacao, multiplicadorCenario, desgasteMaximo);
@@ -44,12 +44,12 @@ public class InspectionMachine extends Machine {
 
         double chanceRejeicao = produto.getRiscoRejeicao() * getMultiplicadorCenario();
 
-        return maquinaFalhou || (RandomProvider.chance(chanceRejeicao));
+        return maquinaFalhou || (GeradorAleatorio.chance(chanceRejeicao));
     }
 
     /**
-     * Dá o veredito do produto: {@link ProductStatus#FAILED} se passou do limite de descarte ou foi rejeitado,
-     * {@link ProductStatus#TO_REPAIR} se precisa de manutenção e {@link ProductStatus#APPROVED} se tá tudo certo
+     * Dá o veredito do produto: {@link StatusProduto#REJEITADO} se passou do limite de descarte ou foi rejeitado,
+     * {@link StatusProduto#PRECISA_MANUTENCAO} se precisa de manutenção e {@link StatusProduto#APROVADO} se tá tudo certo
      *
      * @param produto produto vindo do empacotamento
      * @return o mesmo produto, c/ o status do veredito
@@ -57,16 +57,16 @@ public class InspectionMachine extends Machine {
     @Override
     public Produto processarEtapa(Produto produto) {
         if (produto.passouLimiteDescarte() || vaiSerRejeitado(produto)) {
-            produto.setStatus(ProductStatus.FAILED);
+            produto.setStatus(StatusProduto.REJEITADO);
             return produto;
         }
 
         if (produto.precisaManutencao()) {
-            produto.setStatus(ProductStatus.TO_REPAIR);
+            produto.setStatus(StatusProduto.PRECISA_MANUTENCAO);
             return produto;
         }
 
-        produto.setStatus(ProductStatus.APPROVED);
+        produto.setStatus(StatusProduto.APROVADO);
         return produto;
     }
 

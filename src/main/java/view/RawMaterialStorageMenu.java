@@ -1,7 +1,7 @@
 package view;
 
 import domain.entities.product.Produto;
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.productionmanager.GerenciadorProducao;
 import domain.entities.rawmaterial.MateriaPrima;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class RawMaterialStorageMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção, de onde vem a matéria-prima
      */
-    public RawMaterialStorageMenu(Menu menu, ProductionManager gerenciadorProducao) {
+    public RawMaterialStorageMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.AZUL);
     }
 
