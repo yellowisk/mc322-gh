@@ -1,6 +1,6 @@
 package domain.strategies;
 
-import domain.entities.demand.Demand;
+import domain.entities.demand.Demanda;
 import domain.interfaces.ProductionStrategy;
 
 import java.util.Comparator;
@@ -25,9 +25,9 @@ public class Ferrari implements ProductionStrategy {
      * @return demanda c/ mais unidades, ou null se nenhuma for elegível
      */
     @Override
-    public Demand selecionarDemanda(List<Demand> demandas, double orcamentoDisponivel) {
+    public Demanda selecionarDemanda(List<Demanda> demandas, double orcamentoDisponivel) {
         return selecionaveis(demandas).stream()
-                .max(Comparator.comparingInt(Demand::getAmount))
+                .max(Comparator.comparingInt(Demanda::getQuantidade))
                 .orElse(null);
     }
 

@@ -1,7 +1,7 @@
 package domain.entities.productionmanager;
 
-import domain.entities.demand.Demand;
-import domain.entities.demand.DemandStatus;
+import domain.entities.demand.Demanda;
+import domain.entities.demand.StatusDemanda;
 import domain.entities.conveyor.Conveyor;
 import domain.entities.machine.Machine;
 import domain.entities.product.Produto;
@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class ProductionManager {
     /// ArrayList de demandas. Haverá uma demanda por produtosDisponiveisFabricacao
-    private List<Demand> demandas = new ArrayList<Demand>();
+    private List<Demanda> demandas = new ArrayList<Demanda>();
     /// ArrayList de produtos fabricados com sucesso e com necessidade de reparo
     private List<Produto> produtosFabricados = new ArrayList<Produto>();
     /// Arraylist de produtos que servirão de moldes/exemplo para o menu e para a produção nas máquinas
@@ -88,7 +88,7 @@ public class ProductionManager {
      * @param num a quantidade de produtos solicitados
      */
     public void registrarDemanda(Produto p, int num) {
-        this.demandas.add(new Demand(p, num));
+        this.demandas.add(new Demanda(p, num));
     }
 
     /**
@@ -97,8 +97,8 @@ public class ProductionManager {
      * @param d a demanda a ser alterada
      * @param num a nova quantidade
      */
-    public void atualizarDemanda(Demand d, int num) {
-        Produto p = getProdutoPeloNome(d.getProductName());
+    public void atualizarDemanda(Demanda d, int num) {
+        Produto p = getProdutoPeloNome(d.getNomeProduto());
         d.atualizarQuantidade(p, num);
     }
 
@@ -148,14 +148,14 @@ public class ProductionManager {
      *
      * @throws NoStrategySelectedException se nenhuma estratégia tiver sido escolhida
      * @throws NullDemandException se a estratégia não encontrar nenhuma demanda elegível
-     * @throws domain.exceptions.PlantaException qualquer erro de {@link #produzirDemanda(Demand)}
+     * @throws domain.exceptions.PlantaException qualquer erro de {@link #produzirDemanda(Demanda)}
      */
     public void iniciarProducao() {
         if (this.currEstrategia == null) {
             throw new NoStrategySelectedException("Nenhuma estratégia de produção selecionada.\n");
         }
 
-        Demand nextDemanda = espiarProximaDemanda();
+        Demanda nextDemanda = espiarProximaDemanda();
 
         if (nextDemanda == null) {
             String buffer = String.format("Dessa vez não é! %s não encontrou nenhuma demanda elegível.\n",
@@ -164,7 +164,7 @@ public class ProductionManager {
         }
 
         System.out.printf("%s escolheu: %s (%d un)\n",
-                this.currEstrategia.getNomeEstrategia(), nextDemanda.getProductName(), nextDemanda.getAmount());
+                this.currEstrategia.getNomeEstrategia(), nextDemanda.getNomeProduto(), nextDemanda.getQuantidade());
         produzirDemanda(nextDemanda);
     }
 
@@ -172,11 +172,11 @@ public class ProductionManager {
      * Retorna a demanda que a estratégia escolheria, sem fabricá-la
      * @return próxima demanda
      */
-    public Demand espiarProximaDemanda() {
+    public Demanda espiarProximaDemanda() {
         if (this.currEstrategia == null) {
             return null;
         }
-        // isViable() and getEstimatedCost() read cached cost, so it's gotta be fresh beforehand
+        // ehViavel() and getCustoEstimado() read cached cost, so it's gotta be fresh beforehand
         atualizarCustoEstimadoTodasDemandas();
         return this.currEstrategia.selecionarDemanda(this.demandas, this.verba);
     }
@@ -198,7 +198,7 @@ public class ProductionManager {
      */
     public void atualizarCustoEstimadoTodasDemandas() {
         double unitOperationCost = calcCustoTotalOperacao();
-        for (Demand d : this.demandas) {
+        for (Demanda d : this.demandas) {
             d.atualizarCustoEstimado(unitOperationCost);
         }
     }
@@ -212,9 +212,9 @@ public class ProductionManager {
     public double getProjectedCost() {
         atualizarCustoEstimadoTodasDemandas();
         double total = 0;
-        for (Demand d : this.demandas) {
-            if (d.getStatus().isSelectable()) {
-                total += d.getEstimatedCost();
+        for (Demanda d : this.demandas) {
+            if (d.getStatus().ehSelecionavel()) {
+                total += d.getCustoEstimado();
             }
         }
         return total;
@@ -233,45 +233,45 @@ public class ProductionManager {
      * @throws InvalidDemandTransitionException se o status da demanda não permitir fabricar
      * @throws InsufficientBudgetException se o orçamento não cobrir o custo estimado
      */
-    public void produzirDemanda(Demand demand) {
+    public void produzirDemanda(Demanda demand) {
         // VERIFICAÇÕES
         if (temMaquinaQuebrada()) {
             throw new MachineNeedsRepairException("Não podemos iniciar a fabricação. Há máquinas precisando de reparo.");
         }
 
-        this.currProduto = this.getProdutoPeloNome(demand.getProductName());
+        this.currProduto = this.getProdutoPeloNome(demand.getNomeProduto());
 
         if (currProduto == null) {
             throw new InvalidDemandException("Dessa vez não é! Produto sem demanda cadastrada.");
         }
 
-        if (demand.getAmount() <= 0) {
+        if (demand.getQuantidade() <= 0) {
             throw new InvalidDemandException(String.format(
                     "Dessa vez não é! Nenhuma unidade de %s foi demandada. Atualize a demanda antes de fabricar.",
                     currProduto.getNome()));
         }
 
-        if (!demand.getStatus().canBeFabricated()) {
+        if (!demand.getStatus().podeSerFabricada()) {
             throw new InvalidDemandTransitionException(String.format(
                     "Dessa vez não é! Demanda de %s está %s e não pode ser fabricada. Atualize a demanda para reativá-la.",
-                    currProduto.getNome(), demand.getStatus().getDescription()));
+                    currProduto.getNome(), demand.getStatus().getDescricao()));
         }
 
         atualizarCustoEstimadoTodasDemandas();
-        if (!demand.isViable(this.verba)) {
+        if (!demand.ehViavel(this.verba)) {
             throw new InsufficientBudgetException(String.format(
                     "Dessa vez não é! Orçamento insuficiente para fabricar %s: custo R$ %.2f, orçamento R$ %.2f.",
-                    currProduto.getNome(), demand.getEstimatedCost(), this.verba));
+                    currProduto.getNome(), demand.getCustoEstimado(), this.verba));
         }
 
-        int alreadyProduced = demand.getProducedAmount();
-        if (demand.getStatus() == DemandStatus.CANCELLED && alreadyProduced > 0) {
+        int alreadyProduced = demand.getQuantidadeProduzida();
+        if (demand.getStatus() == StatusDemanda.CANCELADA && alreadyProduced > 0) {
             ConsolePrinter.arvoreInfo(false, "Retomando demanda de %s de onde parou (%d/%d).",
-                    currProduto.getNome(), alreadyProduced, demand.getAmount());
+                    currProduto.getNome(), alreadyProduced, demand.getQuantidade());
         }
 
 
-        demand.startProduction();
+        demand.iniciarProducao();
         int batch = ++this.loteCount;
 
         this.getEsteira().turnOn();
@@ -282,7 +282,7 @@ public class ProductionManager {
         System.out.printf("Eitcha!!! Iniciando produção de: %s (lote %d)\n", currProduto.getNome(), batch);
         ConsolePrinter.pausarProducao(1500);
 
-        int productsRemaining = demand.getRemainingAmount();
+        int productsRemaining = demand.getQuantidadeRestante();
         int sectionFabricatedAmount = 0;
 
         // Variáveis de auditoria
@@ -295,7 +295,7 @@ public class ProductionManager {
         Produto currentProduct = null;
 
         while (sectionFabricatedAmount < productsRemaining) {
-            System.out.printf("(%d/%d) %s " + "─".repeat(24) + "\n", (alreadyProduced + sectionFabricatedAmount + 1), demand.getAmount(), currProduto.getNome());
+            System.out.printf("(%d/%d) %s " + "─".repeat(24) + "\n", (alreadyProduced + sectionFabricatedAmount + 1), demand.getQuantidade(), currProduto.getNome());
 
             try {
                 for (ProductionStages etapaAtual : etapasProducao) {
@@ -380,13 +380,13 @@ public class ProductionManager {
         String infoText;
 
         if (sectionFabricatedAmount == productsRemaining) {
-            demand.fulfill(sectionFabricatedAmount, sectionProductionTime);
+            demand.concluir(sectionFabricatedAmount, sectionProductionTime);
             infoText = String.format(" Demanda de %s concluída em %.2f segundos de produção.",
-                    demand.getProductName(), demand.getTotalProductionTime());
+                    demand.getNomeProduto(), demand.getTempoTotalProducao());
         } else {
-            demand.cancel(sectionFabricatedAmount, sectionProductionTime);
+            demand.cancelar(sectionFabricatedAmount, sectionProductionTime);
             infoText = String.format(" Demanda de %s cancelada (%d/%d). Fabrique de novo para continuar de onde parou.",
-                    demand.getProductName(), demand.getProducedAmount(), demand.getAmount());
+                    demand.getNomeProduto(), demand.getQuantidadeProduzida(), demand.getQuantidade());
         }
 
         ConsolePrinter.cartao("%d produtos fabricados: %d aprovados, %d precisam de manutenção e %d rejeitados." + "\n" + infoText,
@@ -465,7 +465,7 @@ public class ProductionManager {
      *
      * @return lista de demandas
      */
-    public List<Demand> getDemandas() {
+    public List<Demanda> getDemandas() {
         return this.demandas;
     }
 

@@ -1,6 +1,6 @@
 package domain.interfaces;
 
-import domain.entities.demand.Demand;
+import domain.entities.demand.Demanda;
 import java.util.List;
 
 /**
@@ -17,7 +17,7 @@ public interface ProductionStrategy {
      * @param orcamentoDisponivel orçamento disponível, em R$. Nem toda estratégia usa
      * @return demanda escolhida, ou null se nenhuma for elegível
      */
-    Demand selecionarDemanda(List<Demand> demandas, double orcamentoDisponivel);
+    Demanda selecionarDemanda(List<Demanda> demandas, double orcamentoDisponivel);
 
     /**
      * Nome da estratégia
@@ -34,15 +34,15 @@ public interface ProductionStrategy {
     String getRegraEstrategia();
 
     /**
-     * Mesmo filtro p/ as três estratégias: só entram demandas {@link domain.entities.demand.DemandStatus#PENDING}
+     * Mesmo filtro p/ as três estratégias: só entram demandas {@link domain.entities.demand.StatusDemanda#PENDENTE}
      * c/ quantidade maior que 0
      *
      * @param demandas todas as demandas cadastradas
      * @return demandas que podem ser escolhidas
      */
-    default List<Demand> selecionaveis(List<Demand> demandas) {
+    default List<Demanda> selecionaveis(List<Demanda> demandas) {
         return demandas.stream()
-                .filter(d -> d.getStatus().isSelectable() && d.getAmount() > 0)
+                .filter(d -> d.getStatus().ehSelecionavel() && d.getQuantidade() > 0)
                 .toList();
     }
 }

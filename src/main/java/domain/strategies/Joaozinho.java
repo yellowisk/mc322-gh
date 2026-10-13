@@ -1,6 +1,6 @@
 package domain.strategies;
 
-import domain.entities.demand.Demand;
+import domain.entities.demand.Demanda;
 import domain.interfaces.ProductionStrategy;
 
 import java.util.Comparator;
@@ -27,11 +27,11 @@ public class Joaozinho implements ProductionStrategy {
      * @return demanda viável c/ mais unidades, ou null se nenhuma couber no orçamento
      */
     @Override
-    public Demand selecionarDemanda(List<Demand> demandas, double orcamentoDisponivel) {
+    public Demanda selecionarDemanda(List<Demanda> demandas, double orcamentoDisponivel) {
         // Entre as demandas que cabem no orçamento, pega a de maior quantidade de produtos
         return selecionaveis(demandas).stream()
-                .filter(d -> d.isViable(orcamentoDisponivel))
-                .max(Comparator.comparingInt(Demand::getAmount))
+                .filter(d -> d.ehViavel(orcamentoDisponivel))
+                .max(Comparator.comparingInt(Demanda::getQuantidade))
                 .orElse(null);
     }
 

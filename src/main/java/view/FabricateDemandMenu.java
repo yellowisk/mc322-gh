@@ -1,6 +1,6 @@
 package view;
 
-import domain.entities.demand.Demand;
+import domain.entities.demand.Demanda;
 import domain.entities.productionmanager.ProductionManager;
 import domain.exceptions.PlantaException;
 
@@ -44,18 +44,18 @@ public class FabricateDemandMenu extends Submenu {
     public void exibir() {
         while (true) {
             imprimirCabecalho();
-            List<Demand> demandas = gerenciadorProducao.getDemandas();
+            List<Demanda> demandas = gerenciadorProducao.getDemandas();
             ConsolePrinter.listarDemandas(gerenciadorProducao);
 
             // A opção logo depois das demandas fabrica o que a estratégia atual escolher
             int proximaPelaEstrategia = demandas.size() + 1;
-            Demand proxima = gerenciadorProducao.espiarProximaDemanda();
+            Demanda proxima = gerenciadorProducao.espiarProximaDemanda();
             String previa;
             if (proxima == null) {
                 previa = ConsolePrinter.colorir(ConsolePrinter.CINZA, "nenhuma demanda elegível");
             } else {
-                previa = proxima.getProductName() + " (" + proxima.getAmount() + " un)";
-                if (!proxima.isViable(gerenciadorProducao.getVerba())) {
+                previa = proxima.getNomeProduto() + " (" + proxima.getQuantidade() + " un)";
+                if (!proxima.ehViavel(gerenciadorProducao.getVerba())) {
                     previa += " " + ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "(orçamento insuficiente)");
                 }
             }

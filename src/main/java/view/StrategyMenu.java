@@ -1,6 +1,6 @@
 package view;
 
-import domain.entities.demand.Demand;
+import domain.entities.demand.Demanda;
 import domain.entities.productionmanager.ProductionManager;
 import domain.exceptions.InvalidOptionException;
 import domain.interfaces.ProductionStrategy;
@@ -93,10 +93,10 @@ public class StrategyMenu extends Submenu {
 
     /** Imprime qual demanda a estratégia atual fabricaria agora, ou avisa se nenhuma é elegível */
     private void imprimirPreviaProximaDemanda() {
-        Demand proxima = gerenciadorProducao.espiarProximaDemanda();
+        Demanda proxima = gerenciadorProducao.espiarProximaDemanda();
         String previa = (proxima == null)
                 ? ConsolePrinter.colorir(ConsolePrinter.CINZA, "nenhuma demanda elegível")
-                : ConsolePrinter.colorir(cor, proxima.getProductName() + " (" + proxima.getAmount() + " un)");
+                : ConsolePrinter.colorir(cor, proxima.getNomeProduto() + " (" + proxima.getQuantidade() + " un)");
         System.out.println("   Próxima demanda a ser fabricada: " + previa + "\n");
     }
 }
