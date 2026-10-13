@@ -15,8 +15,13 @@ public class Main {
      *             <br>Ex.: {@code ./gradlew run --args=42}
      */
     public static void main(String[] args) {
-        if (args.length > 0)
-            GeradorAleatorio.setSeed(Long.parseLong(args[0]));
+        if (args.length > 0) {
+            try {
+                GeradorAleatorio.setSeed(Long.parseLong(args[0]));
+            } catch (NumberFormatException e) {
+                System.out.println("Seed inválida (\"" + args[0] + "\"): tem que ser um número inteiro. Seguindo sem seed.");
+            }
+        }
         new Menu().iniciar();
     }
 }
