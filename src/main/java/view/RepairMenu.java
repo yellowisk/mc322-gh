@@ -7,40 +7,40 @@ import java.util.List;
 
 public class RepairMenu extends Submenu {
 
-    public RepairMenu(Menu menu, ProductionManager productionManager) {
-        super(menu, productionManager, ConsolePrinter.YELLOW);
+    public RepairMenu(Menu menu, ProductionManager gerenciadorProducao) {
+        super(menu, gerenciadorProducao, ConsolePrinter.AMARELO);
     }
 
     @Override
-    public String icon() {
-        return ConsolePrinter.color(color, "⚒");
+    public String icone() {
+        return ConsolePrinter.colorir(cor, "⚒");
     }
 
     @Override
-    public String label() {
+    public String rotulo() {
         return "Reparar máquinas";
     }
 
     @Override
-    public void show() {
+    public void exibir() {
         while (true) {
-            printHeader();
+            imprimirCabecalho();
 
             // Lista de Máquinas
-            List<Machine> machines = productionManager.getMachines();
+            List<Machine> machines = gerenciadorProducao.getMachines();
             for (int i = 0; i < machines.size(); i++) {
                 Machine m = machines.get(i);
-                String healthColor = m.precisaManutencao() ? ConsolePrinter.RED : ConsolePrinter.GREEN;
-                String health = ConsolePrinter.color(healthColor, String.format("❤ %d/%d", m.getSaude(), m.getSaudeMaxima()));
-                String broken = m.precisaManutencao() ? " " + ConsolePrinter.color(ConsolePrinter.RED, "(quebrada)") : "";
+                String healthColor = m.precisaManutencao() ? ConsolePrinter.VERMELHO : ConsolePrinter.VERDE;
+                String health = ConsolePrinter.colorir(healthColor, String.format("❤ %d/%d", m.getSaude(), m.getSaudeMaxima()));
+                String broken = m.precisaManutencao() ? " " + ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "(quebrada)") : "";
 
                 System.out.printf(" %d. %-26s %s%s\n", i + 1, m.getNome(), health, broken);
             }
             System.out.println();
-            ConsolePrinter.printBackOption();
+            ConsolePrinter.imprimirOpcaoVoltar();
             menu.printFooter();
 
-            int option = menu.readInt("Qual máquina você deseja " + ConsolePrinter.color(color, "REPARAR") + "? ");
+            int option = menu.readInt("Qual máquina você deseja " + ConsolePrinter.colorir(cor, "REPARAR") + "? ");
 
             if (option == 0) break;
 
@@ -49,13 +49,13 @@ public class RepairMenu extends Submenu {
             // Processo principal
             try {
                 chosenMachine = machines.get(option - 1);
-                productionManager.repairMachine(chosenMachine);
+                gerenciadorProducao.repairMachine(chosenMachine);
                 animateRepair(chosenMachine.getNome()); // Animação
-                menu.setLastBuffer(ConsolePrinter.okText("%s reparada!", chosenMachine.getNome().toUpperCase()));
+                menu.setLastBuffer(ConsolePrinter.textoOk("%s reparada!", chosenMachine.getNome().toUpperCase()));
             } catch (IndexOutOfBoundsException e) { // Caso o índice seja inválido
-                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Máquina inválida!"));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Máquina inválida!"));
             } catch (IllegalArgumentException | IllegalStateException e) {
-                menu.setLastBuffer(ConsolePrinter.failText("%s", e.getMessage()));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }
     }
@@ -74,8 +74,8 @@ public class RepairMenu extends Submenu {
                 String spaces = " ".repeat(i);
                 String trail = " ".repeat(travelDistance - i); // Serve para tampar os blocos das iterações anteriores
 
-                System.out.print("\rReparando " + machineName + " [" + ConsolePrinter.color(color, spaces + "█" + trail) + "]");
-                ConsolePrinter.pause(150);
+                System.out.print("\rReparando " + machineName + " [" + ConsolePrinter.colorir(cor, spaces + "█" + trail) + "]");
+                ConsolePrinter.pausar(150);
             }
         }
     }

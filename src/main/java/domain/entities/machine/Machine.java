@@ -116,7 +116,7 @@ public abstract class Machine implements Auditable {
      * Se a saúde cair abaixo de saudeCritica, a máquina fica {@link StatusDeMaquina#QUEBRADA}
      */
     private void desgastar() {
-        this.saude -= RandomProvider.nextInt(this.desgasteMaximo) + 1;
+        this.saude -= RandomProvider.sortearInt(this.desgasteMaximo) + 1;
         if (this.saude < this.saudeCritica) {
             this.status = StatusDeMaquina.QUEBRADA;
         }
@@ -140,11 +140,11 @@ public abstract class Machine implements Auditable {
     @Override
     public String gerarRelatorioDiagnostico() {
         String reset = ConsolePrinter.RESET;
-        String azul = ConsolePrinter.BLUE;
-        String verde = ConsolePrinter.GREEN;
-        String vermelho = ConsolePrinter.RED;
-        String amarelo = ConsolePrinter.YELLOW;
-        String cinza = ConsolePrinter.GRAY;
+        String azul = ConsolePrinter.AZUL;
+        String verde = ConsolePrinter.VERDE;
+        String vermelho = ConsolePrinter.VERMELHO;
+        String amarelo = ConsolePrinter.AMARELO;
+        String cinza = ConsolePrinter.CINZA;
 
         // Saúde
         String corSaude = precisaManutencao() ? vermelho : verde;

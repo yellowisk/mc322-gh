@@ -5,28 +5,27 @@ import domain.entities.productionmanager.ProductionManager;
 import domain.entities.rawmaterial.RawMaterial;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class RawMaterialStorageMenu extends Submenu {
 
-    public RawMaterialStorageMenu(Menu menu, ProductionManager productionManager) {
-        super(menu, productionManager, ConsolePrinter.BLUE);
+    public RawMaterialStorageMenu(Menu menu, ProductionManager gerenciadorProducao) {
+        super(menu, gerenciadorProducao, ConsolePrinter.AZUL);
     }
 
     @Override
-    public String icon() {
-        return ConsolePrinter.color(color, "≡");
+    public String icone() {
+        return ConsolePrinter.colorir(cor, "≡");
     }
 
     @Override
-    public String label() {
+    public String rotulo() {
         return "Ver armazém de matéria prima";
     }
 
     @Override
-    public void show() {
-        List<Product> fabricatedProducts = productionManager.getFabricatedProducts();
+    public void exibir() {
+        List<Product> fabricatedProducts = gerenciadorProducao.getFabricatedProducts();
 
         // Agrupamento de produtos por listas
         List<Integer> batchNumbers = new ArrayList<>();
@@ -52,12 +51,12 @@ public class RawMaterialStorageMenu extends Submenu {
         boolean expandAll = true;
 
         while (true) {
-            printHeader();
+            imprimirCabecalho();
             System.out.println(" Matérias-prima disponíveis: ");
 
-            RawMaterial rm = productionManager.getRawMaterial();
-            String line = String.format(color + "%s" + ConsolePrinter.RESET + ": %.2f %s", rm.getName(), rm.getQuantity(), rm.getUnit());
-            ConsolePrinter.optionsList(line, "Voltar");
+            RawMaterial rm = gerenciadorProducao.getRawMaterial();
+            String line = String.format(cor + "%s" + ConsolePrinter.RESET + ": %.2f %s", rm.getName(), rm.getQuantity(), rm.getUnit());
+            ConsolePrinter.listaOpcoes(line, "Voltar");
 
             menu.printFooter();
 
@@ -66,7 +65,7 @@ public class RawMaterialStorageMenu extends Submenu {
             if (option == 0) {
                 break;
             } else {
-                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Opção inválida!"));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
             }
         }
     }

@@ -83,20 +83,20 @@ public class ProductionManager {
      */
     public void runNextProduction() {
         if (this.currentStrategy == null) {
-            ConsolePrinter.fail("Nenhuma estratégia de produção selecionada.\n");
+            ConsolePrinter.imprimirFalha("Nenhuma estratégia de produção selecionada.\n");
             return;
         }
 
         Demand nextDemand = peekNextDemand();
 
         if (nextDemand == null) {
-            ConsolePrinter.fail("Dessa vez não é! %s não encontrou nenhuma demanda elegível.\n",
-                    this.currentStrategy.getStrategyName());
+            ConsolePrinter.imprimirFalha("Dessa vez não é! %s não encontrou nenhuma demanda elegível.\n",
+                    this.currentStrategy.getNomeEstrategia());
             return;
         }
 
         System.out.printf("%s escolheu: %s (%d un)\n",
-                this.currentStrategy.getStrategyName(), nextDemand.getProductName(), nextDemand.getAmount());
+                this.currentStrategy.getNomeEstrategia(), nextDemand.getProductName(), nextDemand.getAmount());
         fabricateDemand(nextDemand);
     }
 
@@ -110,7 +110,7 @@ public class ProductionManager {
         }
         // isViable() and getEstimatedCost() read cached cost, so it's gotta be fresh beforehand
         refreshEstimatedCosts();
-        return this.currentStrategy.selectDemand(this.demands, this.budget);
+        return this.currentStrategy.selecionarDemanda(this.demands, this.budget);
     }
 
     public double getUnitOperationCost() {
@@ -157,17 +157,17 @@ public class ProductionManager {
         this.chosenProduct = this.getProductByName(demand.getProductName());
 
         if (chosenProduct == null) {
-            ConsolePrinter.fail("Produto sem demanda cadastrada.\n");
+            ConsolePrinter.imprimirFalha("Produto sem demanda cadastrada.\n");
             return;
         }
 
         if (demand.getAmount() <= 0) {
-            ConsolePrinter.fail("Nenhuma unidade de %s foi demandada. Atualize a demanda antes de fabricar.\n", chosenProduct.getNome());
+            ConsolePrinter.imprimirFalha("Nenhuma unidade de %s foi demandada. Atualize a demanda antes de fabricar.\n", chosenProduct.getNome());
             return;
         }
 
         if (!demand.getStatus().canBeFabricated()) {
-            ConsolePrinter.fail("Demanda de %s está %s e não pode ser fabricada. Atualize a demanda para reativá-la.\n",
+            ConsolePrinter.imprimirFalha("Demanda de %s está %s e não pode ser fabricada. Atualize a demanda para reativá-la.\n",
                     chosenProduct.getNome(), demand.getStatus().getDescription());
             return;
         }
@@ -181,7 +181,7 @@ public class ProductionManager {
 
         int alreadyProduced = demand.getProducedAmount();
         if (demand.getStatus() == DemandStatus.CANCELLED && alreadyProduced > 0) {
-            ConsolePrinter.treeInfo(false, "Retomando demanda de %s de onde parou (%d/%d).",
+            ConsolePrinter.arvoreInfo(false, "Retomando demanda de %s de onde parou (%d/%d).",
                     chosenProduct.getNome(), alreadyProduced, demand.getAmount());
         }
 
@@ -194,7 +194,7 @@ public class ProductionManager {
         }
 
         System.out.printf("Eitcha!!! Iniciando produção de: %s (lote %d)\n", chosenProduct.getNome(), batch);
-        ConsolePrinter.productionPause(1500);
+        ConsolePrinter.pausarProducao(1500);
 
         int productsRemaining = demand.getRemainingAmount();
         int sectionFabricatedAmount = 0;
@@ -215,7 +215,7 @@ public class ProductionManager {
                 for (ProductionStages etapaAtual : etapasProducao) {
                     Machine currentMachine = this.machines.get(etapaAtual.getCode());
 
-                    ConsolePrinter.stageHeader(currentMachine, "%s", etapaAtual.getNome());
+                    ConsolePrinter.cabecalhoEtapa(currentMachine, "%s", etapaAtual.getNome());
 
                     if (!calcProductionCost(currentMachine)) {
                         String mensagem = String.format("Dessa vez não é! Orçamento insuficiente para operar a máquina de %s!", currentMachine.getTipo());
@@ -226,24 +226,24 @@ public class ProductionManager {
                     if (etapaAtual == ProductionStages.PROCESSING) {
                         conveyor.addRawMaterial(chosenProduct.getQuantidadeMateriaPrimaPorUnidade());
                         report.increaseRawMaterialSpent(chosenProduct.getQuantidadeMateriaPrimaPorUnidade()); // Auditoria
-                        ConsolePrinter.treeInfo(false, "%s carregado para a esteira.", this.rawMaterial.getName());
+                        ConsolePrinter.arvoreInfo(false, "%s carregado para a esteira.", this.rawMaterial.getName());
 
                         this.rawMaterial.consume(conveyor.removeRawMaterial());
-                        ConsolePrinter.treeInfo(false, "%s transportado até a máquina de %s. E é ligeiro!", this.rawMaterial.getName(), currentMachine.getTipo());
+                        ConsolePrinter.arvoreInfo(false, "%s transportado até a máquina de %s. E é ligeiro!", this.rawMaterial.getName(), currentMachine.getTipo());
 
-                        ConsolePrinter.treeInfo(false, "Máquina %s %.2f %s de %s...", etapaAtual.getGerundio(), this.chosenProduct.getQuantidadeMateriaPrimaPorUnidade(), this.rawMaterial.getUnit(), this.rawMaterial.getName());
+                        ConsolePrinter.arvoreInfo(false, "Máquina %s %.2f %s de %s...", etapaAtual.getGerundio(), this.chosenProduct.getQuantidadeMateriaPrimaPorUnidade(), this.rawMaterial.getUnit(), this.rawMaterial.getName());
                         currentProduct = currentMachine.processar(this.chosenProduct);
                         currentProduct.setLote(batch);
 
-                        ConsolePrinter.treeOk(true, "Tu não acredita! Sabe o que é? \"%s\" #%d criado.", currentProduct.getNome(), currentProduct.getId());
+                        ConsolePrinter.arvoreOk(true, "Tu não acredita! Sabe o que é? \"%s\" #%d criado.", currentProduct.getNome(), currentProduct.getId());
                         this.conveyor.addProduct(currentProduct);
                     } else {
-                        ConsolePrinter.treeInfo(false, "%s #%d transportado até a máquina de %s. E é ligeiro!", currentProduct.getNome(), currentProduct.getId(), currentMachine.getTipo());
+                        ConsolePrinter.arvoreInfo(false, "%s #%d transportado até a máquina de %s. E é ligeiro!", currentProduct.getNome(), currentProduct.getId(), currentMachine.getTipo());
 
-                        ConsolePrinter.treeInfo(false, "Máquina %s o produto %s #%d...", etapaAtual.getGerundio(), currentProduct.getNome(), currentProduct.getId());
+                        ConsolePrinter.arvoreInfo(false, "Máquina %s o produto %s #%d...", etapaAtual.getGerundio(), currentProduct.getNome(), currentProduct.getId());
                         currentProduct = currentMachine.processar(this.conveyor.removeProduct());
 
-                        ConsolePrinter.treeOk(true, "Produto %s #%d foi %s com sucesso.", currentProduct.getNome(), currentProduct.getId(), etapaAtual.getVerboParticipio());
+                        ConsolePrinter.arvoreOk(true, "Produto %s #%d foi %s com sucesso.", currentProduct.getNome(), currentProduct.getId(), etapaAtual.getVerboParticipio());
                         this.conveyor.addProduct(currentProduct);
                     }
                 }
@@ -251,17 +251,17 @@ public class ProductionManager {
                 // Validação final
                 if (currentProduct.getStatus() == ProductStatus.APPROVED) {
                     this.fabricatedProducts.add(this.conveyor.removeProduct());
-                    ConsolePrinter.treeOk(true, "Eitcha, como ele tem força! O produto %s #%d" + ConsolePrinter.GREEN + " foi aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getNome(), currentProduct.getId());
+                    ConsolePrinter.arvoreOk(true, "Eitcha, como ele tem força! O produto %s #%d" + ConsolePrinter.VERDE + " foi aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getNome(), currentProduct.getId());
                     sectionApprovedAmount++;
                     report.increaseTotalApprovedProducts();
                 } else if (currentProduct.getStatus() == ProductStatus.TO_REPAIR) {
                     this.fabricatedProducts.add(this.conveyor.removeProduct());
-                    ConsolePrinter.treeOk(true, "Cade a força? O produto %s #%d" + ConsolePrinter.YELLOW + " foi parcialmente aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getNome(), currentProduct.getId());
+                    ConsolePrinter.arvoreOk(true, "Cade a força? O produto %s #%d" + ConsolePrinter.AMARELO + " foi parcialmente aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getNome(), currentProduct.getId());
                     sectionNeedsMaintenanceAmount++;
                     report.increaseTotalNeedsMaintenanceProducts();
                 } else {
                     this.conveyor.removeProduct();
-                    ConsolePrinter.treeFail(true, "Cade a força? O produto %s #%d" + ConsolePrinter.RED + " foi rejeitado" + ConsolePrinter.RESET + " na inspeção e descartado.", currentProduct.getNome(), currentProduct.getId());
+                    ConsolePrinter.arvoreFalha(true, "Cade a força? O produto %s #%d" + ConsolePrinter.VERMELHO + " foi rejeitado" + ConsolePrinter.RESET + " na inspeção e descartado.", currentProduct.getNome(), currentProduct.getId());
                     report.increaseTotalRejectedProducts();
                     sectionRejectedAmount++;
                 }
@@ -271,10 +271,10 @@ public class ProductionManager {
 
             } catch (MachineNeedsRepairException e) {
                 setTemMaquinaQuebrada(true);
-                ConsolePrinter.treeFail(true, e.getMessage());
+                ConsolePrinter.arvoreFalha(true, e.getMessage());
                 break;
             } catch (Exception e) {
-                ConsolePrinter.treeFail(true, e.getMessage());
+                ConsolePrinter.arvoreFalha(true, e.getMessage());
                 break;
             }
         }
@@ -295,7 +295,7 @@ public class ProductionManager {
                     demand.getProductName(), demand.getProducedAmount(), demand.getAmount());
         }
 
-        ConsolePrinter.card("%d produtos fabricados: %d aprovados, %d precisam de manutenção e %d rejeitados." + "\n" + infoText,
+        ConsolePrinter.cartao("%d produtos fabricados: %d aprovados, %d precisam de manutenção e %d rejeitados." + "\n" + infoText,
                 sectionFabricatedAmount, sectionApprovedAmount,
                 sectionNeedsMaintenanceAmount, sectionRejectedAmount);
 

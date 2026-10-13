@@ -6,46 +6,46 @@ import domain.exceptions.InvalidDemandAmountException;
 
 public class UpdateDemandMenu extends Submenu {
 
-    public UpdateDemandMenu(Menu menu, ProductionManager productionManager) {
-        super(menu, productionManager, ConsolePrinter.YELLOW);
+    public UpdateDemandMenu(Menu menu, ProductionManager gerenciadorProducao) {
+        super(menu, gerenciadorProducao, ConsolePrinter.AMARELO);
     }
 
     @Override
-    public String icon() {
-        return ConsolePrinter.color(color, "⟳");
+    public String icone() {
+        return ConsolePrinter.colorir(cor, "⟳");
     }
 
     @Override
-    public String label() {
+    public String rotulo() {
         return "Atualizar demandas";
     }
 
     @Override
-    public void show() {
+    public void exibir() {
         while (true) {
-            printHeader();
-            ConsolePrinter.listDemands(productionManager);
-            ConsolePrinter.printBackOption();
+            imprimirCabecalho();
+            ConsolePrinter.listarDemandas(gerenciadorProducao);
+            ConsolePrinter.imprimirOpcaoVoltar();
 
             menu.printFooter();
-            int option = menu.readInt("Qual demanda deseja " + ConsolePrinter.color(color, "ATUALIZAR") + "? ");
+            int option = menu.readInt("Qual demanda deseja " + ConsolePrinter.colorir(cor, "ATUALIZAR") + "? ");
 
             if (option == 0) break;
 
             Demand selectedDemand;
             try {
-                selectedDemand = productionManager.getDemands().get(option - 1);
+                selectedDemand = gerenciadorProducao.getDemands().get(option - 1);
             } catch (IndexOutOfBoundsException e) {
-                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Opção inválida!"));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
                 continue;
             }
 
             int newValue = menu.readInt("Digite o novo valor da demanda: ");
             try {
-                productionManager.updateDemand(selectedDemand, newValue);
-                menu.setLastBuffer(ConsolePrinter.okText("Demanda de %s atualizada para %d!", selectedDemand.getProductName(), newValue));
+                gerenciadorProducao.updateDemand(selectedDemand, newValue);
+                menu.setLastBuffer(ConsolePrinter.textoOk("Demanda de %s atualizada para %d!", selectedDemand.getProductName(), newValue));
             } catch (InvalidDemandAmountException e) {
-                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! %s", e.getMessage()));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! %s", e.getMessage()));
             }
         }
     }

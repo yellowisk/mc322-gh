@@ -227,11 +227,11 @@ public abstract class Product implements Auditable {
     @Override
     public String gerarRelatorioDiagnostico() {
         String reset = view.ConsolePrinter.RESET;
-        String azul = view.ConsolePrinter.BLUE;
-        String verde = view.ConsolePrinter.GREEN;
-        String vermelho = view.ConsolePrinter.RED;
-        String amarelo = view.ConsolePrinter.YELLOW;
-        String cinza = view.ConsolePrinter.GRAY;
+        String azul = view.ConsolePrinter.AZUL;
+        String verde = view.ConsolePrinter.VERDE;
+        String vermelho = view.ConsolePrinter.VERMELHO;
+        String amarelo = view.ConsolePrinter.AMARELO;
+        String cinza = view.ConsolePrinter.CINZA;
 
         String idStr = cinza + String.format("%-5d", this.id) + reset;
         String nomeStr = cinza + String.format("%-16s", this.nome) + reset;
@@ -256,7 +256,7 @@ public abstract class Product implements Auditable {
      * @return fator que multiplica o tempo base
      */
     protected double fatorAleatorio() {
-        return 1.2 * BigDecimal.valueOf(RandomProvider.nextDouble())
+        return 1.2 * BigDecimal.valueOf(RandomProvider.sortearDouble())
                 .setScale(1, RoundingMode.UP).doubleValue();
     }
 

@@ -9,23 +9,23 @@ import java.util.List;
 
 public class StorageMenu extends Submenu {
 
-    public StorageMenu(Menu menu, ProductionManager productionManager) {
-        super(menu, productionManager, ConsolePrinter.BLUE);
+    public StorageMenu(Menu menu, ProductionManager gerenciadorProducao) {
+        super(menu, gerenciadorProducao, ConsolePrinter.AZUL);
     }
 
     @Override
-    public String icon() {
-        return ConsolePrinter.color(color, "≡");
+    public String icone() {
+        return ConsolePrinter.colorir(cor, "≡");
     }
 
     @Override
-    public String label() {
+    public String rotulo() {
         return "Ver armazém";
     }
 
     @Override
-    public void show() {
-        List<Product> fabricatedProducts = productionManager.getFabricatedProducts();
+    public void exibir() {
+        List<Product> fabricatedProducts = gerenciadorProducao.getFabricatedProducts();
 
         // Agrupamento de produtos por listas
         List<Integer> batchNumbers = new ArrayList<>();
@@ -51,18 +51,18 @@ public class StorageMenu extends Submenu {
         boolean expandAll = true;
 
         while (true) {
-            printHeader();
+            imprimirCabecalho();
             System.out.println(" Lista de lotes: ");
 
             if (batchNumbers.isEmpty()) {
-                System.out.println(ConsolePrinter.GRAY + " O armazém está vazio. Nenhum produto finalizado." + ConsolePrinter.RESET + "\n");
+                System.out.println(ConsolePrinter.CINZA + " O armazém está vazio. Nenhum produto finalizado." + ConsolePrinter.RESET + "\n");
             } else {
                 for (int i = 0; i < batchNumbers.size(); i++) {
                     int batchId = batchNumbers.get(i);
                     List<Product> productsInBatch = batchLists.get(i);
 
                     // Linha principal do lote (não expansível)
-                    System.out.printf(ConsolePrinter.GRAY + " %d." + ConsolePrinter.RESET + " Lote #%d: %s (★ %.2f) [Total: %d un]\n",
+                    System.out.printf(ConsolePrinter.CINZA + " %d." + ConsolePrinter.RESET + " Lote #%d: %s (★ %.2f) [Total: %d un]\n",
                             (i + 1), batchId,
                             productsInBatch.getFirst().getNome(),
                             productsInBatch.getFirst().getQualidade(),
@@ -72,12 +72,12 @@ public class StorageMenu extends Submenu {
                     if (expandedOptions[i] == 1) {
                         for (Product p : productsInBatch) {
                             String treeSymbol = (p == productsInBatch.getLast()) ? "└─" : "├─";
-                            System.out.printf("    " + ConsolePrinter.GRAY + " %s %s #%d, Risco %s, %s\n" + ConsolePrinter.RESET,
+                            System.out.printf("    " + ConsolePrinter.CINZA + " %s %s #%d, Risco %s, %s\n" + ConsolePrinter.RESET,
                                     treeSymbol,
                                     p.getNome(), p.getId(), String.format("%.0f%%", p.getRiscoRejeicao() * 100),
                                     p.precisaManutencao()
-                                            ? ConsolePrinter.color(ConsolePrinter.RED, "✗ Alto risco")
-                                            : ConsolePrinter.color(ConsolePrinter.GREEN, "✓ OK")
+                                            ? ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "✗ Alto risco")
+                                            : ConsolePrinter.colorir(ConsolePrinter.VERDE, "✓ OK")
                                     );
                         }
                     }
@@ -86,10 +86,10 @@ public class StorageMenu extends Submenu {
 
             System.out.println();
             if (!batchNumbers.isEmpty()) {
-                System.out.printf(ConsolePrinter.GRAY + " 99." + ConsolePrinter.RESET + " Expandir/Recolher todos\n\n");
+                System.out.printf(ConsolePrinter.CINZA + " 99." + ConsolePrinter.RESET + " Expandir/Recolher todos\n\n");
             }
 
-            ConsolePrinter.printBackOption();
+            ConsolePrinter.imprimirOpcaoVoltar();
             menu.printFooter();
 
             int option = menu.readInt("Escolha: ");
@@ -107,7 +107,7 @@ public class StorageMenu extends Submenu {
             try {
                 expandedOptions[option - 1] ^= 1; // Inverte a flag usando bitwise XOR
             } catch (IndexOutOfBoundsException e) {
-                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Opção de lote inválida!"));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção de lote inválida!"));
             }
         }
     }
