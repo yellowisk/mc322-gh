@@ -18,7 +18,7 @@ import java.util.List;
  * @author Glayson Oliveira
  * @author Heitor Almeida
  */
-public class AuditMenu extends Submenu {
+public class MenuAuditoria extends Submenu {
 
     /**
      * Cria o submenu c/ a cor roxa
@@ -26,7 +26,7 @@ public class AuditMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção, de onde vêm as máquinas, os produtos e o relatório
      */
-    public AuditMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
+    public MenuAuditoria(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.ROXO);
     }
 
@@ -42,89 +42,89 @@ public class AuditMenu extends Submenu {
 
     @Override
     public void exibir() {
-        boolean running = true;
-        while (running) {
+        boolean rodando = true;
+        while (rodando) {
             imprimirCabecalho();
 
             // Lista de opções
             String[] opcoes = {"Relatório geral", "Detalhar máquinas", "Detalhar produtos", "Voltar"};
             ConsolePrinter.listaOpcoes(opcoes);
 
-            menu.printFooter();
+            menu.imprimirRodape();
 
-            int option = menu.readInt("Escolha: ");
+            int opcao = menu.lerInteiro("Escolha: ");
 
-            if (option == 0) break;
+            if (opcao == 0) break;
 
-            switch (option) {
+            switch (opcao) {
                 case 1 -> relatorioGeral();
                 case 2 -> detalharMaquinas();
                 case 3 -> detalharProdutos();
-                default -> menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
+                default -> menu.setUltimaMensagem(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
             }
         }
     }
 
     /** Números acumulados de todas as produções da sessão */
-    private void printProductionReport() {
-        Relatorio report = gerenciadorProducao.getRelatorio();
-        String unit = gerenciadorProducao.getMateriaPrima().getUnidade();
+    private void imprimirRelatorioProducao() {
+        Relatorio relatorio = gerenciadorProducao.getRelatorio();
+        String unidade = gerenciadorProducao.getMateriaPrima().getUnidade();
 
         System.out.println(ConsolePrinter.NEGRITO + " Relatório da Produção" + ConsolePrinter.RESET);
-        System.out.printf(" - Produtos fabricados: %d\n", report.getTotalProdutos());
+        System.out.printf(" - Produtos fabricados: %d\n", relatorio.getTotalProdutos());
         System.out.printf("   %s✓ %d aprovados%s | %s! %d precisam de manutenção%s | %s✗ %d rejeitados%s\n",
-                ConsolePrinter.VERDE, report.getTotalProdutosAprovados(), ConsolePrinter.RESET,
-                ConsolePrinter.AMARELO, report.getTotalProdutosPrecisamManutencao(), ConsolePrinter.RESET,
-                ConsolePrinter.VERMELHO, report.getTotalProdutosRejeitados(), ConsolePrinter.RESET);
-        System.out.printf(" - Taxa de sucesso: %.0f%%\n", report.getTaxaSucessoProducao() * 100);
-        System.out.printf(" - Tempo total de produção: %.2f s\n", report.getTempoTotalProducao());
-        System.out.printf(" - Matéria-prima gasta: %.2f %s\n", report.getMateriaPrimaGastaTotal(), unit);
-        System.out.printf(" - Dinheiro gasto com operação das máquinas: R$ %.2f\n\n", report.getDinheiroGasto());
+                ConsolePrinter.VERDE, relatorio.getTotalProdutosAprovados(), ConsolePrinter.RESET,
+                ConsolePrinter.AMARELO, relatorio.getTotalProdutosPrecisamManutencao(), ConsolePrinter.RESET,
+                ConsolePrinter.VERMELHO, relatorio.getTotalProdutosRejeitados(), ConsolePrinter.RESET);
+        System.out.printf(" - Taxa de sucesso: %.0f%%\n", relatorio.getTaxaSucessoProducao() * 100);
+        System.out.printf(" - Tempo total de produção: %.2f s\n", relatorio.getTempoTotalProducao());
+        System.out.printf(" - Matéria-prima gasta: %.2f %s\n", relatorio.getMateriaPrimaGastaTotal(), unidade);
+        System.out.printf(" - Dinheiro gasto com operação das máquinas: R$ %.2f\n\n", relatorio.getDinheiroGasto());
     }
 
     /**
      * Submenu do relatório geral.
      */
     private void relatorioGeral() {
-        boolean running = true;
+        boolean rodando = true;
 
-        while (running) {
+        while (rodando) {
             imprimirCabecalho();
 
             System.out.println(ConsolePrinter.colorir(cor," Relatório geral\n"));
 
-            printProductionReport();
+            imprimirRelatorioProducao();
 
             // Lista com todas as entidade auditáveis
-            List<Auditavel> auditables = new ArrayList<>();
-            auditables.addAll(gerenciadorProducao.getMaquinas());
-            auditables.addAll(gerenciadorProducao.getProdutosFabricados());
+            List<Auditavel> auditaveis = new ArrayList<>();
+            auditaveis.addAll(gerenciadorProducao.getMaquinas());
+            auditaveis.addAll(gerenciadorProducao.getProdutosFabricados());
 
-            int totalAuditables = auditables.size();
-            int issuesCount = 0;
+            int totalAuditaveis = auditaveis.size();
+            int quantidadeProblemas = 0;
 
             System.out.println(ConsolePrinter.NEGRITO + " Relatório da Fábrica" + ConsolePrinter.RESET);
 
-            for (Auditavel auditable : auditables) {
-                if (auditable.precisaManutencao()) {
-                    issuesCount++;
+            for (Auditavel auditavel : auditaveis) {
+                if (auditavel.precisaManutencao()) {
+                    quantidadeProblemas++;
                 }
             }
 
-            System.out.printf(" - Total de itens auditados: %d\n", totalAuditables);
+            System.out.printf(" - Total de itens auditados: %d\n", totalAuditaveis);
             System.out.printf(" - Itens precisando de intervenção: %s%d%s\n",
-                    issuesCount > 0 ? ConsolePrinter.VERMELHO : ConsolePrinter.VERDE,
-                    issuesCount,
+                    quantidadeProblemas > 0 ? ConsolePrinter.VERMELHO : ConsolePrinter.VERDE,
+                    quantidadeProblemas,
                     ConsolePrinter.RESET);
 
             System.out.println(ConsolePrinter.NEGRITO + " Lista de problemas:" + ConsolePrinter.RESET);
 
             boolean foundIssues = false;
-            for (Auditavel auditable : auditables) {
-                if (auditable.precisaManutencao()) {
+            for (Auditavel auditavel : auditaveis) {
+                if (auditavel.precisaManutencao()) {
                     foundIssues = true;
                     /* Cada Auditavel sabe se descrever, então não precisamos saber se é máquina ou produto */
-                    System.out.println(ConsolePrinter.VERMELHO + " ✗ " + ConsolePrinter.RESET + auditable.gerarResumoProblema());
+                    System.out.println(ConsolePrinter.VERMELHO + " ✗ " + ConsolePrinter.RESET + auditavel.gerarResumoProblema());
                 }
             }
 
@@ -134,13 +134,13 @@ public class AuditMenu extends Submenu {
 
             System.out.println();
             ConsolePrinter.imprimirOpcaoVoltar();
-            menu.printFooter();
+            menu.imprimirRodape();
 
-            int option = menu.readInt("Escolha: ");
-            if (option == 0) {
+            int opcao = menu.lerInteiro("Escolha: ");
+            if (opcao == 0) {
                 break;
             } else {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
             }
         }
     }
@@ -149,61 +149,61 @@ public class AuditMenu extends Submenu {
      * Submenu de detalhar máquinas. Contém opções expansíveis.
      */
     private void detalharMaquinas() {
-        boolean running = true;
+        boolean rodando = true;
 
         // Array de máquinas
-        List<Maquina> machineList = gerenciadorProducao.getMaquinas();
-        int[] expandedOptions = new int[machineList.size()]; // Flags de ativação (1 ou 0)
-        boolean expandAll = true; // Controle de estado para a opção de Expandir/Recolher tudo
+        List<Maquina> maquinas = gerenciadorProducao.getMaquinas();
+        int[] opcoesExpandidas = new int[maquinas.size()]; // Flags de ativação (1 ou 0)
+        boolean expandirTodos = true; // Controle de estado para a opção de Expandir/Recolher tudo
 
-        while (running) {
+        while (rodando) {
             imprimirCabecalho();
             System.out.println(ConsolePrinter.colorir(cor," Auditoria de máquinas\n"));
 
-            if (machineList.isEmpty()) {
+            if (maquinas.isEmpty()) {
                 System.out.println(ConsolePrinter.CINZA + " Não há nenhuma máquina cadastrada." + ConsolePrinter.RESET);
             }
 
             // Menu: Lista expansível de máquinas
             System.out.println(" Máquinas disponíveis:\n");
             int i = 0;
-            for (Maquina m : machineList) {
+            for (Maquina m : maquinas) {
                 System.out.printf(
                         ConsolePrinter.CINZA + "  %d." + ConsolePrinter.RESET + " %s " + ConsolePrinter.CINZA + "(%s)" + ConsolePrinter.RESET + "\n",
                         (i + 1), m.getNome(), m.getTipo());
 
-                if (expandedOptions[i] == 1) { // Expansão
+                if (opcoesExpandidas[i] == 1) { // Expansão
                     System.out.print(m.gerarRelatorioDiagnostico());
                 }
                 i++;
             }
 
             System.out.println();
-            if (!machineList.isEmpty()) {
+            if (!maquinas.isEmpty()) {
                 System.out.printf(ConsolePrinter.CINZA + " 99." + ConsolePrinter.RESET + " Expandir/Recolher todos\n\n");
             }
             ConsolePrinter.imprimirOpcaoVoltar();
 
-            menu.printFooter();
+            menu.imprimirRodape();
 
             // Escolha da opção
-            int option = menu.readInt("Escolha: ");
+            int opcao = menu.lerInteiro("Escolha: ");
 
-            if (option == 0) break;
+            if (opcao == 0) break;
 
             // Tratamento da opção Expandir/Recolher todos
-            if (option == 99 && !machineList.isEmpty()) {
-                int newState = expandAll ? 1 : 0;
-                Arrays.fill(expandedOptions, newState);
-                expandAll = !expandAll;
+            if (opcao == 99 && !maquinas.isEmpty()) {
+                int novoEstado = expandirTodos ? 1 : 0;
+                Arrays.fill(opcoesExpandidas, novoEstado);
+                expandirTodos = !expandirTodos;
                 continue;
             }
 
             try {
-                Menu.validarOpcao(option, expandedOptions.length, "Dessa vez não é! Máquina inválida!");
-                expandedOptions[option - 1] = expandedOptions[option - 1] ^ 1; // Inverte a flag usando bitwise XOR
+                Menu.validarOpcao(opcao, opcoesExpandidas.length, "Dessa vez não é! Máquina inválida!");
+                opcoesExpandidas[opcao - 1] = opcoesExpandidas[opcao - 1] ^ 1; // Inverte a flag usando bitwise XOR
             } catch (InvalidOptionException e) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }
     }
@@ -213,16 +213,16 @@ public class AuditMenu extends Submenu {
      * (id, nome, lote, qualidade, risco acumulado, risco de rejeição e status)
      */
     private void detalharProdutos() {
-        boolean running = true;
+        boolean rodando = true;
 
         // Array de Produtos
-        List<Produto> productList = gerenciadorProducao.getProdutosFabricados();
+        List<Produto> produtos = gerenciadorProducao.getProdutosFabricados();
 
-        while (running) {
+        while (rodando) {
             imprimirCabecalho();
             System.out.println(ConsolePrinter.colorir(cor," Auditoria de produtos\n"));
 
-            if (productList.isEmpty()) {
+            if (produtos.isEmpty()) {
                 System.out.println(ConsolePrinter.CINZA + " Nenhum produto foi produzido ainda." + ConsolePrinter.RESET);
             } else {
                 // Ccabeçalho alinhado da tabela
@@ -232,7 +232,7 @@ public class AuditMenu extends Submenu {
                 ConsolePrinter.linhaRecuada(85);
 
                 // Imprime as linhas da tabela
-                for (Produto p : productList) {
+                for (Produto p : produtos) {
                     System.out.println(p.gerarRelatorioDiagnostico());
                 }
             }
@@ -240,14 +240,14 @@ public class AuditMenu extends Submenu {
             System.out.println();
             ConsolePrinter.imprimirOpcaoVoltar();
 
-            menu.printFooter();
+            menu.imprimirRodape();
 
-            int option = menu.readInt("Escolha: ");
+            int opcao = menu.lerInteiro("Escolha: ");
 
-            if (option == 0) {
+            if (opcao == 0) {
                 break;
             } else {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
             }
         }
     }

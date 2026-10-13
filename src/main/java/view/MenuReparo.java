@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author Heitor Almeida
  */
-public class RepairMenu extends Submenu {
+public class MenuReparo extends Submenu {
 
     /**
      * Cria o submenu c/ a cor amarela
@@ -21,7 +21,7 @@ public class RepairMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção
      */
-    public RepairMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
+    public MenuReparo(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.AMARELO);
     }
 
@@ -55,9 +55,9 @@ public class RepairMenu extends Submenu {
             }
             System.out.println();
             ConsolePrinter.imprimirOpcaoVoltar();
-            menu.printFooter();
+            menu.imprimirRodape();
 
-            int opcao = menu.readInt("Qual máquina você deseja " + ConsolePrinter.colorir(cor, "REPARAR") + "? ");
+            int opcao = menu.lerInteiro("Qual máquina você deseja " + ConsolePrinter.colorir(cor, "REPARAR") + "? ");
 
             if (opcao == 0) break;
 
@@ -69,9 +69,9 @@ public class RepairMenu extends Submenu {
                 maquinaEscolhida = maquinas.get(opcao - 1);
                 gerenciadorProducao.repararMaquina(maquinaEscolhida);
                 animarReparo(maquinaEscolhida.getNome()); // Animação
-                menu.setLastBuffer(ConsolePrinter.textoOk("%s reparada!", maquinaEscolhida.getNome().toUpperCase()));
+                menu.setUltimaMensagem(ConsolePrinter.textoOk("%s reparada!", maquinaEscolhida.getNome().toUpperCase()));
             } catch (InvalidOptionException | MachineUnavailableException e) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }
     }

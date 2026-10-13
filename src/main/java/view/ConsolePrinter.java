@@ -24,7 +24,7 @@ public class ConsolePrinter {
     public static final String CINZA = "\u001B[38;5;246m";
     public static final String VERMELHO = "\033[38;2;234;67;53m";
     private static final int ATRASO_LINHA_ARVORE_MS = 125;
-    private static ProductionSpeed velocidadeProducao = ProductionSpeed.NORMAL;
+    private static VelocidadeProducao velocidadeProducao = VelocidadeProducao.NORMAL;
 
     private static final String FORMATO_LINHA_DEMANDA = "%-16s  %-12s  %-16s  %-16s  %-18s  %-10s";
     private static final int LARGURA_TABELA_DEMANDA = 16 + 12 + 16 + 16 + 18 + 10 + 2 * 5;
@@ -47,7 +47,7 @@ public class ConsolePrinter {
     }
 
     /**
-     * Log de sucesso c/ um ✓ verde, retornado p/ o lastBuffer do {@link Menu}
+     * Log de sucesso c/ um ✓ verde, retornado p/ a ultimaMensagem do {@link Menu}
      *
      * @param formato formato, igual ao do {@link String#format}
      * @param argumentos argumentos do formato
@@ -58,7 +58,7 @@ public class ConsolePrinter {
     }
 
     /**
-     * Log de falha c/ um ✗ vermelho, retornado p/ o lastBuffer do {@link Menu}
+     * Log de falha c/ um ✗ vermelho, retornado p/ a ultimaMensagem do {@link Menu}
      *
      * @param formato formato, igual ao do {@link String#format}
      * @param argumentos argumentos do formato
@@ -157,7 +157,7 @@ public class ConsolePrinter {
      *
      * @return velocidade atual
      */
-    public static ProductionSpeed getVelocidadeProducao() {
+    public static VelocidadeProducao getVelocidadeProducao() {
         return velocidadeProducao;
     }
 
@@ -166,7 +166,7 @@ public class ConsolePrinter {
      *
      * @param velocidade nova velocidade
      */
-    public static void setVelocidadeProducao(ProductionSpeed velocidade) {
+    public static void setVelocidadeProducao(VelocidadeProducao velocidade) {
         velocidadeProducao = velocidade;
     }
 

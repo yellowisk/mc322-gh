@@ -17,6 +17,6 @@ public class Main {
     public static void main(String[] args) {
         if (args.length > 0)
             GeradorAleatorio.setSeed(Long.parseLong(args[0]));
-        new Menu().start();
+        new Menu().iniciar();
     }
 }

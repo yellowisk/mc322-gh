@@ -10,7 +10,7 @@ import domain.exceptions.InsufficientBudgetException;
  *
  * @author Heitor Almeida
  */
-public class BuyRawMaterialMenu extends Submenu {
+public class MenuComprarMateriaPrima extends Submenu {
 
     /**
      * exibe o submenu de compra
@@ -18,7 +18,7 @@ public class BuyRawMaterialMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção, onde a compra é feita
      */
-    public BuyRawMaterialMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
+    public MenuComprarMateriaPrima(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.VERDE);
     }
 
@@ -46,43 +46,43 @@ public class BuyRawMaterialMenu extends Submenu {
             System.out.printf("   Custo unitário: " + ConsolePrinter.colorir(cor, "R$ %.2f / %s") + "\n\n", mp.getPreco(), mp.getUnidade());
             ConsolePrinter.imprimirOpcaoVoltar();
 
-            menu.printFooter();
-            int quantidade = menu.readInt("Quantos " + mp.getUnidade() + " deseja " + ConsolePrinter.colorir(cor, "COMPRAR") + "? ");
+            menu.imprimirRodape();
+            int quantidade = menu.lerInteiro("Quantos " + mp.getUnidade() + " deseja " + ConsolePrinter.colorir(cor, "COMPRAR") + "? ");
 
             if (quantidade == 0) break;
 
             if (quantidade < 0) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Quantidade inválida!"));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("Dessa vez não é! Quantidade inválida!"));
                 continue;
             }
 
             float custoTotal = quantidade * mp.getPreco();
             if (custoTotal > gerenciadorProducao.getVerba()) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Orçamento insuficiente: a compra custa R$ %.2f e o orçamento é R$ %.2f.",
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("Dessa vez não é! Orçamento insuficiente: a compra custa R$ %.2f e o orçamento é R$ %.2f.",
                         custoTotal, gerenciadorProducao.getVerba()));
                 continue;
             }
 
             System.out.printf("\nVerba projetada: R$ %.2f " + ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "(▾ R$ -%.2f)") + "\n",
                     gerenciadorProducao.getVerba() - custoTotal, custoTotal);
-            int confirmacao = menu.readInt("Confirmar compra? [" + ConsolePrinter.colorir(ConsolePrinter.VERDE, "1") + "] Sim / ["
+            int confirmacao = menu.lerInteiro("Confirmar compra? [" + ConsolePrinter.colorir(ConsolePrinter.VERDE, "1") + "] Sim / ["
                     + ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "0") + "] Não: ");
 
             if (confirmacao != 1) {
-                menu.setLastBuffer(ConsolePrinter.colorir(cor, "Compra cancelada."));
+                menu.setUltimaMensagem(ConsolePrinter.colorir(cor, "Compra cancelada."));
                 continue;
             }
 
             try {
                 float valorPago = gerenciadorProducao.comprarMateriaPrima(quantidade);
                 if (valorPago >= 150) {
-                    menu.setLastBuffer(ConsolePrinter.textoOk("Dessa vez não é! Cliente comprou 150 reais e, sim, cliente ganhou um balão de presente!"));
+                    menu.setUltimaMensagem(ConsolePrinter.textoOk("Dessa vez não é! Cliente comprou 150 reais e, sim, cliente ganhou um balão de presente!"));
                 } else {
-                    menu.setLastBuffer(ConsolePrinter.textoOk("Eitcha!!! Compra de matéria-prima realizada com sucesso!"));
+                    menu.setUltimaMensagem(ConsolePrinter.textoOk("Eitcha!!! Compra de matéria-prima realizada com sucesso!"));
                 }
                 break;
             } catch (InsufficientBudgetException e) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }
     }
