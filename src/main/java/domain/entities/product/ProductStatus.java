@@ -1,7 +1,7 @@
 package domain.entities.product;
 
 /**
- * Em que ponto da linha de produção um {@link Product} está. A ordem na linha é
+ * Em que ponto da linha de produção um {@link Produto} está. A ordem na linha é
  * UNDERGOING, PROCESSED, PACKED e depois da inspeção é APPROVED, TO_REPAIR ou FAILED
  *
  * @author Heitor Almeida

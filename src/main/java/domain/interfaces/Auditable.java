@@ -3,7 +3,7 @@ package domain.interfaces;
 /**
  * Contrato p/ os componentes que aparecem na auditoria da fábrica: cada um informa o próprio estado
  * (relatório de diagnóstico), se precisa de manutenção e um resumo do problema.
- * Implementada por {@link domain.entities.machine.Machine} e {@link domain.entities.product.Product}
+ * Implementada por {@link domain.entities.machine.Machine} e {@link domain.entities.product.Produto}
  *
  * @author Heitor Almeida
  */

@@ -9,7 +9,7 @@ import domain.entities.machine.ProcessingMachine;
 import domain.entities.product.CopoDeVidro;
 import domain.entities.product.KitCopoDeVidro;
 import domain.entities.product.PoteDeVidro;
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
 import domain.entities.rawmaterial.RawMaterial;
 
@@ -17,6 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Classe principal para os menus. Aqui fica a lógica principal
+ * das telas da fábrica e é a partir daqui que os submenus são chamados
+ */
 public class Menu {
     private ScenarioConfig currScenario;
     private ProductionManager productionManager;
@@ -28,6 +32,9 @@ public class Menu {
     private List<Submenu> submenus;
 
 
+    /**
+     * Método de inicialização do menu, chamado na main
+     */
     public void start() {
         boolean running = true;
 
@@ -51,12 +58,15 @@ public class Menu {
         optionsList.add("Sair");
         String[] options = optionsList.toArray(new String[0]);
 
+        /**
+         * Lppp principal
+         */
         while (running) {
             ConsolePrinter.limparTela();
             ConsolePrinter.cartao(ConsolePrinter.colorir(ConsolePrinter.CINZA, "⌂") + " FÁBRICA IDEAL");
             System.out.println();
             System.out.println(" Cenário atual:    " + currScenario.getDisplayName());
-            System.out.println(" Estratégia atual: " + productionManager.getCurrentStrategy().getNomeEstrategia() + "\n");
+            System.out.println(" Estratégia atual: " + productionManager.getCurrEstrategia().getNomeEstrategia() + "\n");
 
             ConsolePrinter.listaOpcoes(options);
 
@@ -76,30 +86,34 @@ public class Menu {
         }
     }
 
+    /**
+     * Método para iniciar o productionManager. Rotina transformada em método
+     * para simplificar o loop principal do menu
+     */
     private void initProductionManager() {
         // Produtos hardcoded
-        productionManager.addNewProduct(new CopoDeVidro("Copo", 0.5));
-        productionManager.addNewProduct(new PoteDeVidro("Pote", 1.2));
-        productionManager.addNewProduct(new KitCopoDeVidro("Kit Copo", 3));
-        Product.resetarContadorId();
+        productionManager.adicionarNovoProduto(new CopoDeVidro("Copo", 0.5));
+        productionManager.adicionarNovoProduto(new PoteDeVidro("Pote", 1.2));
+        productionManager.adicionarNovoProduto(new KitCopoDeVidro("Kit Copo", 3));
+        Produto.resetarContadorId();
 
         // Esteira hardcoded
         productionManager.addNewConveyor(new Conveyor("Esteira Ligeira", 20));
 
         // Máquinas hardcoded
-        productionManager.addNewMachine(new ProcessingMachine(
+        productionManager.adicionarMaquina(new ProcessingMachine(
                         "Máquina de Processamento", 20, 0.25,
                         0.78, currScenario.getScenarioMultiplier(),
                         currScenario.getWearDamage()
                 )
         );
-        productionManager.addNewMachine(new PackingMachine(
+        productionManager.adicionarMaquina(new PackingMachine(
                         "Máquina de Empacotamento", 20, 0.15,
                         0.5, currScenario.getScenarioMultiplier(),
                         currScenario.getWearDamage()
                 )
         );
-        productionManager.addNewMachine(new InspectionMachine(
+        productionManager.adicionarMaquina(new InspectionMachine(
                         "Máquina de Inspeção", 20, 0.10,
                         0.43, currScenario.getScenarioMultiplier(),
                         currScenario.getWearDamage()
@@ -121,9 +135,12 @@ public class Menu {
                 new SpeedMenu(this, productionManager)
         );
 
-        productionManager.setStrategy(strategyMenu.estrategiaPadrao());
+        productionManager.setCurrEstrategia(strategyMenu.estrategiaPadrao());
     }
 
+    /**
+     * Tela inicial
+     */
     private void printIntroScreen() {
         ConsolePrinter.limparTela();
         ConsolePrinter.linha();
@@ -149,6 +166,9 @@ public class Menu {
         scanner.nextLine();
     }
 
+    /**
+     * Tela de seleção de cenário
+     */
     private void scenarioChooserMenu() {
 
         ScenarioConfig[] scenariosList = {
@@ -216,9 +236,9 @@ public class Menu {
         } else {
             ConsolePrinter.linha();
         }
-        ConsolePrinter.imprimirResumo(productionManager.getBudget(),
-                productionManager.getRawMaterial().getQuantity(),
-                productionManager.getFabricatedProducts().size());
+        ConsolePrinter.imprimirResumo(productionManager.getVerba(),
+                productionManager.getMateriaPrima().getQuantity(),
+                productionManager.getProdutosFabricados().size());
         System.out.println();
     }
 }

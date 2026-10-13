@@ -1,6 +1,6 @@
 package view;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
 
 import java.util.ArrayList;
@@ -41,19 +41,19 @@ public class StorageMenu extends Submenu {
      */
     @Override
     public void exibir() {
-        List<Product> produtosFabricados = gerenciadorProducao.getFabricatedProducts();
+        List<Produto> produtosFabricados = gerenciadorProducao.getProdutosFabricados();
 
         // Agrupamento de produtos por listas
         List<Integer> numerosLotes = new ArrayList<>();
-        List<List<Product>> listasLotes = new ArrayList<>();
-        for (Product p : produtosFabricados) {
+        List<List<Produto>> listasLotes = new ArrayList<>();
+        for (Produto p : produtosFabricados) {
             int numeroLote = p.getLote();
             int indice = numerosLotes.indexOf(numeroLote);
 
             if (indice == -1) {
                 // Se o lote ainda não existe nas listas, cria um novo
                 numerosLotes.add(numeroLote);
-                List<Product> novaLista = new ArrayList<>();
+                List<Produto> novaLista = new ArrayList<>();
                 novaLista.add(p);
                 listasLotes.add(novaLista);
             } else {
@@ -75,7 +75,7 @@ public class StorageMenu extends Submenu {
             } else {
                 for (int i = 0; i < numerosLotes.size(); i++) {
                     int idLote = numerosLotes.get(i);
-                    List<Product> produtosDoLote = listasLotes.get(i);
+                    List<Produto> produtosDoLote = listasLotes.get(i);
 
                     // Linha principal do lote (não expansível)
                     System.out.printf(ConsolePrinter.CINZA + " %d." + ConsolePrinter.RESET + " Lote #%d: %s (★ %.2f) [Total: %d un]\n",
@@ -86,7 +86,7 @@ public class StorageMenu extends Submenu {
 
                     // Forma expandida: lista os produtos internos do lote
                     if (opcoesExpandidas[i] == 1) {
-                        for (Product p : produtosDoLote) {
+                        for (Produto p : produtosDoLote) {
                             String simboloArvore = (p == produtosDoLote.getLast()) ? "└─" : "├─";
                             System.out.printf("    " + ConsolePrinter.CINZA + " %s %s #%d, Risco %s, %s\n" + ConsolePrinter.RESET,
                                     simboloArvore,

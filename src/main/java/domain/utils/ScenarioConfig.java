@@ -1,5 +1,8 @@
 package domain.utils;
 
+/**
+ * Classe para armazenar as informações de um cenário
+ */
 public class ScenarioConfig {
     private final String name;
     private final String type;

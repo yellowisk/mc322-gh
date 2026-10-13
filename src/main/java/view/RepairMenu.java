@@ -42,7 +42,7 @@ public class RepairMenu extends Submenu {
             imprimirCabecalho();
 
             // Lista de Máquinas
-            List<Machine> maquinas = gerenciadorProducao.getMachines();
+            List<Machine> maquinas = gerenciadorProducao.getMaquinas();
             for (int i = 0; i < maquinas.size(); i++) {
                 Machine m = maquinas.get(i);
                 String corSaude = m.precisaManutencao() ? ConsolePrinter.VERMELHO : ConsolePrinter.VERDE;

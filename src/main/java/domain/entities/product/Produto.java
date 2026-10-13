@@ -8,13 +8,13 @@ import java.math.RoundingMode;
 
 /**
  * Produto do Mercadinho Ideal. Os objetos criados no Menu são os modelos do catálogo, e cada
- * unidade fabricada é um objeto novo criado a partir de um modelo por {@link #processar(Product, ProductStatus)}.
+ * unidade fabricada é um objeto novo criado a partir de um modelo por {@link #processar(Produto, ProductStatus)}.
  * O risco de rejeição vem da qualidade + o risco acumulado nas etapas, e decide o veredito na inspeção:
  * abaixo de 0.25 é aprovado, até 0.45 vai pro armazém precisando de manutenção, e acima disso é descartado
  *
  * @author Heitor Almeida
  */
-public abstract class Product implements Auditable {
+public abstract class Produto implements Auditable {
     private static int proximoId = 1;
 
     private final int id;
@@ -39,7 +39,7 @@ public abstract class Product implements Auditable {
      * @param qualidade qualidade, entre 0 e 1. Quanto maior, maior o risco de rejeição
      * @param probabilidadeFalhaAcumulada risco acumulado inicial, normalmente 0
      */
-    public Product(String nome, double quantidadeMateriaPrimaPorUnidade, double qualidade,
+    public Produto(String nome, double quantidadeMateriaPrimaPorUnidade, double qualidade,
                    double probabilidadeFalhaAcumulada) {
         this.id = proximoId++;
         this.nome = nome;
@@ -48,7 +48,7 @@ public abstract class Product implements Auditable {
         this.probabilidadeFalhaAcumulada = probabilidadeFalhaAcumulada;
         this.status = ProductStatus.UNDERGOING;
 
-        /* Toda subclasse de Product chama esse construtor via super, então isso roda p/ toda instância criada */
+        /* Toda subclasse de Produto chama esse construtor via super, então isso roda p/ toda instância criada */
         totalProdutosFabricados++;
     }
 
@@ -67,7 +67,7 @@ public abstract class Product implements Auditable {
      * @param novoStatus status da unidade nova
      * @return unidade nova
      */
-    public abstract Product processar(Product modelo, ProductStatus novoStatus);
+    public abstract Produto processar(Produto modelo, ProductStatus novoStatus);
 
     /**
      * Sorteia quanto tempo uma unidade levou pra ser fabricada: o tempo base do tipo vezes {@link #fatorAleatorio()}

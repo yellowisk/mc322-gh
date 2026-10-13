@@ -40,7 +40,7 @@ public class BuyRawMaterialMenu extends Submenu {
     public void exibir() {
         while (true) {
             imprimirCabecalho();
-            RawMaterial mp = gerenciadorProducao.getRawMaterial();
+            RawMaterial mp = gerenciadorProducao.getMateriaPrima();
             System.out.printf("   Item: " + ConsolePrinter.colorir(cor, "%s") + "\n", mp.getName());
             System.out.printf("   Estoque atual: " + ConsolePrinter.colorir(cor, "%.2f %s") + "\n", mp.getQuantity(), mp.getUnit());
             System.out.printf("   Custo unitário: " + ConsolePrinter.colorir(cor, "R$ %.2f / %s") + "\n\n", mp.getPrice(), mp.getUnit());
@@ -57,14 +57,14 @@ public class BuyRawMaterialMenu extends Submenu {
             }
 
             float custoTotal = quantidade * mp.getPrice();
-            if (custoTotal > gerenciadorProducao.getBudget()) {
+            if (custoTotal > gerenciadorProducao.getVerba()) {
                 menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Orçamento insuficiente: a compra custa R$ %.2f e o orçamento é R$ %.2f.",
-                        custoTotal, gerenciadorProducao.getBudget()));
+                        custoTotal, gerenciadorProducao.getVerba()));
                 continue;
             }
 
             System.out.printf("\nVerba projetada: R$ %.2f " + ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "(▾ R$ -%.2f)") + "\n",
-                    gerenciadorProducao.getBudget() - custoTotal, custoTotal);
+                    gerenciadorProducao.getVerba() - custoTotal, custoTotal);
             int confirmacao = menu.readInt("Confirmar compra? [" + ConsolePrinter.colorir(ConsolePrinter.VERDE, "1") + "] Sim / ["
                     + ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "0") + "] Não: ");
 

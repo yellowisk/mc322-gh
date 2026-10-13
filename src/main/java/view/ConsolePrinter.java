@@ -289,7 +289,7 @@ public class ConsolePrinter {
      * @param gerenciador gerenciador da produção, de onde vêm as demandas e o orçamento
      */
     public static void listarDemandas(ProductionManager gerenciador) {
-        List<Demand> demandas = gerenciador.getDemands();
+        List<Demand> demandas = gerenciador.getDemandas();
         double custoProjetadoTotal = gerenciador.getProjectedCost(); // also refreshes each demand's cost btw
 
         System.out.printf("    " + CINZA + FORMATO_LINHA_DEMANDA + RESET + "\n",
@@ -339,14 +339,14 @@ public class ConsolePrinter {
 
         System.out.println();
         if (custoProjetadoTotal > 0) {
-            double orcamentoProjetado = gerenciador.getBudget() - custoProjetadoTotal;
+            double orcamentoProjetado = gerenciador.getVerba() - custoProjetadoTotal;
             System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f " + VERMELHO + "(▾ R$ -%.2f)" + RESET + "\n",
                     orcamentoProjetado, custoProjetadoTotal);
             if (orcamentoProjetado < 0) {
                 System.out.println("\n" + colorir(VERMELHO, " ⚠ Orçamento insuficiente para fabricar todas as demandas pendentes!"));
             }
         } else {
-            System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f\n" + RESET, gerenciador.getBudget());
+            System.out.printf(" Projeção Total de Orçamento Após Custo Operacional: R$ %.2f\n" + RESET, gerenciador.getVerba());
         }
         System.out.println();
     }

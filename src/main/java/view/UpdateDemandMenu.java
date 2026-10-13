@@ -49,7 +49,7 @@ public class UpdateDemandMenu extends Submenu {
 
             Demand demandaEscolhida;
             try {
-                demandaEscolhida = gerenciadorProducao.getDemands().get(opcao - 1);
+                demandaEscolhida = gerenciadorProducao.getDemandas().get(opcao - 1);
             } catch (IndexOutOfBoundsException e) {
                 menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
                 continue;
@@ -57,7 +57,7 @@ public class UpdateDemandMenu extends Submenu {
 
             int novoValor = menu.readInt("Digite o novo valor da demanda: ");
             try {
-                gerenciadorProducao.updateDemand(demandaEscolhida, novoValor);
+                gerenciadorProducao.atualizarDemanda(demandaEscolhida, novoValor);
                 menu.setLastBuffer(ConsolePrinter.textoOk("Demanda de %s atualizada para %d!", demandaEscolhida.getProductName(), novoValor));
             } catch (InvalidDemandAmountException e) {
                 menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! %s", e.getMessage()));

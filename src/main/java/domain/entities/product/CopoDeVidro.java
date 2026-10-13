@@ -5,7 +5,7 @@ package domain.entities.product;
  *
  * @author Heitor Almeida
  */
-public class CopoDeVidro extends Product {
+public class CopoDeVidro extends Produto {
 
     /**
      * Cria o copo c/ a qualidade fixa do tipo e risco acumulado 0
@@ -18,8 +18,8 @@ public class CopoDeVidro extends Product {
     }
 
     @Override
-    public Product processar(Product modelo, ProductStatus novoStatus) {
-        Product p = new CopoDeVidro(modelo.getNome(), modelo.getQuantidadeMateriaPrimaPorUnidade());
+    public Produto processar(Produto modelo, ProductStatus novoStatus) {
+        Produto p = new CopoDeVidro(modelo.getNome(), modelo.getQuantidadeMateriaPrimaPorUnidade());
         p.setStatus(novoStatus);
         return p;
     }

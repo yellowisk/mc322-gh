@@ -1,12 +1,15 @@
 package view;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
 import domain.entities.rawmaterial.RawMaterial;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Submenu do armazém de matéria-prima
+ */
 public class RawMaterialStorageMenu extends Submenu {
 
     public RawMaterialStorageMenu(Menu menu, ProductionManager gerenciadorProducao) {
@@ -25,19 +28,19 @@ public class RawMaterialStorageMenu extends Submenu {
 
     @Override
     public void exibir() {
-        List<Product> fabricatedProducts = gerenciadorProducao.getFabricatedProducts();
+        List<Produto> fabricatedProducts = gerenciadorProducao.getProdutosFabricados();
 
         // Agrupamento de produtos por listas
         List<Integer> batchNumbers = new ArrayList<>();
-        List<List<Product>> batchLists = new ArrayList<>();
-        for (Product p : fabricatedProducts) {
+        List<List<Produto>> batchLists = new ArrayList<>();
+        for (Produto p : fabricatedProducts) {
             int batchNum = p.getLote();
             int index = batchNumbers.indexOf(batchNum);
 
             if (index == -1) {
                 // Se o lote ainda não existe nas listas, cria um novo
                 batchNumbers.add(batchNum);
-                List<Product> newList = new ArrayList<>();
+                List<Produto> newList = new ArrayList<>();
                 newList.add(p);
                 batchLists.add(newList);
             } else {
@@ -54,7 +57,7 @@ public class RawMaterialStorageMenu extends Submenu {
             imprimirCabecalho();
             System.out.println(" Matérias-prima disponíveis: ");
 
-            RawMaterial rm = gerenciadorProducao.getRawMaterial();
+            RawMaterial rm = gerenciadorProducao.getMateriaPrima();
             String line = String.format(cor + "%s" + ConsolePrinter.RESET + ": %.2f %s", rm.getName(), rm.getQuantity(), rm.getUnit());
             ConsolePrinter.listaOpcoes(line, "Voltar");
 

@@ -1,6 +1,6 @@
 package domain.entities.machine;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.product.ProductStatus;
 
 /**
@@ -34,8 +34,8 @@ public class ProcessingMachine extends Machine {
      * @return unidade nova, c/ id próprio
      */
     @Override
-    public Product processarEtapa(Product produto) {
-        Product novoProduto = produto.processar(produto, ProductStatus.PROCESSED);
+    public Produto processarEtapa(Produto produto) {
+        Produto novoProduto = produto.processar(produto, ProductStatus.PROCESSED);
         tentaAumentarRisco(novoProduto);
         return novoProduto;
     }

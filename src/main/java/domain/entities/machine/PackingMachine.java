@@ -1,6 +1,6 @@
 package domain.entities.machine;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.product.ProductStatus;
 
 /**
@@ -34,7 +34,7 @@ public class PackingMachine extends Machine {
      * @return o mesmo produto, empacotado
      */
     @Override
-    public Product processarEtapa(Product produto) {
+    public Produto processarEtapa(Produto produto) {
         tentaAumentarRisco(produto);
 
         produto.setStatus(ProductStatus.PACKED);

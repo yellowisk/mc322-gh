@@ -1,6 +1,6 @@
 package domain.entities.machine;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.exceptions.MachineNeedsRepairException;
 import domain.exceptions.MachineUnavailableException;
 import domain.interfaces.Auditable;
@@ -8,7 +8,7 @@ import domain.utils.RandomProvider;
 import view.ConsolePrinter;
 
 /**
- * Máquina de uma etapa da linha de produção. Cada {@link #processar(Product)} desgasta a máquina,
+ * Máquina de uma etapa da linha de produção. Cada {@link #processar(Produto)} desgasta a máquina,
  * e quanto menor a saúde, maior a chance de falha. Abaixo do limiar crítico ela quebra e precisa de reparo
  *
  * @author Heitor Almeida
@@ -60,18 +60,18 @@ public abstract class Machine implements Auditable {
      * @param produto O produto deverá ser fabricado.
      * @return Produto fabricado.
      */
-    public abstract Product processarEtapa(Product produto);
+    public abstract Produto processarEtapa(Produto produto);
 
     /**
-     * Passa o produto pela etapa da máquina via {@link #processarEtapa(Product)} e desgasta a máquina.
-     * As checagens e o desgaste ficam aqui, a etapa ({@link #processarEtapa(Product)}) em si fica em cada subclasse
+     * Passa o produto pela etapa da máquina via {@link #processarEtapa(Produto)} e desgasta a máquina.
+     * As checagens e o desgaste ficam aqui, a etapa ({@link #processarEtapa(Produto)}) em si fica em cada subclasse
      *
      * @param produto modelo do catálogo ou unidade vinda da etapa anterior
      * @return o produto depois da etapa
      * @throws MachineUnavailableException se a máquina estiver desligada
      * @throws MachineNeedsRepairException se a saúde estiver abaixo do limiar crítico
      */
-    public Product processar(Product produto) {
+    public Produto processar(Produto produto) {
         if (!estaLigada()) {
             String mensagem = String.format("Eitcha, João! A %s não pode processar nada, ela tá desligada!", getNome().toLowerCase());
             throw new MachineUnavailableException(mensagem);
@@ -82,7 +82,7 @@ public abstract class Machine implements Auditable {
             throw new MachineNeedsRepairException(mensagem);
         }
 
-        Product resultado = processarEtapa(produto);
+        Produto resultado = processarEtapa(produto);
         desgastar(); // Trecho que será rodado sempre que o 'processar()' for utilizado
         return resultado;
     }
@@ -102,7 +102,7 @@ public abstract class Machine implements Auditable {
      *
      * @param produto produto que pode sair c/ defeito
      */
-    protected void tentaAumentarRisco(Product produto) {
+    protected void tentaAumentarRisco(Produto produto) {
         if (sorteiaFalha()) {
             double incremento = 0.12 * multiplicadorCenario;
             produto.aumentarProbabilidadeFalha(incremento);
@@ -217,7 +217,7 @@ public abstract class Machine implements Auditable {
         this.saude = saude;
     }
 
-    /** Desliga a máquina, o que faz {@link #processar(Product)} parar de funcionar */
+    /** Desliga a máquina, o que faz {@link #processar(Produto)} parar de funcionar */
     public void desligar() {
         this.ligada = false;
     }

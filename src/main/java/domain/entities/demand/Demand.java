@@ -1,6 +1,6 @@
 package domain.entities.demand;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.exceptions.InvalidDemandAmountException;
 import domain.exceptions.InvalidDemandTransitionException;
 
@@ -32,7 +32,7 @@ public class Demand {
      * @param product modelo do catálogo, dá o nome e a matéria-prima por unidade
      * @param amount quantas unidades fabricar
      */
-    public Demand(Product product, int amount) {
+    public Demand(Produto product, int amount) {
         this.productName = product.getNome();
         this.amount = amount;
         this.status = DemandStatus.PENDING;
@@ -48,7 +48,7 @@ public class Demand {
      * @param product modelo do catálogo, dá a matéria-prima por unidade
      * @return matéria-prima total
      */
-    private double calcRawMaterialNeeded(Product product) {
+    private double calcRawMaterialNeeded(Produto product) {
         // for those who just joined the stream: "calc" is short for "calculate"
         return (product.getQuantidadeMateriaPrimaPorUnidade() * this.amount);
     }
@@ -114,7 +114,7 @@ public class Demand {
      * @param newAmount nova quantidade, 0 ou mais
      * @throws InvalidDemandAmountException se {@code newAmount} for negativo
      */
-    public void updateAmount(Product product, int newAmount) {
+    public void atualizarQuantidade(Produto product, int newAmount) {
         if (newAmount < 0) {
             throw new InvalidDemandAmountException("A demanda não pode ser negativa!");
         }
@@ -143,7 +143,7 @@ public class Demand {
     }
 
     /**
-     * Último custo calculado por {@link #updateEstimatedCost(double)}
+     * Último custo calculado por {@link #atualizarCustoEstimado(double)}
      *
      * @return custo estimado do que falta fabricar, em R$
      */
@@ -156,7 +156,7 @@ public class Demand {
      *
      * @param unitOperationCost custo de operação das máquinas p/ fabricar uma unidade, em R$
      */
-    public void updateEstimatedCost(double unitOperationCost) {
+    public void atualizarCustoEstimado(double unitOperationCost) {
         this.estimatedCost = getRemainingAmount() * unitOperationCost;
     }
 

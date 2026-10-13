@@ -4,6 +4,8 @@ import domain.entities.demand.Demand;
 import domain.entities.productionmanager.ProductionManager;
 import domain.exceptions.InsufficientBudgetException;
 import domain.exceptions.MachineNeedsRepairException;
+import domain.exceptions.NoStrategySelectedException;
+import domain.exceptions.NullDemandException;
 
 import java.util.List;
 
@@ -37,30 +39,31 @@ public class FabricateDemandMenu extends Submenu {
 
     /**
      * Loop do submenu. Depois de uma fabricação espera o ENTER e volta pro menu principal. Opção inválida,
-     * orçamento insuficiente ou máquina quebrada voltam pra lista c/ a mensagem no rodapé
+     * orçamento insuficiente, máquina quebrada, nenhuma estratégia ou nenhuma demanda elegível voltam pra
+     * lista c/ a mensagem no rodapé
      */
     @Override
     public void exibir() {
         while (true) {
             imprimirCabecalho();
-            List<Demand> demandas = gerenciadorProducao.getDemands();
+            List<Demand> demandas = gerenciadorProducao.getDemandas();
             ConsolePrinter.listarDemandas(gerenciadorProducao);
 
             // A opção logo depois das demandas fabrica o que a estratégia atual escolher
             int proximaPelaEstrategia = demandas.size() + 1;
-            Demand proxima = gerenciadorProducao.peekNextDemand();
+            Demand proxima = gerenciadorProducao.espiarProximaDemanda();
             String previa;
             if (proxima == null) {
                 previa = ConsolePrinter.colorir(ConsolePrinter.CINZA, "nenhuma demanda elegível");
             } else {
                 previa = proxima.getProductName() + " (" + proxima.getAmount() + " un)";
-                if (!proxima.isViable(gerenciadorProducao.getBudget())) {
+                if (!proxima.isViable(gerenciadorProducao.getVerba())) {
                     previa += " " + ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "(orçamento insuficiente)");
                 }
             }
             System.out.printf(ConsolePrinter.CINZA + " %d." + ConsolePrinter.RESET + " " + ConsolePrinter.colorir(cor, "▶")
                             + " Próxima pela estratégia " + ConsolePrinter.colorir(cor, "%s") + ": %s\n\n",
-                    proximaPelaEstrategia, gerenciadorProducao.getCurrentStrategy().getNomeEstrategia(), previa);
+                    proximaPelaEstrategia, gerenciadorProducao.getCurrEstrategia().getNomeEstrategia(), previa);
             ConsolePrinter.imprimirOpcaoVoltar();
 
             menu.printFooter();
@@ -70,7 +73,7 @@ public class FabricateDemandMenu extends Submenu {
 
             try {
                 if (opcao == proximaPelaEstrategia) {
-                    gerenciadorProducao.runNextProduction();
+                    gerenciadorProducao.iniciarProducao();
                 } else {
                     Demand demandaEscolhida;
                     try {
@@ -79,9 +82,10 @@ public class FabricateDemandMenu extends Submenu {
                         menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
                         continue;
                     }
-                    gerenciadorProducao.fabricateDemand(demandaEscolhida);
+                    gerenciadorProducao.produzirDemanda(demandaEscolhida);
                 }
-            } catch (InsufficientBudgetException | MachineNeedsRepairException e) {
+            } catch (InsufficientBudgetException | MachineNeedsRepairException
+                     | NoStrategySelectedException | NullDemandException e) {
                 menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }

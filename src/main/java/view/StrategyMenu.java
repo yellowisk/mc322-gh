@@ -63,7 +63,7 @@ public class StrategyMenu extends Submenu {
 
             for (int i = 0; i < estrategias.size(); i++) {
                 ProductionStrategy estrategia = estrategias.get(i);
-                boolean ativa = estrategia == gerenciadorProducao.getCurrentStrategy();
+                boolean ativa = estrategia == gerenciadorProducao.getCurrEstrategia();
                 System.out.printf(ConsolePrinter.CINZA + " %d." + ConsolePrinter.RESET + " %s %s " + ConsolePrinter.CINZA + "(%s)" + ConsolePrinter.RESET + "\n",
                         i + 1,
                         ativa ? ConsolePrinter.colorir(ConsolePrinter.VERDE, "●") : "○",
@@ -86,14 +86,14 @@ public class StrategyMenu extends Submenu {
                 continue;
             }
 
-            gerenciadorProducao.setStrategy(escolhida);
+            gerenciadorProducao.setCurrEstrategia(escolhida);
             menu.setLastBuffer(ConsolePrinter.textoOk("Estratégia alterada para %s!", escolhida.getNomeEstrategia()));
         }
     }
 
     /** Imprime qual demanda a estratégia atual fabricaria agora, ou avisa se nenhuma é elegível */
     private void imprimirPreviaProximaDemanda() {
-        Demand proxima = gerenciadorProducao.peekNextDemand();
+        Demand proxima = gerenciadorProducao.espiarProximaDemanda();
         String previa = (proxima == null)
                 ? ConsolePrinter.colorir(ConsolePrinter.CINZA, "nenhuma demanda elegível")
                 : ConsolePrinter.colorir(cor, proxima.getProductName() + " (" + proxima.getAmount() + " un)");

@@ -56,7 +56,7 @@ public enum DemandStatus {
     /**
      * Allow-list explícita dos próximos status válidos p/ cada status atual.
      * Uma demanda pode voltar pra {@link #PENDING} de qualquer status, menos {@link #IN_PRODUCTION}, pois atualizar a
-     * quantidade de uma demanda ({@link Demand#updateAmount}) reseta ela, tornando-a uma nova demanda.<br>
+     * quantidade de uma demanda ({@link Demand#atualizarQuantidade}) reseta ela, tornando-a uma nova demanda.<br>
      * Uma demanda em produção sempre termina como {@link #COMPLETED} ou {@link #CANCELLED} antes de dar para atualizá-la
      *
      * @param target status pro qual a demanda quer ir
