@@ -1,12 +1,11 @@
 package domain.exceptions;
 
 /**
- * Lançada quando não tem matéria-prima suficiente p/ um consumo, ou seja, quando a retirada deixaria o estoque
- * abaixo do mínimo
+ * Lançada quando mandam fabricar pela estratégia mas nenhuma estratégia de produção foi escolhida
  *
  * @author Glayson Oliveira
  */
-public class InsufficientRawMaterialException extends PlantaException {
+public class EstrategiaNaoSelecionadaException extends PlantaException {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -14,7 +13,7 @@ public class InsufficientRawMaterialException extends PlantaException {
      *
      * @param message a mensagem que vai aparecer pro usuário
      */
-    public InsufficientRawMaterialException(String message) {
+    public EstrategiaNaoSelecionadaException(String message) {
         super(message);
     }
 }

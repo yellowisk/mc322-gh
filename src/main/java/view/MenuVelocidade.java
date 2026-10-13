@@ -1,7 +1,7 @@
 package view;
 
 import domain.entities.productionmanager.GerenciadorProducao;
-import domain.exceptions.InvalidOptionException;
+import domain.exceptions.OpcaoInvalidaException;
 
 /**
  * Submenu da velocidade da animação da produção. A escolhida vale p/ o resto da sessão
@@ -57,7 +57,7 @@ public class MenuVelocidade extends Submenu {
             if (escolha == 0) break;
             try {
                 Menu.validarOpcao(escolha, velocidades.length, "Dessa vez não é! Opção inválida!");
-            } catch (InvalidOptionException e) {
+            } catch (OpcaoInvalidaException e) {
                 menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }

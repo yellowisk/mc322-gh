@@ -5,7 +5,7 @@ package domain.exceptions;
  *
  * @author Glayson Oliveira
  */
-public class InvalidOptionException extends PlantaException {
+public class OpcaoInvalidaException extends PlantaException {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -13,7 +13,7 @@ public class InvalidOptionException extends PlantaException {
      *
      * @param message a mensagem que vai aparecer pro usuário
      */
-    public InvalidOptionException(String message) {
+    public OpcaoInvalidaException(String message) {
         super(message);
     }
 }

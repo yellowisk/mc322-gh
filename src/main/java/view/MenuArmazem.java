@@ -2,7 +2,7 @@ package view;
 
 import domain.entities.product.Produto;
 import domain.entities.productionmanager.GerenciadorProducao;
-import domain.exceptions.InvalidOptionException;
+import domain.exceptions.OpcaoInvalidaException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -124,7 +124,7 @@ public class MenuArmazem extends Submenu {
             try {
                 Menu.validarOpcao(opcao, opcoesExpandidas.length, "Dessa vez não é! Opção de lote inválida!");
                 opcoesExpandidas[opcao - 1] ^= 1; // Inverte a flag usando bitwise XOR
-            } catch (InvalidOptionException e) {
+            } catch (OpcaoInvalidaException e) {
                 menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }

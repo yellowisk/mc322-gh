@@ -5,7 +5,7 @@ package domain.exceptions;
  *
  * @author Heitor Almeida
  */
-public class InvalidDemandAmountException extends PlantaException {
+public class QuantidadeDemandaInvalidaException extends PlantaException {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -13,7 +13,7 @@ public class InvalidDemandAmountException extends PlantaException {
      *
      * @param message a mensagem que vai aparecer no menu
      */
-    public InvalidDemandAmountException(String message) {
+    public QuantidadeDemandaInvalidaException(String message) {
         super(message);
     }
 }

@@ -1,7 +1,7 @@
 package view;
 
 import domain.entities.report.Relatorio;
-import domain.exceptions.InvalidOptionException;
+import domain.exceptions.OpcaoInvalidaException;
 import domain.exceptions.PlantaException;
 import domain.utils.ConfiguracaoCenario;
 import domain.entities.conveyor.Esteira;
@@ -200,7 +200,7 @@ public class Menu {
                 validarOpcao(opcao, cenarios.length, "Dessa vez não é! Opção de cenário inválida!");
                 cenarioAtual = cenarios[opcao - 1];
                 break;
-            } catch (InvalidOptionException e) {
+            } catch (OpcaoInvalidaException e) {
                 System.out.println("\n" + ConsolePrinter.textoFalha("%s", e.getMessage()));
                 esperarEnter();
             }
@@ -215,11 +215,11 @@ public class Menu {
      * @param opcao opção digitada pelo usuário
      * @param quantidade quantas opções a lista tem
      * @param mensagem mensagem de erro p/ mostrar se a opção não existir
-     * @throws InvalidOptionException se a opção estiver fora da lista
+     * @throws OpcaoInvalidaException se a opção estiver fora da lista
      */
     static void validarOpcao(int opcao, int quantidade, String mensagem) {
         if (opcao < 1 || opcao > quantidade) {
-            throw new InvalidOptionException(mensagem);
+            throw new OpcaoInvalidaException(mensagem);
         }
     }
 

@@ -2,7 +2,7 @@ package view;
 
 import domain.entities.productionmanager.GerenciadorProducao;
 import domain.entities.rawmaterial.MateriaPrima;
-import domain.exceptions.InsufficientBudgetException;
+import domain.exceptions.OrcamentoInsuficienteException;
 
 /**
  * Submenu de compra de matéria-prima. Mostra o estoque e o preço, pede a quantidade, mostra a verba
@@ -81,7 +81,7 @@ public class MenuComprarMateriaPrima extends Submenu {
                     menu.setUltimaMensagem(ConsolePrinter.textoOk("Eitcha!!! Compra de matéria-prima realizada com sucesso!"));
                 }
                 break;
-            } catch (InsufficientBudgetException e) {
+            } catch (OrcamentoInsuficienteException e) {
                 menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }

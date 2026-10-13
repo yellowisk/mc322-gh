@@ -6,7 +6,7 @@ package domain.exceptions;
  *
  * @author Glayson Oliveira
  */
-public class InsufficientBudgetException extends PlantaException {
+public class OrcamentoInsuficienteException extends PlantaException {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -14,7 +14,7 @@ public class InsufficientBudgetException extends PlantaException {
      *
      * @param message a mensagem que vai aparecer pro usuário
      */
-    public InsufficientBudgetException(String message) {
+    public OrcamentoInsuficienteException(String message) {
         super(message);
     }
 }

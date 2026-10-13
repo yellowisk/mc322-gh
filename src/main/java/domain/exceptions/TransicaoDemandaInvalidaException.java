@@ -7,7 +7,7 @@ package domain.exceptions;
  *
  * @author Heitor Almeida
  */
-public class InvalidDemandTransitionException extends PlantaException {
+public class TransicaoDemandaInvalidaException extends PlantaException {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -15,7 +15,7 @@ public class InvalidDemandTransitionException extends PlantaException {
      *
      * @param message o motivo, ex.: "Transição de status inválida para Copo: Concluída -> Em Produção"
      */
-    public InvalidDemandTransitionException(String message) {
+    public TransicaoDemandaInvalidaException(String message) {
         super(message);
     }
 }

@@ -1,7 +1,7 @@
 package domain.entities.conveyor;
 
 import domain.entities.product.Produto;
-import domain.exceptions.MachineUnavailableException;
+import domain.exceptions.MaquinaIndisponivelException;
 
 /**
  * Esteira que leva a matéria-prima e os produtos entre as máquinas. Carrega uma coisa por vez e só funciona ligada
@@ -26,7 +26,7 @@ public class Esteira {
      */
     public Esteira(String nome, int capacidadeMaxima) {
         if (capacidadeMaxima <= 0) {
-            throw new IllegalArgumentException("Dessa vez não é! A conveyor can't have a negative capacity.");
+            throw new IllegalArgumentException("Dessa vez não é! A capacidade da esteira tem que ser positiva.");
         }
         this.nome = nome;
         this.capacidadeMaxima = capacidadeMaxima;
@@ -54,13 +54,13 @@ public class Esteira {
      */
     private void verificarPodeCarregar(double quantidade) {
         if (!this.ligada) {
-            throw new IllegalStateException("Dessa vez não é! The conveyor is off.");
+            throw new IllegalStateException("Dessa vez não é! A esteira está desligada.");
         }
         if (this.materiaPrima > 0 || this.produto != null) {
-            throw new IllegalStateException("Dessa vez não é! The conveyor is already occupied.");
+            throw new IllegalStateException("Dessa vez não é! A esteira já está ocupada.");
         }
         if (!verificarCapacidade(quantidade)) {
-            throw new IllegalArgumentException("Dessa vez não é! The conveyor can't take this weight.");
+            throw new IllegalArgumentException("Dessa vez não é! A esteira não aguenta esse peso.");
         }
     }
 
@@ -81,16 +81,16 @@ public class Esteira {
      * Remove a matéria prima da esteira retornando a quantidade
      * do material
      * @return quantidade de matéria prima da esteira
-     * @throws domain.exceptions.MachineUnavailableException se a esteira estiver desligada
+     * @throws domain.exceptions.MaquinaIndisponivelException se a esteira estiver desligada
      * @throws IllegalStateException se não tiver matéria-prima na esteira
      */
     public double removerMateriaPrima() {
         if (!estaLigada()) {
-            throw new MachineUnavailableException("Dessa vez não é! The conveyor is off.");
+            throw new MaquinaIndisponivelException("Dessa vez não é! A esteira está desligada.");
         }
 
         if (this.materiaPrima == 0) {
-            throw new IllegalStateException("Dessa vez não é! There's no product on the conveyor.");
+            throw new IllegalStateException("Dessa vez não é! Não tem matéria-prima na esteira.");
         }
 
         double n = this.materiaPrima;
@@ -114,16 +114,16 @@ public class Esteira {
     /**
      * Remove o produto da esteira, retornando-o
      * @return o produto
-     * @throws domain.exceptions.MachineUnavailableException se a esteira estiver desligada
+     * @throws domain.exceptions.MaquinaIndisponivelException se a esteira estiver desligada
      * @throws IllegalArgumentException se não tiver produto na esteira
      */
     public Produto removerProduto() {
         if (!estaLigada()) {
-            throw new MachineUnavailableException("Não é mais ligeira... A esteira está desligada.");
+            throw new MaquinaIndisponivelException("Não é mais ligeira... A esteira está desligada.");
         }
 
         if (this.produto == null) {
-            throw new IllegalArgumentException("Dessa vez não é! There's no product on the conveyor.");
+            throw new IllegalArgumentException("Dessa vez não é! Não tem produto na esteira.");
         }
 
 
@@ -139,7 +139,7 @@ public class Esteira {
      */
     private boolean verificarCapacidade(double peso) {
         if (peso < 0) {
-            throw new IllegalArgumentException("Dessa vez não é! The weight can't be negative");
+            throw new IllegalArgumentException("Dessa vez não é! O peso não pode ser negativo.");
         }
 
         return (peso <= this.capacidadeMaxima);

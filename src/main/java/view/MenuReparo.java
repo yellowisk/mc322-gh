@@ -2,8 +2,8 @@ package view;
 
 import domain.entities.machine.Maquina;
 import domain.entities.productionmanager.GerenciadorProducao;
-import domain.exceptions.InvalidOptionException;
-import domain.exceptions.MachineUnavailableException;
+import domain.exceptions.OpcaoInvalidaException;
+import domain.exceptions.MaquinaIndisponivelException;
 
 import java.util.List;
 
@@ -70,7 +70,7 @@ public class MenuReparo extends Submenu {
                 gerenciadorProducao.repararMaquina(maquinaEscolhida);
                 animarReparo(maquinaEscolhida.getNome()); // Animação
                 menu.setUltimaMensagem(ConsolePrinter.textoOk("%s reparada!", maquinaEscolhida.getNome().toUpperCase()));
-            } catch (InvalidOptionException | MachineUnavailableException e) {
+            } catch (OpcaoInvalidaException | MaquinaIndisponivelException e) {
                 menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }

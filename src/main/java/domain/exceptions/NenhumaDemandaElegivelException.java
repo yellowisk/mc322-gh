@@ -5,7 +5,7 @@ package domain.exceptions;
  *
  * @author Glayson Oliveira
  */
-public class NullDemandException extends PlantaException {
+public class NenhumaDemandaElegivelException extends PlantaException {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -13,7 +13,7 @@ public class NullDemandException extends PlantaException {
      *
      * @param message a mensagem que vai aparecer pro usuário, c/ o nome da estratégia
      */
-    public NullDemandException(String message) {
+    public NenhumaDemandaElegivelException(String message) {
         super(message);
     }
 }
