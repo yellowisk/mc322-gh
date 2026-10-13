@@ -5,14 +5,14 @@ import domain.exceptions.InvalidOptionException;
 import domain.exceptions.PlantaException;
 import domain.utils.ConfiguracaoCenario;
 import domain.entities.conveyor.Esteira;
-import domain.entities.machine.InspectionMachine;
-import domain.entities.machine.PackingMachine;
-import domain.entities.machine.ProcessingMachine;
+import domain.entities.machine.MaquinaInspecao;
+import domain.entities.machine.MaquinaEmpacotamento;
+import domain.entities.machine.MaquinaProcessamento;
 import domain.entities.product.CopoDeVidro;
 import domain.entities.product.KitCopoDeVidro;
 import domain.entities.product.PoteDeVidro;
 import domain.entities.product.Produto;
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.productionmanager.GerenciadorProducao;
 import domain.entities.rawmaterial.MateriaPrima;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import java.util.Scanner;
  */
 public class Menu {
     private ConfiguracaoCenario currScenario;
-    private ProductionManager productionManager;
+    private GerenciadorProducao productionManager;
     private Relatorio report = new Relatorio();
 
     private final Scanner scanner = new Scanner(System.in);
@@ -43,7 +43,7 @@ public class Menu {
         printIntroScreen();
         scenarioChooserMenu();
 
-        productionManager = new ProductionManager(
+        productionManager = new GerenciadorProducao(
                 new MateriaPrima("Vidro", 50, "kg", 5, 1),
                 currScenario.getVerba(),
                 report
@@ -68,7 +68,7 @@ public class Menu {
             ConsolePrinter.cartao(ConsolePrinter.colorir(ConsolePrinter.CINZA, "⌂") + " FÁBRICA IDEAL");
             System.out.println();
             System.out.println(" Cenário atual:    " + currScenario.getNomeExibicao());
-            System.out.println(" Estratégia atual: " + productionManager.getCurrEstrategia().getNomeEstrategia() + "\n");
+            System.out.println(" Estratégia atual: " + productionManager.getEstrategiaAtual().getNomeEstrategia() + "\n");
 
             ConsolePrinter.listaOpcoes(options);
 
@@ -99,22 +99,22 @@ public class Menu {
         Produto.resetarContadorId();
 
         // Esteira hardcoded
-        productionManager.addNewConveyor(new Esteira("Esteira Ligeira", 20));
+        productionManager.adicionarEsteira(new Esteira("Esteira Ligeira", 20));
 
         // Máquinas hardcoded
-        productionManager.adicionarMaquina(new ProcessingMachine(
+        productionManager.adicionarMaquina(new MaquinaProcessamento(
                         "Máquina de Processamento", 20, 0.25,
                         0.78, currScenario.getMultiplicadorCenario(),
                         currScenario.getDesgasteMaximo()
                 )
         );
-        productionManager.adicionarMaquina(new PackingMachine(
+        productionManager.adicionarMaquina(new MaquinaEmpacotamento(
                         "Máquina de Empacotamento", 20, 0.15,
                         0.5, currScenario.getMultiplicadorCenario(),
                         currScenario.getDesgasteMaximo()
                 )
         );
-        productionManager.adicionarMaquina(new InspectionMachine(
+        productionManager.adicionarMaquina(new MaquinaInspecao(
                         "Máquina de Inspeção", 20, 0.10,
                         0.43, currScenario.getMultiplicadorCenario(),
                         currScenario.getDesgasteMaximo()
@@ -136,7 +136,7 @@ public class Menu {
                 new SpeedMenu(this, productionManager)
         );
 
-        productionManager.setCurrEstrategia(strategyMenu.estrategiaPadrao());
+        productionManager.setEstrategiaAtual(strategyMenu.estrategiaPadrao());
     }
 
     /**

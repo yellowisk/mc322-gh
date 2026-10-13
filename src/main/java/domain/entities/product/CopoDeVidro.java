@@ -18,7 +18,7 @@ public class CopoDeVidro extends Produto {
     }
 
     @Override
-    public Produto processar(Produto modelo, ProductStatus novoStatus) {
+    public Produto processar(Produto modelo, StatusProduto novoStatus) {
         Produto p = new CopoDeVidro(modelo.getNome(), modelo.getQuantidadeMateriaPrimaPorUnidade());
         p.setStatus(novoStatus);
         return p;

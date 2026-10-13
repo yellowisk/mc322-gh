@@ -1,6 +1,6 @@
 package view;
 
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.productionmanager.GerenciadorProducao;
 import domain.entities.rawmaterial.MateriaPrima;
 import domain.exceptions.InsufficientBudgetException;
 
@@ -18,7 +18,7 @@ public class BuyRawMaterialMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção, onde a compra é feita
      */
-    public BuyRawMaterialMenu(Menu menu, ProductionManager gerenciadorProducao) {
+    public BuyRawMaterialMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.VERDE);
     }
 
@@ -74,7 +74,7 @@ public class BuyRawMaterialMenu extends Submenu {
             }
 
             try {
-                float valorPago = gerenciadorProducao.buyRawMaterial(quantidade);
+                float valorPago = gerenciadorProducao.comprarMateriaPrima(quantidade);
                 if (valorPago >= 150) {
                     menu.setLastBuffer(ConsolePrinter.textoOk("Dessa vez não é! Cliente comprou 150 reais e, sim, cliente ganhou um balão de presente!"));
                 } else {

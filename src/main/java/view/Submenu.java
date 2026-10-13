@@ -1,6 +1,6 @@
 package view;
 
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.productionmanager.GerenciadorProducao;
 
 /**
  * Base de todo submenu do menu principal. Cada submenu tem um ícone, um nome e uma cor, e o {@link Menu}
@@ -12,7 +12,7 @@ public abstract class Submenu {
     /** Menu principal, p/ ler a entrada e mandar mensagens pro rodapé */
     protected final Menu menu;
     /** De onde o submenu lê e altera o estado da fábrica */
-    protected final ProductionManager gerenciadorProducao;
+    protected final GerenciadorProducao gerenciadorProducao;
     /** Cor principal do submenu: ícone, ações, destaques e mensagens neutras */
     protected final String cor;
 
@@ -23,7 +23,7 @@ public abstract class Submenu {
      * @param gerenciadorProducao gerenciador da produção
      * @param cor cor principal, uma das constantes do {@link ConsolePrinter}
      */
-    protected Submenu(Menu menu, ProductionManager gerenciadorProducao, String cor) {
+    protected Submenu(Menu menu, GerenciadorProducao gerenciadorProducao, String cor) {
         this.menu = menu;
         this.gerenciadorProducao = gerenciadorProducao;
         this.cor = cor;

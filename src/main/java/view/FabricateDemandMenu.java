@@ -1,7 +1,7 @@
 package view;
 
 import domain.entities.demand.Demanda;
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.productionmanager.GerenciadorProducao;
 import domain.exceptions.PlantaException;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public class FabricateDemandMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção
      */
-    public FabricateDemandMenu(Menu menu, ProductionManager gerenciadorProducao) {
+    public FabricateDemandMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.ROXO);
     }
 
@@ -61,7 +61,7 @@ public class FabricateDemandMenu extends Submenu {
             }
             System.out.printf(ConsolePrinter.CINZA + " %d." + ConsolePrinter.RESET + " " + ConsolePrinter.colorir(cor, "▶")
                             + " Próxima pela estratégia " + ConsolePrinter.colorir(cor, "%s") + ": %s\n\n",
-                    proximaPelaEstrategia, gerenciadorProducao.getCurrEstrategia().getNomeEstrategia(), previa);
+                    proximaPelaEstrategia, gerenciadorProducao.getEstrategiaAtual().getNomeEstrategia(), previa);
             ConsolePrinter.imprimirOpcaoVoltar();
 
             menu.printFooter();

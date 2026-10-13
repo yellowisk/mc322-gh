@@ -1,7 +1,7 @@
 package view;
 
-import domain.entities.machine.Machine;
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.machine.Maquina;
+import domain.entities.productionmanager.GerenciadorProducao;
 import domain.exceptions.InvalidOptionException;
 import domain.exceptions.MachineUnavailableException;
 
@@ -21,7 +21,7 @@ public class RepairMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção
      */
-    public RepairMenu(Menu menu, ProductionManager gerenciadorProducao) {
+    public RepairMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.AMARELO);
     }
 
@@ -44,9 +44,9 @@ public class RepairMenu extends Submenu {
             imprimirCabecalho();
 
             // Lista de Máquinas
-            List<Machine> maquinas = gerenciadorProducao.getMaquinas();
+            List<Maquina> maquinas = gerenciadorProducao.getMaquinas();
             for (int i = 0; i < maquinas.size(); i++) {
-                Machine m = maquinas.get(i);
+                Maquina m = maquinas.get(i);
                 String corSaude = m.precisaManutencao() ? ConsolePrinter.VERMELHO : ConsolePrinter.VERDE;
                 String saude = ConsolePrinter.colorir(corSaude, String.format("❤ %d/%d", m.getSaude(), m.getSaudeMaxima()));
                 String quebrada = m.precisaManutencao() ? " " + ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "(quebrada)") : "";
@@ -61,13 +61,13 @@ public class RepairMenu extends Submenu {
 
             if (opcao == 0) break;
 
-            Machine maquinaEscolhida;
+            Maquina maquinaEscolhida;
 
             // Processo principal
             try {
                 Menu.validarOpcao(opcao, maquinas.size(), "Dessa vez não é! Máquina inválida!");
                 maquinaEscolhida = maquinas.get(opcao - 1);
-                gerenciadorProducao.repairMachine(maquinaEscolhida);
+                gerenciadorProducao.repararMaquina(maquinaEscolhida);
                 animarReparo(maquinaEscolhida.getNome()); // Animação
                 menu.setLastBuffer(ConsolePrinter.textoOk("%s reparada!", maquinaEscolhida.getNome().toUpperCase()));
             } catch (InvalidOptionException | MachineUnavailableException e) {

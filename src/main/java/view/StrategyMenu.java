@@ -1,9 +1,9 @@
 package view;
 
 import domain.entities.demand.Demanda;
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.productionmanager.GerenciadorProducao;
 import domain.exceptions.InvalidOptionException;
-import domain.interfaces.ProductionStrategy;
+import domain.interfaces.EstrategiaProducao;
 import domain.strategies.Ferrari;
 import domain.strategies.FilaDoCaixa;
 import domain.strategies.Joaozinho;
@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class StrategyMenu extends Submenu {
     /** Estratégias disponíveis, na ordem do menu. */
-    private final List<ProductionStrategy> estrategias = List.of(
+    private final List<EstrategiaProducao> estrategias = List.of(
             new FilaDoCaixa(),
             new Ferrari(),
             new Joaozinho()
@@ -30,7 +30,7 @@ public class StrategyMenu extends Submenu {
      * @param menu menu principal
      * @param gerenciadorProducao gerenciador da produção
      */
-    public StrategyMenu(Menu menu, ProductionManager gerenciadorProducao) {
+    public StrategyMenu(Menu menu, GerenciadorProducao gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.LARANJA);
     }
 
@@ -49,7 +49,7 @@ public class StrategyMenu extends Submenu {
      *
      * @return a primeira da lista: {@link domain.strategies.FilaDoCaixa}
      */
-    public ProductionStrategy estrategiaPadrao() {
+    public EstrategiaProducao estrategiaPadrao() {
         return estrategias.getFirst();
     }
 
@@ -63,8 +63,8 @@ public class StrategyMenu extends Submenu {
             imprimirPreviaProximaDemanda();
 
             for (int i = 0; i < estrategias.size(); i++) {
-                ProductionStrategy estrategia = estrategias.get(i);
-                boolean ativa = estrategia == gerenciadorProducao.getCurrEstrategia();
+                EstrategiaProducao estrategia = estrategias.get(i);
+                boolean ativa = estrategia == gerenciadorProducao.getEstrategiaAtual();
                 System.out.printf(ConsolePrinter.CINZA + " %d." + ConsolePrinter.RESET + " %s %s " + ConsolePrinter.CINZA + "(%s)" + ConsolePrinter.RESET + "\n",
                         i + 1,
                         ativa ? ConsolePrinter.colorir(ConsolePrinter.VERDE, "●") : "○",
@@ -84,9 +84,9 @@ public class StrategyMenu extends Submenu {
                 menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }
-            ProductionStrategy escolhida = estrategias.get(escolha - 1);
+            EstrategiaProducao escolhida = estrategias.get(escolha - 1);
 
-            gerenciadorProducao.setCurrEstrategia(escolhida);
+            gerenciadorProducao.setEstrategiaAtual(escolhida);
             menu.setLastBuffer(ConsolePrinter.textoOk("Estratégia alterada para %s!", escolhida.getNomeEstrategia()));
         }
     }

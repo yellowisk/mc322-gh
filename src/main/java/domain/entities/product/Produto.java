@@ -1,25 +1,25 @@
 package domain.entities.product;
 
-import domain.interfaces.Auditable;
-import domain.utils.RandomProvider;
+import domain.interfaces.Auditavel;
+import domain.utils.GeradorAleatorio;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
  * Produto do Mercadinho Ideal. Os objetos criados no Menu são os modelos do catálogo, e cada
- * unidade fabricada é um objeto novo criado a partir de um modelo por {@link #processar(Produto, ProductStatus)}.
+ * unidade fabricada é um objeto novo criado a partir de um modelo por {@link #processar(Produto, StatusProduto)}.
  * O risco de rejeição vem da qualidade + o risco acumulado nas etapas, e decide o veredito na inspeção:
  * abaixo de 0.25 é aprovado, até 0.45 vai pro armazém precisando de manutenção, e acima disso é descartado
  *
  * @author Heitor Almeida
  */
-public abstract class Produto implements Auditable {
+public abstract class Produto implements Auditavel {
     private static int proximoId = 1;
 
     private final int id;
     private final String nome;
-    private ProductStatus status;
+    private StatusProduto status;
     private final double quantidadeMateriaPrimaPorUnidade;
     private final double qualidade;
     private double probabilidadeFalhaAcumulada;
@@ -32,7 +32,7 @@ public abstract class Produto implements Auditable {
     private final static double LIMITE_RISCO_DESCARTE = 0.45;
 
     /**
-     * Cria o produto c/ o próximo id e status {@link ProductStatus#UNDERGOING}
+     * Cria o produto c/ o próximo id e status {@link StatusProduto#EM_PRODUCAO}
      *
      * @param nome nome do produto, ex.: "Copo"
      * @param quantidadeMateriaPrimaPorUnidade matéria-prima gasta por unidade, em kg
@@ -46,7 +46,7 @@ public abstract class Produto implements Auditable {
         this.quantidadeMateriaPrimaPorUnidade = quantidadeMateriaPrimaPorUnidade;
         this.qualidade = qualidade;
         this.probabilidadeFalhaAcumulada = probabilidadeFalhaAcumulada;
-        this.status = ProductStatus.UNDERGOING;
+        this.status = StatusProduto.EM_PRODUCAO;
 
         /* Toda subclasse de Produto chama esse construtor via super, então isso roda p/ toda instância criada */
         totalProdutosFabricados++;
@@ -67,7 +67,7 @@ public abstract class Produto implements Auditable {
      * @param novoStatus status da unidade nova
      * @return unidade nova
      */
-    public abstract Produto processar(Produto modelo, ProductStatus novoStatus);
+    public abstract Produto processar(Produto modelo, StatusProduto novoStatus);
 
     /**
      * Sorteia quanto tempo uma unidade levou pra ser fabricada: o tempo base do tipo vezes {@link #fatorAleatorio()}
@@ -106,7 +106,7 @@ public abstract class Produto implements Auditable {
      *
      * @return status atual
      */
-    public ProductStatus getStatus() {
+    public StatusProduto getStatus() {
         return status;
     }
 
@@ -115,7 +115,7 @@ public abstract class Produto implements Auditable {
      *
      * @param status novo status
      */
-    public void setStatus(ProductStatus status) {
+    public void setStatus(StatusProduto status) {
         this.status = status;
     }
 
@@ -256,7 +256,7 @@ public abstract class Produto implements Auditable {
      * @return fator que multiplica o tempo base
      */
     protected double fatorAleatorio() {
-        return 1.2 * BigDecimal.valueOf(RandomProvider.sortearDouble())
+        return 1.2 * BigDecimal.valueOf(GeradorAleatorio.sortearDouble())
                 .setScale(1, RoundingMode.UP).doubleValue();
     }
 

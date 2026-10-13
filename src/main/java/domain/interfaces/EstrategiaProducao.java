@@ -4,12 +4,12 @@ import domain.entities.demand.Demanda;
 import java.util.List;
 
 /**
- * Padrão Strategy p/ escolher qual demanda fabricar a seguir. O ProductionManager guarda a estratégia
+ * Padrão Strategy p/ escolher qual demanda fabricar a seguir. O GerenciadorProducao guarda a estratégia
  * atual, e o menu de estratégia deixa trocar entre elas
  *
  * @author Heitor Almeida
  */
-public interface ProductionStrategy {
+public interface EstrategiaProducao {
     /**
      * Escolhe a próxima demanda a ser fabricada entre as elegíveis de {@link #selecionaveis(List)}
      *

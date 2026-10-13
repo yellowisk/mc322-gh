@@ -1,8 +1,8 @@
 package view;
 
 import domain.entities.demand.Demanda;
-import domain.entities.machine.Machine;
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.machine.Maquina;
+import domain.entities.productionmanager.GerenciadorProducao;
 
 import java.util.List;
 
@@ -96,7 +96,7 @@ public class ConsolePrinter {
      * @param formato nome da etapa, sai em caixa alta
      * @param argumentos argumentos do formato
      */
-    public static void cabecalhoEtapa(Machine maquina, String formato, Object... argumentos) {
+    public static void cabecalhoEtapa(Maquina maquina, String formato, Object... argumentos) {
         String titulo = ROXO + "▸ " + String.format(formato.toUpperCase(), argumentos) + RESET;
         String saude = String.format("%d/%d", maquina.getSaude(), maquina.getSaudeMaxima());
         String chanceFalha = "";
@@ -288,9 +288,9 @@ public class ConsolePrinter {
      *
      * @param gerenciador gerenciador da produção, de onde vêm as demandas e o orçamento
      */
-    public static void listarDemandas(ProductionManager gerenciador) {
+    public static void listarDemandas(GerenciadorProducao gerenciador) {
         List<Demanda> demandas = gerenciador.getDemandas();
-        double custoProjetadoTotal = gerenciador.getProjectedCost(); // also refreshes each demand's cost btw
+        double custoProjetadoTotal = gerenciador.getCustoProjetado(); // also refreshes each demand's cost btw
 
         System.out.printf("    " + CINZA + FORMATO_LINHA_DEMANDA + RESET + "\n",
                 "Produto", "Demanda", "MP", "Custo", "Status", "Tempo");

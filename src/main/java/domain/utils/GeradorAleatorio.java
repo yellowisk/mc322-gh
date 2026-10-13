@@ -8,12 +8,12 @@ import java.util.Random;
  *
  * @author Heitor Almeida
  */
-public final class RandomProvider {
-    private static Random random = new Random();
+public final class GeradorAleatorio {
+    private static Random aleatorio = new Random();
     /* começa aleatório de verdade por padrão */
     private static Long seed = null;
 
-    private RandomProvider() {}
+    private GeradorAleatorio() {}
 
     /**
      * Fixa a seed, recriando o gerador. A partir daí os sorteios se repetem igual em toda execução
@@ -22,7 +22,7 @@ public final class RandomProvider {
      */
     public static void setSeed(long novaSeed) {
         seed = novaSeed;
-        random = new Random(novaSeed);
+        aleatorio = new Random(novaSeed);
     }
 
     /**
@@ -42,7 +42,7 @@ public final class RandomProvider {
      * @return inteiro entre 0 e o limite
      */
     public static int sortearInt(int limite) {
-        return random.nextInt(limite);
+        return aleatorio.nextInt(limite);
     }
 
     /**
@@ -51,7 +51,7 @@ public final class RandomProvider {
      * @return double entre 0 e 1
      */
     public static double sortearDouble() {
-        return random.nextDouble();
+        return aleatorio.nextDouble();
     }
 
     /**

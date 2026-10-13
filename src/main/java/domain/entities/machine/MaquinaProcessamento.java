@@ -1,14 +1,14 @@
 package domain.entities.machine;
 
 import domain.entities.product.Produto;
-import domain.entities.product.ProductStatus;
+import domain.entities.product.StatusProduto;
 
 /**
  * Primeira etapa da linha: transforma a matéria-prima em um produto novo
  *
  * @author Heitor Almeida
  */
-public class ProcessingMachine extends Machine {
+public class MaquinaProcessamento extends Maquina {
 
     /**
      * Cria a máquina de processamento
@@ -20,14 +20,14 @@ public class ProcessingMachine extends Machine {
      * @param multiplicadorCenario multiplicador de falha do cenário
      * @param desgasteMaximo desgaste máximo por uso
      */
-    public ProcessingMachine(String nome, int capacidadeMaxima, double chanceFalhaBase,
+    public MaquinaProcessamento(String nome, int capacidadeMaxima, double chanceFalhaBase,
                              double custoOperacao, double multiplicadorCenario,
                              int desgasteMaximo) {
         super(nome, capacidadeMaxima, chanceFalhaBase, custoOperacao, multiplicadorCenario, desgasteMaximo);
     }
 
     /**
-     * Cria uma unidade nova a partir do modelo do catálogo, já como {@link ProductStatus#PROCESSED}.
+     * Cria uma unidade nova a partir do modelo do catálogo, já como {@link StatusProduto#PROCESSADO}.
      * Se a máquina falhar no sorteio, a unidade sai c/ mais risco acumulado
      *
      * @param produto modelo do catálogo
@@ -35,7 +35,7 @@ public class ProcessingMachine extends Machine {
      */
     @Override
     public Produto processarEtapa(Produto produto) {
-        Produto novoProduto = produto.processar(produto, ProductStatus.PROCESSED);
+        Produto novoProduto = produto.processar(produto, StatusProduto.PROCESSADO);
         tentaAumentarRisco(novoProduto);
         return novoProduto;
     }

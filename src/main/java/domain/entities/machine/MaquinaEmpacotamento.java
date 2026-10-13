@@ -1,14 +1,14 @@
 package domain.entities.machine;
 
 import domain.entities.product.Produto;
-import domain.entities.product.ProductStatus;
+import domain.entities.product.StatusProduto;
 
 /**
  * Segunda etapa da linha: empacota o produto que saiu do processamento
  *
  * @author Heitor Almeida
  */
-public class PackingMachine extends Machine {
+public class MaquinaEmpacotamento extends Maquina {
 
     /**
      * Cria a máquina de empacotamento
@@ -20,14 +20,14 @@ public class PackingMachine extends Machine {
      * @param multiplicadorCenario multiplicador de falha do cenário
      * @param desgasteMaximo desgaste máximo por uso
      */
-    public PackingMachine(String nome, int capacidadeMaxima, double chanceFalhaBase,
+    public MaquinaEmpacotamento(String nome, int capacidadeMaxima, double chanceFalhaBase,
                              double custoOperacao, double multiplicadorCenario,
                              int desgasteMaximo) {
         super(nome, capacidadeMaxima, chanceFalhaBase, custoOperacao, multiplicadorCenario, desgasteMaximo);
     }
 
     /**
-     * Marca o produto como {@link ProductStatus#PACKED}. Se a máquina falhar no sorteio,
+     * Marca o produto como {@link StatusProduto#EMPACOTADO}. Se a máquina falhar no sorteio,
      * o produto sai c/ mais risco acumulado
      *
      * @param produto produto vindo do processamento
@@ -37,7 +37,7 @@ public class PackingMachine extends Machine {
     public Produto processarEtapa(Produto produto) {
         tentaAumentarRisco(produto);
 
-        produto.setStatus(ProductStatus.PACKED);
+        produto.setStatus(StatusProduto.EMPACOTADO);
         return produto;
     }
 

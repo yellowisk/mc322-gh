@@ -3,9 +3,9 @@ package domain.entities.productionmanager;
 import domain.entities.demand.Demanda;
 import domain.entities.demand.StatusDemanda;
 import domain.entities.conveyor.Esteira;
-import domain.entities.machine.Machine;
+import domain.entities.machine.Maquina;
 import domain.entities.product.Produto;
-import domain.entities.product.ProductStatus;
+import domain.entities.product.StatusProduto;
 import domain.entities.rawmaterial.MateriaPrima;
 import domain.entities.report.Relatorio;
 import domain.exceptions.InsufficientBudgetException;
@@ -17,7 +17,7 @@ import domain.exceptions.MachineUnavailableException;
 import domain.exceptions.NoStrategySelectedException;
 import domain.exceptions.NullDemandException;
 import domain.exceptions.PlantaException;
-import domain.interfaces.ProductionStrategy;
+import domain.interfaces.EstrategiaProducao;
 import view.ConsolePrinter;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import java.util.List;
  * @author Heitor Almeida
  * @author Glayson Oliveira
  */
-public class ProductionManager {
+public class GerenciadorProducao {
     /// ArrayList de demandas. Haverá uma demanda por produtosDisponiveisFabricacao
     private List<Demanda> demandas = new ArrayList<Demanda>();
     /// ArrayList de produtos fabricados com sucesso e com necessidade de reparo
@@ -39,19 +39,19 @@ public class ProductionManager {
     /// Arraylist de produtos que servirão de moldes/exemplo para o menu e para a produção nas máquinas
     private List<Produto> produtosDisponiveisFabricacao = new ArrayList<Produto>();
     /// ArrayList de máquinas existentes na fábrica
-    private List<Machine> maquinas = new ArrayList<Machine>();
+    private List<Maquina> maquinas = new ArrayList<Maquina>();
     /// esteira da fábrica
     private Esteira esteira;
     /// produto selecionado atualmente
-    private Produto currProduto;
+    private Produto produtoAtual;
     /// matéria-prima da fábrica
     private final MateriaPrima materiaPrima;
     /// verba atual da fábrica
     private float verba;
     /// estratégia selecionada atualmente
-    private ProductionStrategy currEstrategia;
+    private EstrategiaProducao estrategiaAtual;
     /// número de lotes produzidos
-    private int loteCount = 0;
+    private int contadorLote = 0;
     /// objeto da classe Relatorio para salvar dados para log
     private Relatorio relatorio;
     /// lista das etapas de produção instanciada para evitar laço 'for' otimizado direto no Enum.
@@ -60,14 +60,14 @@ public class ProductionManager {
     /**
      * Cria o gerenciador sem máquinas, produtos, esteira nem estratégia, que são adicionados depois pelo menu
      *
-     * @param rawMaterial matéria-prima da fábrica
-     * @param budget verba inicial, em R$, que vem do cenário escolhido
-     * @param rp relatório onde a auditoria vai acumulando os dados da produção
+     * @param materiaPrima matéria-prima da fábrica
+     * @param verba verba inicial, em R$, que vem do cenário escolhido
+     * @param relatorio relatório onde a auditoria vai acumulando os dados da produção
      */
-    public ProductionManager(MateriaPrima rawMaterial, float budget, Relatorio rp) {
-        this.materiaPrima = rawMaterial;
-        this.verba = budget;
-        this.relatorio = rp;
+    public GerenciadorProducao(MateriaPrima materiaPrima, float verba, Relatorio relatorio) {
+        this.materiaPrima = materiaPrima;
+        this.verba = verba;
+        this.relatorio = relatorio;
     }
     
     /**
@@ -121,7 +121,7 @@ public class ProductionManager {
      * Adiciona uma máquina na lista de máquinas
      * @param m a máquina a ser adicionada
      */
-    public void adicionarMaquina(Machine m) {
+    public void adicionarMaquina(Maquina m) {
         this.maquinas.add(m);
     }
     
@@ -130,8 +130,8 @@ public class ProductionManager {
      *
      * @param s nova estratégia
      */
-    public void setCurrEstrategia(ProductionStrategy s) {
-        this.currEstrategia = s;
+    public void setEstrategiaAtual(EstrategiaProducao s) {
+        this.estrategiaAtual = s;
     }
     
     /**
@@ -139,8 +139,8 @@ public class ProductionManager {
      *
      * @return estratégia atual, ou null se nenhuma tiver sido escolhida
      */
-    public ProductionStrategy getCurrEstrategia() {
-        return this.currEstrategia;
+    public EstrategiaProducao getEstrategiaAtual() {
+        return this.estrategiaAtual;
     }
 
     /**
@@ -151,21 +151,21 @@ public class ProductionManager {
      * @throws domain.exceptions.PlantaException qualquer erro de {@link #produzirDemanda(Demanda)}
      */
     public void iniciarProducao() {
-        if (this.currEstrategia == null) {
+        if (this.estrategiaAtual == null) {
             throw new NoStrategySelectedException("Nenhuma estratégia de produção selecionada.\n");
         }
 
-        Demanda nextDemanda = espiarProximaDemanda();
+        Demanda proximaDemanda = espiarProximaDemanda();
 
-        if (nextDemanda == null) {
-            String buffer = String.format("Dessa vez não é! %s não encontrou nenhuma demanda elegível.\n",
-                    this.currEstrategia.getNomeEstrategia());
-            throw new NullDemandException(buffer);
+        if (proximaDemanda == null) {
+            String mensagem = String.format("Dessa vez não é! %s não encontrou nenhuma demanda elegível.\n",
+                    this.estrategiaAtual.getNomeEstrategia());
+            throw new NullDemandException(mensagem);
         }
 
         System.out.printf("%s escolheu: %s (%d un)\n",
-                this.currEstrategia.getNomeEstrategia(), nextDemanda.getNomeProduto(), nextDemanda.getQuantidade());
-        produzirDemanda(nextDemanda);
+                this.estrategiaAtual.getNomeEstrategia(), proximaDemanda.getNomeProduto(), proximaDemanda.getQuantidade());
+        produzirDemanda(proximaDemanda);
     }
 
     /**
@@ -173,12 +173,12 @@ public class ProductionManager {
      * @return próxima demanda
      */
     public Demanda espiarProximaDemanda() {
-        if (this.currEstrategia == null) {
+        if (this.estrategiaAtual == null) {
             return null;
         }
         // ehViavel() and getCustoEstimado() read cached cost, so it's gotta be fresh beforehand
         atualizarCustoEstimadoTodasDemandas();
-        return this.currEstrategia.selecionarDemanda(this.demandas, this.verba);
+        return this.estrategiaAtual.selecionarDemanda(this.demandas, this.verba);
     }
 
     /**
@@ -186,20 +186,20 @@ public class ProductionManager {
      * @return custo total de operação
      */
     public double calcCustoTotalOperacao() {
-        double sum = 0;
-        for (Machine m : this.maquinas) {
-            sum += m.getCustoOperacao();
+        double soma = 0;
+        for (Maquina m : this.maquinas) {
+            soma += m.getCustoOperacao();
         }
-        return sum;
+        return soma;
     }
 
     /**
      * Atualiza o custo estimado de todas as demandas
      */
     public void atualizarCustoEstimadoTodasDemandas() {
-        double unitOperationCost = calcCustoTotalOperacao();
+        double custoOperacaoUnitario = calcCustoTotalOperacao();
         for (Demanda d : this.demandas) {
-            d.atualizarCustoEstimado(unitOperationCost);
+            d.atualizarCustoEstimado(custoOperacaoUnitario);
         }
     }
 
@@ -209,7 +209,7 @@ public class ProductionManager {
      *
      * @return custo total projetado, em R$
      */
-    public double getProjectedCost() {
+    public double getCustoProjetado() {
         atualizarCustoEstimadoTodasDemandas();
         double total = 0;
         for (Demanda d : this.demandas) {
@@ -227,97 +227,97 @@ public class ProductionManager {
      * Todas as verificações rodam antes de mexer em qualquer estado, então se uma falhar
      * nada é alterado (estoque, verba e status da demanda continuam iguais).
      *
-     * @param demand A demanda que será fabricada.
+     * @param demanda A demanda que será fabricada.
      * @throws MachineNeedsRepairException se alguma máquina precisar de reparo
      * @throws InvalidDemandException se o produto da demanda não existir ou se ela não tiver unidades pedidas
      * @throws InvalidDemandTransitionException se o status da demanda não permitir fabricar
      * @throws InsufficientBudgetException se o orçamento não cobrir o custo estimado
      */
-    public void produzirDemanda(Demanda demand) {
+    public void produzirDemanda(Demanda demanda) {
         // VERIFICAÇÕES
         if (temMaquinaQuebrada()) {
             throw new MachineNeedsRepairException("Não podemos iniciar a fabricação. Há máquinas precisando de reparo.");
         }
 
-        this.currProduto = this.getProdutoPeloNome(demand.getNomeProduto());
+        this.produtoAtual = this.getProdutoPeloNome(demanda.getNomeProduto());
 
-        if (currProduto == null) {
+        if (produtoAtual == null) {
             throw new InvalidDemandException("Dessa vez não é! Produto sem demanda cadastrada.");
         }
 
-        if (demand.getQuantidade() <= 0) {
+        if (demanda.getQuantidade() <= 0) {
             throw new InvalidDemandException(String.format(
                     "Dessa vez não é! Nenhuma unidade de %s foi demandada. Atualize a demanda antes de fabricar.",
-                    currProduto.getNome()));
+                    produtoAtual.getNome()));
         }
 
-        if (!demand.getStatus().podeSerFabricada()) {
+        if (!demanda.getStatus().podeSerFabricada()) {
             throw new InvalidDemandTransitionException(String.format(
                     "Dessa vez não é! Demanda de %s está %s e não pode ser fabricada. Atualize a demanda para reativá-la.",
-                    currProduto.getNome(), demand.getStatus().getDescricao()));
+                    produtoAtual.getNome(), demanda.getStatus().getDescricao()));
         }
 
         atualizarCustoEstimadoTodasDemandas();
-        if (!demand.ehViavel(this.verba)) {
+        if (!demanda.ehViavel(this.verba)) {
             throw new InsufficientBudgetException(String.format(
                     "Dessa vez não é! Orçamento insuficiente para fabricar %s: custo R$ %.2f, orçamento R$ %.2f.",
-                    currProduto.getNome(), demand.getCustoEstimado(), this.verba));
+                    produtoAtual.getNome(), demanda.getCustoEstimado(), this.verba));
         }
 
-        int alreadyProduced = demand.getQuantidadeProduzida();
-        if (demand.getStatus() == StatusDemanda.CANCELADA && alreadyProduced > 0) {
+        int jaProduzidas = demanda.getQuantidadeProduzida();
+        if (demanda.getStatus() == StatusDemanda.CANCELADA && jaProduzidas > 0) {
             ConsolePrinter.arvoreInfo(false, "Retomando demanda de %s de onde parou (%d/%d).",
-                    currProduto.getNome(), alreadyProduced, demand.getQuantidade());
+                    produtoAtual.getNome(), jaProduzidas, demanda.getQuantidade());
         }
 
 
-        demand.iniciarProducao();
-        int batch = ++this.loteCount;
+        demanda.iniciarProducao();
+        int lote = ++this.contadorLote;
 
         this.getEsteira().ligar();
-        for (Machine m: this.getMaquinas()) {
+        for (Maquina m: this.getMaquinas()) {
             m.ligar();
         }
 
-        System.out.printf("Eitcha!!! Iniciando produção de: %s (lote %d)\n", currProduto.getNome(), batch);
+        System.out.printf("Eitcha!!! Iniciando produção de: %s (lote %d)\n", produtoAtual.getNome(), lote);
         ConsolePrinter.pausarProducao(1500);
 
-        int productsRemaining = demand.getQuantidadeRestante();
-        int sectionFabricatedAmount = 0;
+        int quantidadeRestante = demanda.getQuantidadeRestante();
+        int fabricadasNaRodada = 0;
 
         // Variáveis de auditoria
-        int sectionApprovedAmount = 0;
-        int sectionNeedsMaintenanceAmount = 0;
-        int sectionRejectedAmount = 0;
-        double sectionProductionTime = 0;
-        double sectionMoneySpent = 0;
+        int aprovadasNaRodada = 0;
+        int precisamManutencaoNaRodada = 0;
+        int rejeitadasNaRodada = 0;
+        double tempoProducaoNaRodada = 0;
+        double dinheiroGastoNaRodada = 0;
 
-        Produto currentProduct = null;
+        Produto produtoNaLinha = null;
 
-        while (sectionFabricatedAmount < productsRemaining) {
-            System.out.printf("(%d/%d) %s " + "─".repeat(24) + "\n", (alreadyProduced + sectionFabricatedAmount + 1), demand.getQuantidade(), currProduto.getNome());
+        while (fabricadasNaRodada < quantidadeRestante) {
+            System.out.printf("(%d/%d) %s " + "─".repeat(24) + "\n", (jaProduzidas + fabricadasNaRodada + 1), demanda.getQuantidade(), produtoAtual.getNome());
 
             try {
                 for (EtapaProducao etapaAtual : etapasProducao) {
-                    Machine currentMachine = this.maquinas.get(etapaAtual.getCodigo());
+                    Maquina maquinaAtual = this.maquinas.get(etapaAtual.getCodigo());
 
-                    ConsolePrinter.cabecalhoEtapa(currentMachine, "%s", etapaAtual.getNome());
+                    ConsolePrinter.cabecalhoEtapa(maquinaAtual, "%s", etapaAtual.getNome());
 
                     // Confere tudo antes de cobrar a etapa, p/ não pagar por uma operação que não vai acontecer
-                    currentMachine.verificarDisponivel();
-                    double materiaPrimaPorUnidade = currProduto.getQuantidadeMateriaPrimaPorUnidade();
+                    maquinaAtual.verificarDisponivel();
+                    double materiaPrimaPorUnidade = produtoAtual.getQuantidadeMateriaPrimaPorUnidade();
                     if (etapaAtual == EtapaProducao.PROCESSAMENTO && !this.materiaPrima.estaDisponivel(materiaPrimaPorUnidade)) {
                         throw new InsufficientRawMaterialException(String.format(
                                 "Cadê a força? Estoque insuficiente para fabricar mais um %s: precisa de %.2f %s. "
                                         + "Compre matéria-prima e fabrique de novo para continuar de onde parou.",
-                                currProduto.getNome(), materiaPrimaPorUnidade, this.materiaPrima.getUnidade()));
+                                produtoAtual.getNome(), materiaPrimaPorUnidade, this.materiaPrima.getUnidade()));
                     }
 
-                    if (!calcProductionCost(currentMachine)) {
-                        String mensagem = String.format("Dessa vez não é! Orçamento insuficiente para operar a máquina de %s!", currentMachine.getTipo());
+                    if (!descontarCustoOperacao(maquinaAtual)) {
+                        String mensagem = String.format("Dessa vez não é! Orçamento insuficiente para operar a máquina de %s!", maquinaAtual.getTipo());
                         throw new InsufficientBudgetException(mensagem);
                     }
-                    sectionMoneySpent += currentMachine.getCustoOperacao(); // Auditoria
+                    dinheiroGastoNaRodada += maquinaAtual.getCustoOperacao(); // Auditoria
 
                     if (etapaAtual == EtapaProducao.PROCESSAMENTO) {
                         esteira.adicionarMateriaPrima(materiaPrimaPorUnidade);
@@ -325,45 +325,45 @@ public class ProductionManager {
 
                         this.materiaPrima.consumir(esteira.removerMateriaPrima());
                         relatorio.aumentarMateriaPrimaGasta(materiaPrimaPorUnidade); // Auditoria, só depois do consumo
-                        ConsolePrinter.arvoreInfo(false, "%s transportado até a máquina de %s. E é ligeiro!", this.materiaPrima.getNome(), currentMachine.getTipo());
+                        ConsolePrinter.arvoreInfo(false, "%s transportado até a máquina de %s. E é ligeiro!", this.materiaPrima.getNome(), maquinaAtual.getTipo());
 
-                        ConsolePrinter.arvoreInfo(false, "Máquina %s %.2f %s de %s...", etapaAtual.getGerundio(), this.currProduto.getQuantidadeMateriaPrimaPorUnidade(), this.materiaPrima.getUnidade(), this.materiaPrima.getNome());
-                        currentProduct = currentMachine.processar(this.currProduto);
-                        currentProduct.setLote(batch);
+                        ConsolePrinter.arvoreInfo(false, "Máquina %s %.2f %s de %s...", etapaAtual.getGerundio(), this.produtoAtual.getQuantidadeMateriaPrimaPorUnidade(), this.materiaPrima.getUnidade(), this.materiaPrima.getNome());
+                        produtoNaLinha = maquinaAtual.processar(this.produtoAtual);
+                        produtoNaLinha.setLote(lote);
 
-                        ConsolePrinter.arvoreOk(true, "Tu não acredita! Sabe o que é? \"%s\" #%d criado.", currentProduct.getNome(), currentProduct.getId());
-                        this.esteira.adicionarProduto(currentProduct);
+                        ConsolePrinter.arvoreOk(true, "Tu não acredita! Sabe o que é? \"%s\" #%d criado.", produtoNaLinha.getNome(), produtoNaLinha.getId());
+                        this.esteira.adicionarProduto(produtoNaLinha);
                     } else {
-                        ConsolePrinter.arvoreInfo(false, "%s #%d transportado até a máquina de %s. E é ligeiro!", currentProduct.getNome(), currentProduct.getId(), currentMachine.getTipo());
+                        ConsolePrinter.arvoreInfo(false, "%s #%d transportado até a máquina de %s. E é ligeiro!", produtoNaLinha.getNome(), produtoNaLinha.getId(), maquinaAtual.getTipo());
 
-                        ConsolePrinter.arvoreInfo(false, "Máquina %s o produto %s #%d...", etapaAtual.getGerundio(), currentProduct.getNome(), currentProduct.getId());
-                        currentProduct = currentMachine.processar(this.esteira.removerProduto());
+                        ConsolePrinter.arvoreInfo(false, "Máquina %s o produto %s #%d...", etapaAtual.getGerundio(), produtoNaLinha.getNome(), produtoNaLinha.getId());
+                        produtoNaLinha = maquinaAtual.processar(this.esteira.removerProduto());
 
-                        ConsolePrinter.arvoreOk(true, "Produto %s #%d foi %s com sucesso.", currentProduct.getNome(), currentProduct.getId(), etapaAtual.getVerboParticipio());
-                        this.esteira.adicionarProduto(currentProduct);
+                        ConsolePrinter.arvoreOk(true, "Produto %s #%d foi %s com sucesso.", produtoNaLinha.getNome(), produtoNaLinha.getId(), etapaAtual.getVerboParticipio());
+                        this.esteira.adicionarProduto(produtoNaLinha);
                     }
                 }
 
                 // Validação final
-                if (currentProduct.getStatus() == ProductStatus.APPROVED) {
+                if (produtoNaLinha.getStatus() == StatusProduto.APROVADO) {
                     this.produtosFabricados.add(this.esteira.removerProduto());
-                    ConsolePrinter.arvoreOk(true, "Eitcha, como ele tem força! O produto %s #%d" + ConsolePrinter.VERDE + " foi aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getNome(), currentProduct.getId());
-                    sectionApprovedAmount++;
+                    ConsolePrinter.arvoreOk(true, "Eitcha, como ele tem força! O produto %s #%d" + ConsolePrinter.VERDE + " foi aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", produtoNaLinha.getNome(), produtoNaLinha.getId());
+                    aprovadasNaRodada++;
                     relatorio.aumentarTotalProdutosAprovados();
-                } else if (currentProduct.getStatus() == ProductStatus.TO_REPAIR) {
+                } else if (produtoNaLinha.getStatus() == StatusProduto.PRECISA_MANUTENCAO) {
                     this.produtosFabricados.add(this.esteira.removerProduto());
-                    ConsolePrinter.arvoreOk(true, "Cade a força? O produto %s #%d" + ConsolePrinter.AMARELO + " foi parcialmente aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getNome(), currentProduct.getId());
-                    sectionNeedsMaintenanceAmount++;
+                    ConsolePrinter.arvoreOk(true, "Cade a força? O produto %s #%d" + ConsolePrinter.AMARELO + " foi parcialmente aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", produtoNaLinha.getNome(), produtoNaLinha.getId());
+                    precisamManutencaoNaRodada++;
                     relatorio.aumentarTotalProdutosPrecisamManutencao();
                 } else {
                     this.esteira.removerProduto();
-                    ConsolePrinter.arvoreFalha(true, "Cade a força? O produto %s #%d" + ConsolePrinter.VERMELHO + " foi rejeitado" + ConsolePrinter.RESET + " na inspeção e descartado.", currentProduct.getNome(), currentProduct.getId());
+                    ConsolePrinter.arvoreFalha(true, "Cade a força? O produto %s #%d" + ConsolePrinter.VERMELHO + " foi rejeitado" + ConsolePrinter.RESET + " na inspeção e descartado.", produtoNaLinha.getNome(), produtoNaLinha.getId());
                     relatorio.aumentarTotalProdutosRejeitados();
-                    sectionRejectedAmount++;
+                    rejeitadasNaRodada++;
                 }
 
-                sectionProductionTime += currProduto.calcularTempoProducao();
-                sectionFabricatedAmount++;
+                tempoProducaoNaRodada += produtoAtual.calcularTempoProducao();
+                fabricadasNaRodada++;
 
             } catch (PlantaException e) {
                 // Máquina quebrou ou orçamento/matéria-prima acabaram no meio do lote: a demanda é cancelada c/ o progresso salvo
@@ -373,29 +373,29 @@ public class ProductionManager {
             }
         }
 
-        relatorio.aumentarDinheiroGasto(sectionMoneySpent);
-        relatorio.aumentarTempoTotalProducao(sectionProductionTime);
+        relatorio.aumentarDinheiroGasto(dinheiroGastoNaRodada);
+        relatorio.aumentarTempoTotalProducao(tempoProducaoNaRodada);
         relatorio.calcularTaxaSucesso();
 
-        String infoText;
+        String textoInfo;
 
-        if (sectionFabricatedAmount == productsRemaining) {
-            demand.concluir(sectionFabricatedAmount, sectionProductionTime);
-            infoText = String.format(" Demanda de %s concluída em %.2f segundos de produção.",
-                    demand.getNomeProduto(), demand.getTempoTotalProducao());
+        if (fabricadasNaRodada == quantidadeRestante) {
+            demanda.concluir(fabricadasNaRodada, tempoProducaoNaRodada);
+            textoInfo = String.format(" Demanda de %s concluída em %.2f segundos de produção.",
+                    demanda.getNomeProduto(), demanda.getTempoTotalProducao());
         } else {
-            demand.cancelar(sectionFabricatedAmount, sectionProductionTime);
-            infoText = String.format(" Demanda de %s cancelada (%d/%d). Fabrique de novo para continuar de onde parou.",
-                    demand.getNomeProduto(), demand.getQuantidadeProduzida(), demand.getQuantidade());
+            demanda.cancelar(fabricadasNaRodada, tempoProducaoNaRodada);
+            textoInfo = String.format(" Demanda de %s cancelada (%d/%d). Fabrique de novo para continuar de onde parou.",
+                    demanda.getNomeProduto(), demanda.getQuantidadeProduzida(), demanda.getQuantidade());
         }
 
-        ConsolePrinter.cartao("%d produtos fabricados: %d aprovados, %d precisam de manutenção e %d rejeitados." + "\n" + infoText,
-                sectionFabricatedAmount, sectionApprovedAmount,
-                sectionNeedsMaintenanceAmount, sectionRejectedAmount);
+        ConsolePrinter.cartao("%d produtos fabricados: %d aprovados, %d precisam de manutenção e %d rejeitados." + "\n" + textoInfo,
+                fabricadasNaRodada, aprovadasNaRodada,
+                precisamManutencaoNaRodada, rejeitadasNaRodada);
 
         // Desliga as máquinas
         this.getEsteira().desligar();
-        for (Machine m: this.getMaquinas()) {
+        for (Maquina m: this.getMaquinas()) {
             m.desligar();
         }
     }
@@ -414,14 +414,14 @@ public class ProductionManager {
 
     /**
      * Desconta da verba o custo de operar a máquina numa etapa, se a verba cobrir
-     * @param machine máquina da etapa
+     * @param maquina máquina da etapa
      * @return true se o custo foi descontado, false se a verba não cobre (e nada é descontado)
      */
-    private boolean calcProductionCost(Machine machine) {
+    private boolean descontarCustoOperacao(Maquina maquina) {
         // for those who just entered the stream: calc is short for _calculate_
         // yellowisk: lol, good one
-        if (this.verba >= machine.getCustoOperacao()) {
-            this.verba -= (float) machine.getCustoOperacao();
+        if (this.verba >= maquina.getCustoOperacao()) {
+            this.verba -= (float) maquina.getCustoOperacao();
             return true;
         }
         return false;
@@ -430,18 +430,18 @@ public class ProductionManager {
     /**
      * Compra matéria-prima e desconta o valor da verba. Se a verba não cobrir, nada é alterado
      *
-     * @param amount quantidade a comprar, na unidade da matéria-prima
+     * @param quantidade quantidade a comprar, na unidade da matéria-prima
      * @return quanto a compra custou no total, em R$
      * @throws InsufficientBudgetException se a verba não cobrir a compra
      */
-    public float buyRawMaterial(int amount) {
-        float totalCost = amount * this.materiaPrima.getPreco();
-        if (this.verba < totalCost) {
+    public float comprarMateriaPrima(int quantidade) {
+        float custoTotal = quantidade * this.materiaPrima.getPreco();
+        if (this.verba < custoTotal) {
             throw new InsufficientBudgetException("Dessa vez não é! Orçamento insuficiente para comprar matéria-prima!");
         }
-        verba -= totalCost;
-        this.materiaPrima.adicionarEstoque(amount);
-        return totalCost;
+        verba -= custoTotal;
+        this.materiaPrima.adicionarEstoque(quantidade);
+        return custoTotal;
     }
 
     // === REPAIR ===
@@ -451,7 +451,7 @@ public class ProductionManager {
      * @param m A máquina a ser reparada
      * @throws MachineUnavailableException se a máquina estiver c/ a saúde cheia e não precisar de reparo
      */
-    public void repairMachine(Machine m) {
+    public void repararMaquina(Maquina m) {
         if (!(m.getSaude() < m.getSaudeMaxima())) {
             throw new MachineUnavailableException("Não foi dessa vez! A " + m.getNome() + " não precisa de reparo.");
         }
@@ -483,7 +483,7 @@ public class ProductionManager {
      *
      * @return lista de máquinas
      */
-    public List<Machine> getMaquinas() {
+    public List<Maquina> getMaquinas() {
         return this.maquinas;
     }
 
@@ -508,10 +508,10 @@ public class ProductionManager {
     /**
      * Define a esteira que leva a matéria-prima e os produtos entre as máquinas
      *
-     * @param conveyor esteira da fábrica
+     * @param esteira esteira da fábrica
      */
-    public void addNewConveyor(Esteira conveyor) {
-        this.esteira = conveyor;
+    public void adicionarEsteira(Esteira esteira) {
+        this.esteira = esteira;
     }
 
     /**
@@ -540,6 +540,6 @@ public class ProductionManager {
      * @return true se tiver máquina esperando reparo
      */
     public boolean temMaquinaQuebrada() {
-        return this.maquinas.stream().anyMatch(Machine::precisaManutencao);
+        return this.maquinas.stream().anyMatch(Maquina::precisaManutencao);
     }
 }
