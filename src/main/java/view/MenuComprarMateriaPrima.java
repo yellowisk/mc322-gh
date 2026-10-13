@@ -2,7 +2,7 @@ package view;
 
 import domain.entities.productionmanager.GerenciadorProducao;
 import domain.entities.rawmaterial.MateriaPrima;
-import domain.exceptions.OrcamentoInsuficienteException;
+import domain.exceptions.PlantaException;
 
 /**
  * Submenu de compra de matéria-prima. Mostra o estoque e o preço, pede a quantidade, mostra a verba
@@ -68,7 +68,12 @@ public class MenuComprarMateriaPrima extends Submenu {
             int confirmacao = menu.lerInteiro("Confirmar compra? [" + ConsolePrinter.colorir(ConsolePrinter.VERDE, "1") + "] Sim / ["
                     + ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "0") + "] Não: ");
 
-            if (confirmacao != 1) {
+            if (confirmacao != 0 && confirmacao != 1) {
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida! Responda 1 p/ sim ou 0 p/ não."));
+                continue;
+            }
+
+            if (confirmacao == 0) {
                 menu.setUltimaMensagem(ConsolePrinter.colorir(cor, "Compra cancelada."));
                 continue;
             }
@@ -81,7 +86,7 @@ public class MenuComprarMateriaPrima extends Submenu {
                     menu.setUltimaMensagem(ConsolePrinter.textoOk("Eitcha!!! Compra de matéria-prima realizada com sucesso!"));
                 }
                 break;
-            } catch (OrcamentoInsuficienteException e) {
+            } catch (PlantaException e) {
                 menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }

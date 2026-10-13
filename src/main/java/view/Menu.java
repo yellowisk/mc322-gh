@@ -41,7 +41,9 @@ public class Menu {
         boolean rodando = true;
 
         imprimirTelaInicial();
-        escolherCenario();
+        if (!escolherCenario()) {
+            return;
+        }
 
         gerenciadorProducao = new GerenciadorProducao(
                 new MateriaPrima("Vidro", 50, "kg", 5, 1),
@@ -164,13 +166,15 @@ public class Menu {
         ConsolePrinter.linha();
         System.out.println();
         System.out.println(ConsolePrinter.colorir(ConsolePrinter.AMARELO, "Pressione ENTER para começar..."));
-        leitor.nextLine();
+        lerLinha();
     }
 
     /**
      * Tela de seleção de cenário
+     *
+     * @return true se um cenário foi escolhido, false se o usuário escolheu sair
      */
-    private void escolherCenario() {
+    private boolean escolherCenario() {
 
         ConfiguracaoCenario[] cenarios = {
                 new ConfiguracaoCenario("Mercadinho Ideal", "Ideal", 1000, 0.5, 1),
@@ -194,12 +198,12 @@ public class Menu {
 
             int opcao = lerInteiro("Escolha: ");
 
-            if (opcao == 0) System.exit(0);
+            if (opcao == 0) return false;
 
             try {
                 validarOpcao(opcao, cenarios.length, "Dessa vez não é! Opção de cenário inválida!");
                 cenarioAtual = cenarios[opcao - 1];
-                break;
+                return true;
             } catch (OpcaoInvalidaException e) {
                 System.out.println("\n" + ConsolePrinter.textoFalha("%s", e.getMessage()));
                 esperarEnter();
@@ -224,14 +228,19 @@ public class Menu {
     }
 
     /**
-     * Lê um inteiro do usuário. Se ele digitar algo que não é número, avisa e pergunta de novo
+     * Lê um inteiro do usuário. Se ele digitar algo que não é número, avisa e pergunta de novo.
+     * Se a entrada do terminal acabar (ex.: Ctrl+D), retorna 0, que em todo menu é "voltar/sair",
+     * então o programa vai saindo dos menus e termina normalmente
      *
      * @param texto texto mostrado antes da entrada
-     * @return o número digitado
+     * @return o número digitado, ou 0 se a entrada acabou
      */
     int lerInteiro(String texto) {
         while (true) {
             System.out.print(texto);
+            if (!leitor.hasNext()) {
+                return 0;
+            }
             if (leitor.hasNextInt()) {
                 return leitor.nextInt();
             }
@@ -243,8 +252,15 @@ public class Menu {
     /** Espera o ENTER, mas antes consome a linha que sobra depois do nextInt() */
     void esperarEnter() {
         System.out.println("\n" + ConsolePrinter.colorir(ConsolePrinter.AMARELO, "Pressione ENTER para voltar..."));
-        leitor.nextLine();
-        leitor.nextLine();
+        lerLinha();
+        lerLinha();
+    }
+
+    /** Lê uma linha inteira da entrada. Se a entrada já acabou, não faz nada */
+    private void lerLinha() {
+        if (leitor.hasNextLine()) {
+            leitor.nextLine();
+        }
     }
 
     /**

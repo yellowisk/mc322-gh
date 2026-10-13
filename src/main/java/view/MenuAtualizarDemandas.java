@@ -2,7 +2,7 @@ package view;
 
 import domain.entities.demand.Demanda;
 import domain.entities.productionmanager.GerenciadorProducao;
-import domain.exceptions.QuantidadeDemandaInvalidaException;
+import domain.exceptions.PlantaException;
 import domain.exceptions.OpcaoInvalidaException;
 
 /**
@@ -60,7 +60,7 @@ public class MenuAtualizarDemandas extends Submenu {
             try {
                 gerenciadorProducao.atualizarDemanda(demandaEscolhida, novoValor);
                 menu.setUltimaMensagem(ConsolePrinter.textoOk("Demanda de %s atualizada para %d!", demandaEscolhida.getNomeProduto(), novoValor));
-            } catch (QuantidadeDemandaInvalidaException e) {
+            } catch (PlantaException e) {
                 menu.setUltimaMensagem(ConsolePrinter.textoFalha("Dessa vez não é! %s", e.getMessage()));
             }
         }
