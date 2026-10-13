@@ -2,6 +2,7 @@ package domain.entities.machine;
 
 import domain.entities.product.Product;
 import domain.exceptions.MachineNeedsRepairException;
+import domain.exceptions.MachineUnavailableException;
 import domain.interfaces.Auditable;
 import domain.utils.RandomProvider;
 import view.ConsolePrinter;
@@ -51,7 +52,7 @@ public abstract class Machine implements Auditable {
      */
     public Product process(Product product) {
         if (!isOn()) {
-            throw new IllegalStateException("Eitcha, João! The machine can't process anything, since it ain't on!");
+            throw new MachineUnavailableException("Eitcha, João! The machine can't process anything, since it ain't on!");
         }
 
         if (needsMaintenance()) {
