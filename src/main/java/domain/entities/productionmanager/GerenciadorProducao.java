@@ -269,8 +269,7 @@ public class GerenciadorProducao {
         double materiaPrimaNecessaria = demanda.getQuantidadeRestante() * produtoAtual.getQuantidadeMateriaPrimaPorUnidade();
         if (!this.materiaPrima.estaDisponivel(materiaPrimaNecessaria)) {
             throw new MateriaPrimaInsuficienteException(String.format(
-                    "Cadê a força? Estoque insuficiente para fabricar %d %s:\n precisa de %.2f %s, tem %.2f %s (mínimo %d %s). "
-                            + "Compre matéria-prima e fabrique de novo.",
+                    "Cadê a força? Estoque insuficiente para fabricar %d %s",
                     demanda.getQuantidadeRestante(), produtoAtual.getNome(),
                     materiaPrimaNecessaria, this.materiaPrima.getUnidade(),
                     this.materiaPrima.getQuantidade(), this.materiaPrima.getUnidade(),

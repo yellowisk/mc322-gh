@@ -57,7 +57,7 @@ public class MateriaPrima {
             throw new DemandaInvalidaException("Cadê a força? A demanda para consumo deve ser maior que zero.");
         }
         if (!estaDisponivel(quantidadePedida)) {
-            throw new MateriaPrimaInsuficienteException("Cadê a força? Estoque insuficiente para atender à demanda de " + quantidadePedida + " " + unidade + ".");
+            throw new MateriaPrimaInsuficienteException("Cadê a força? Estoque insuficiente para atender à \ndemanda de " + quantidadePedida + " " + unidade + ".");
         }
         this.quantidade -= quantidadePedida;
     }

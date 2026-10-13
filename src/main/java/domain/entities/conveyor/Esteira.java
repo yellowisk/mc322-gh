@@ -54,10 +54,10 @@ public class Esteira {
      */
     private void verificarPodeCarregar(double quantidade) {
         if (!this.ligada) {
-            throw new IllegalStateException("Dessa vez não é! A esteira está desligada.");
+            throw new MaquinaIndisponivelException("Dessa vez não é! A esteira está desligada.");
         }
         if (this.materiaPrima > 0 || this.produto != null) {
-            throw new IllegalStateException("Dessa vez não é! A esteira já está ocupada.");
+            throw new MaquinaIndisponivelException("Dessa vez não é! A esteira já está ocupada.");
         }
         if (!verificarCapacidade(quantidade)) {
             throw new IllegalArgumentException("Dessa vez não é! A esteira não aguenta esse peso.");
