@@ -1,44 +1,46 @@
 package view;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
 import domain.entities.rawmaterial.RawMaterial;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Submenu do armazém de matéria-prima
+ */
 public class RawMaterialStorageMenu extends Submenu {
 
-    public RawMaterialStorageMenu(Menu menu, ProductionManager productionManager) {
-        super(menu, productionManager, ConsolePrinter.BLUE);
+    public RawMaterialStorageMenu(Menu menu, ProductionManager gerenciadorProducao) {
+        super(menu, gerenciadorProducao, ConsolePrinter.AZUL);
     }
 
     @Override
-    public String icon() {
-        return ConsolePrinter.color(color, "≡");
+    public String icone() {
+        return ConsolePrinter.colorir(cor, "≡");
     }
 
     @Override
-    public String label() {
+    public String rotulo() {
         return "Ver armazém de matéria prima";
     }
 
     @Override
-    public void show() {
-        List<Product> fabricatedProducts = productionManager.getFabricatedProducts();
+    public void exibir() {
+        List<Produto> fabricatedProducts = gerenciadorProducao.getProdutosFabricados();
 
         // Agrupamento de produtos por listas
         List<Integer> batchNumbers = new ArrayList<>();
-        List<List<Product>> batchLists = new ArrayList<>();
-        for (Product p : fabricatedProducts) {
-            int batchNum = p.getBatch();
+        List<List<Produto>> batchLists = new ArrayList<>();
+        for (Produto p : fabricatedProducts) {
+            int batchNum = p.getLote();
             int index = batchNumbers.indexOf(batchNum);
 
             if (index == -1) {
                 // Se o lote ainda não existe nas listas, cria um novo
                 batchNumbers.add(batchNum);
-                List<Product> newList = new ArrayList<>();
+                List<Produto> newList = new ArrayList<>();
                 newList.add(p);
                 batchLists.add(newList);
             } else {
@@ -52,12 +54,12 @@ public class RawMaterialStorageMenu extends Submenu {
         boolean expandAll = true;
 
         while (true) {
-            printHeader();
+            imprimirCabecalho();
             System.out.println(" Matérias-prima disponíveis: ");
 
-            RawMaterial rm = productionManager.getRawMaterial();
-            String line = String.format(color + "%s" + ConsolePrinter.RESET + ": %.2f %s", rm.getName(), rm.getQuantity(), rm.getUnit());
-            ConsolePrinter.optionsList(line, "Voltar");
+            RawMaterial rm = gerenciadorProducao.getMateriaPrima();
+            String line = String.format(cor + "%s" + ConsolePrinter.RESET + ": %.2f %s", rm.getName(), rm.getQuantity(), rm.getUnit());
+            ConsolePrinter.listaOpcoes(line, "Voltar");
 
             menu.printFooter();
 
@@ -66,7 +68,7 @@ public class RawMaterialStorageMenu extends Submenu {
             if (option == 0) {
                 break;
             } else {
-                menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! Opção inválida!"));
+                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
             }
         }
     }

@@ -1,5 +1,9 @@
 package domain.entities.productionmanager;
 
+/**
+ * Etapas de produção. Esse enum foi criado para generalizar o processo de fabricação
+ * em ProductionManager
+ */
 public enum ProductionStages {
     PROCESSING(0, "processamento", "processando", "processado"),
     PACKAGING(1, "empacotamento", "empacotando", "empacotado"),

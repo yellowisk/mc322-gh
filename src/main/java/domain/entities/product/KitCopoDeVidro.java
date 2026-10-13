@@ -1,26 +1,37 @@
 package domain.entities.product;
 
-public class KitCopoDeVidro extends Product {
+/**
+ * Kit de copos de vidro, o produto de alta qualidade (1.0) e mais demorado (tempo base de 30s)
+ *
+ * @author Heitor Almeida
+ */
+public class KitCopoDeVidro extends Produto {
 
-    public KitCopoDeVidro(String name, double rawMaterialPerUnit) {
-        super(name, rawMaterialPerUnit, 1.0, 0.0);
+    /**
+     * Cria o kit c/ a qualidade fixa do tipo e risco acumulado 0
+     *
+     * @param nome nome que aparece nos menus
+     * @param quantidadeMateriaPrimaPorUnidade matéria-prima gasta por unidade, em kg
+     */
+    public KitCopoDeVidro(String nome, double quantidadeMateriaPrimaPorUnidade) {
+        super(nome, quantidadeMateriaPrimaPorUnidade, 1.0, 0.0);
     }
 
     @Override
-    public Product process(Product model, ProductStatus newStatus) {
-        Product p = new KitCopoDeVidro(model.getName(), model.getRawMaterialPerUnit());
-        p.setStatus(newStatus);
+    public Produto processar(Produto modelo, ProductStatus novoStatus) {
+        Produto p = new KitCopoDeVidro(modelo.getNome(), modelo.getQuantidadeMateriaPrimaPorUnidade());
+        p.setStatus(novoStatus);
         return p;
     }
 
     @Override
-    public double countProductionTime() {
-        double baseTime = 30.0;
-        return baseTime * randomFactor();
+    public double calcularTempoProducao() {
+        double tempoBase = 30.0;
+        return tempoBase * fatorAleatorio();
     }
 
     @Override
-    public String getType() {
+    public String getTipo() {
         return "Alta Qualidade";
     }
 }

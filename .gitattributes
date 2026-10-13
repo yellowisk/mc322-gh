@@ -1,0 +1,4 @@
+# gradlew must keep LF or it breaks on Linux/macOS, while .bat files need CRLF on Windows
+gradlew        text eol=lf
+*.bat          text eol=crlf
+*.jar          binary

@@ -6,28 +6,38 @@ import domain.interfaces.ProductionStrategy;
 import java.util.Comparator;
 import java.util.List;
 
-/*
-Biggest Demand!!
-
-https://www.instagram.com/p/DcRinHop9NR/
-Ferrari is a rich influencer that once visited the mercadinho and bought a lotta products there to get a 'balão surpresa'. Bro is definitely the typa person to buy as much products as possible the imo
-*/
+/**
+ * Estratégia da maior demanda: escolhe a demanda c/ mais unidades, mesmo que não caiba no orçamento.
+ * <p>
+ * O Ferrari é um influencer rico que uma vez visitou o mercadinho e comprou um monte de produto
+ * pra ganhar um balão surpresa. Com certeza o tipo de pessoa que compra o máximo possível
+ * (<a href="https://www.instagram.com/p/DcRinHop9NR/">o vídeo</a>)
+ *
+ * @author Heitor Almeida
+ */
 public class Ferrari implements ProductionStrategy {
 
+    /**
+     * Pega a demanda elegível c/ a maior quantidade. Ignora o orçamento
+     *
+     * @param demandas todas as demandas cadastradas
+     * @param orcamentoDisponivel não é usado por essa estratégia
+     * @return demanda c/ mais unidades, ou null se nenhuma for elegível
+     */
     @Override
-    public Demand selectDemand(List<Demand> demands, double availableBudget) {
-        return selectable(demands).stream()
+    public Demand selecionarDemanda(List<Demand> demandas, double orcamentoDisponivel) {
+        return selecionaveis(demandas).stream()
                 .max(Comparator.comparingInt(Demand::getAmount))
                 .orElse(null);
     }
 
     @Override
-    public String getStrategyName() {
+    public String getNomeEstrategia() {
         return "Ferrari";
     }
 
     @Override
-    public String getStrategyRule() {
+    public String getRegraEstrategia() {
         return "maior demanda";
     }
 }

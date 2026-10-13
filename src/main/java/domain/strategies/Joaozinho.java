@@ -10,28 +10,38 @@ import java.util.List;
  * Estratégia que seleciona a demanda com a maior quantidade
  * de produtos e que caiba no orçamento.
  *
- * Chamamos de João porque ele sempre ganha a maior quantidade de copos
+ * Chamamos de Joãozinho porque ele sempre ganha a maior quantidade de copos
  * nos vídeos
+ *
+ * @author Glayson Oliveira
  */
 public class Joaozinho implements ProductionStrategy {
     private final String nome = "Joãozinho";
 
+    /**
+     * Pega a demanda elegível c/ a maior quantidade entre as que cabem no orçamento.
+     * Usa o custo estimado de cada demanda, que o ProductionManager atualiza antes de chamar
+     *
+     * @param demandas todas as demandas cadastradas
+     * @param orcamentoDisponivel orçamento disponível, em R$
+     * @return demanda viável c/ mais unidades, ou null se nenhuma couber no orçamento
+     */
     @Override
-    public Demand selectDemand(List<Demand> demands, double availableBudget) {
+    public Demand selecionarDemanda(List<Demand> demandas, double orcamentoDisponivel) {
         // Entre as demandas que cabem no orçamento, pega a de maior quantidade de produtos
-        return selectable(demands).stream()
-                .filter(d -> d.isViable(availableBudget))
+        return selecionaveis(demandas).stream()
+                .filter(d -> d.isViable(orcamentoDisponivel))
                 .max(Comparator.comparingInt(Demand::getAmount))
                 .orElse(null);
     }
 
     @Override
-    public String getStrategyName() {
+    public String getNomeEstrategia() {
         return this.nome;
     }
 
     @Override
-    public String getStrategyRule() {
+    public String getRegraEstrategia() {
         return "máximo de produtos no orçamento";
     }
 }

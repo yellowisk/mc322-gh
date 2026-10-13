@@ -1,26 +1,37 @@
 package domain.entities.product;
 
-public class CopoDeVidro extends Product {
+/**
+ * Copo de vidro, o produto de baixa qualidade (0.4) e mais rápido de fazer (tempo base de 10s)
+ *
+ * @author Heitor Almeida
+ */
+public class CopoDeVidro extends Produto {
 
-    public CopoDeVidro(String name, double rawMaterialPerUnit) {
-        super(name, rawMaterialPerUnit, 0.4, 0.0);
+    /**
+     * Cria o copo c/ a qualidade fixa do tipo e risco acumulado 0
+     *
+     * @param nome nome que aparece nos menus
+     * @param quantidadeMateriaPrimaPorUnidade matéria-prima gasta por unidade, em kg
+     */
+    public CopoDeVidro(String nome, double quantidadeMateriaPrimaPorUnidade) {
+        super(nome, quantidadeMateriaPrimaPorUnidade, 0.4, 0.0);
     }
 
     @Override
-    public Product process(Product model, ProductStatus newStatus) {
-        Product p = new CopoDeVidro(model.getName(), model.getRawMaterialPerUnit());
-        p.setStatus(newStatus);
+    public Produto processar(Produto modelo, ProductStatus novoStatus) {
+        Produto p = new CopoDeVidro(modelo.getNome(), modelo.getQuantidadeMateriaPrimaPorUnidade());
+        p.setStatus(novoStatus);
         return p;
     }
 
     @Override
-    public double countProductionTime() {
-        double baseTime = 10.0;
-        return baseTime * randomFactor();
+    public double calcularTempoProducao() {
+        double tempoBase = 10.0;
+        return tempoBase * fatorAleatorio();
     }
 
     @Override
-    public String getType() {
+    public String getTipo() {
         return "Baixa Qualidade";
     }
 }

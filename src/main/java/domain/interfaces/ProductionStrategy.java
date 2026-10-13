@@ -3,17 +3,45 @@ package domain.interfaces;
 import domain.entities.demand.Demand;
 import java.util.List;
 
+/**
+ * Padrão Strategy p/ escolher qual demanda fabricar a seguir. O ProductionManager guarda a estratégia
+ * atual, e o menu de estratégia deixa trocar entre elas
+ *
+ * @author Heitor Almeida
+ */
 public interface ProductionStrategy {
-    Demand selectDemand(List<Demand> demands, double availableBudget);
+    /**
+     * Escolhe a próxima demanda a ser fabricada entre as elegíveis de {@link #selecionaveis(List)}
+     *
+     * @param demandas todas as demandas cadastradas
+     * @param orcamentoDisponivel orçamento disponível, em R$. Nem toda estratégia usa
+     * @return demanda escolhida, ou null se nenhuma for elegível
+     */
+    Demand selecionarDemanda(List<Demand> demandas, double orcamentoDisponivel);
 
-    String getStrategyName();
+    /**
+     * Nome da estratégia
+     *
+     * @return nome que aparece nos menus, ex.: "Fila do Caixa"
+     */
+    String getNomeEstrategia();
 
-    /** Short rule shown next to the name in the menu, e.g. "ordem de chegada" */
-    String getStrategyRule();
+    /**
+     * Regra curta mostrada do lado do nome no menu
+     *
+     * @return regra, ex.: "ordem de chegada"
+     */
+    String getRegraEstrategia();
 
-    /** Same filter for all three strategies */
-    default List<Demand> selectable(List<Demand> demands) {
-        return demands.stream()
+    /**
+     * Mesmo filtro p/ as três estratégias: só entram demandas {@link domain.entities.demand.DemandStatus#PENDING}
+     * c/ quantidade maior que 0
+     *
+     * @param demandas todas as demandas cadastradas
+     * @return demandas que podem ser escolhidas
+     */
+    default List<Demand> selecionaveis(List<Demand> demandas) {
+        return demandas.stream()
                 .filter(d -> d.getStatus().isSelectable() && d.getAmount() > 0)
                 .toList();
     }
