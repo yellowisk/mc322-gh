@@ -10,7 +10,9 @@ import domain.entities.rawmaterial.RawMaterial;
 import domain.entities.report.Report;
 import domain.exceptions.InsufficientBudgetException;
 import domain.exceptions.InvalidDemandException;
+import domain.exceptions.InvalidDemandTransitionException;
 import domain.exceptions.MachineNeedsRepairException;
+import domain.exceptions.MachineUnavailableException;
 import domain.exceptions.NoStrategySelectedException;
 import domain.exceptions.NullDemandException;
 import domain.interfaces.ProductionStrategy;
@@ -124,6 +126,10 @@ public class ProductionManager {
 
     /**
      * Inicia a produção da próxima demanda. A demanda é escolhida pela estratégia atual.
+     *
+     * @throws NoStrategySelectedException se nenhuma estratégia tiver sido escolhida
+     * @throws NullDemandException se a estratégia não encontrar nenhuma demanda elegível
+     * @throws domain.exceptions.PlantaException qualquer erro de {@link #produzirDemanda(Demand)}
      */
     public void iniciarProducao() {
         if (this.currEstrategia == null) {
@@ -197,7 +203,14 @@ public class ProductionManager {
      * Método principal da classe.
      * Realiza o processo de fabricação da demanda escolhida.
      *
+     * Todas as verificações rodam antes de mexer em qualquer estado, então se uma falhar
+     * nada é alterado (estoque, verba e status da demanda continuam iguais).
+     *
      * @param demand A demanda que será fabricada.
+     * @throws MachineNeedsRepairException se alguma máquina precisar de reparo
+     * @throws InvalidDemandException se o produto da demanda não existir ou se ela não tiver unidades pedidas
+     * @throws InvalidDemandTransitionException se o status da demanda não permitir fabricar
+     * @throws InsufficientBudgetException se o orçamento não cobrir o custo estimado
      */
     public void produzirDemanda(Demand demand) {
         // VERIFICAÇÕES
@@ -208,19 +221,19 @@ public class ProductionManager {
         this.currProduto = this.getProdutoPeloNome(demand.getProductName());
 
         if (currProduto == null) {
-            ConsolePrinter.imprimirFalha("Produto sem demanda cadastrada.\n");
-            return;
+            throw new InvalidDemandException("Dessa vez não é! Produto sem demanda cadastrada.");
         }
 
         if (demand.getAmount() <= 0) {
-            ConsolePrinter.imprimirFalha("Nenhuma unidade de %s foi demandada. Atualize a demanda antes de fabricar.\n", currProduto.getNome());
-            return;
+            throw new InvalidDemandException(String.format(
+                    "Dessa vez não é! Nenhuma unidade de %s foi demandada. Atualize a demanda antes de fabricar.",
+                    currProduto.getNome()));
         }
 
         if (!demand.getStatus().canBeFabricated()) {
-            ConsolePrinter.imprimirFalha("Demanda de %s está %s e não pode ser fabricada. Atualize a demanda para reativá-la.\n",
-                    currProduto.getNome(), demand.getStatus().getDescription());
-            return;
+            throw new InvalidDemandTransitionException(String.format(
+                    "Dessa vez não é! Demanda de %s está %s e não pode ser fabricada. Atualize a demanda para reativá-la.",
+                    currProduto.getNome(), demand.getStatus().getDescription()));
         }
 
         atualizarCustoEstimadoTodasDemandas();
@@ -394,10 +407,11 @@ public class ProductionManager {
     /**
      * Função que repara a máquina escolhida.
      * @param m A máquina a ser reparada
+     * @throws MachineUnavailableException se a máquina estiver c/ a saúde cheia e não precisar de reparo
      */
     public void repairMachine(Machine m) {
         if (!(m.getSaude() < m.getSaudeMaxima())) {
-            throw new IllegalStateException("Não foi dessa vez! A " + m.getNome() + " não precisa de reparo");
+            throw new MachineUnavailableException("Não foi dessa vez! A " + m.getNome() + " não precisa de reparo.");
         }
         m.reparar();
         setTemMaquinaQuebrada(false);

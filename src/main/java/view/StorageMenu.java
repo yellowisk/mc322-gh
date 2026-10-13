@@ -2,6 +2,7 @@ package view;
 
 import domain.entities.product.Produto;
 import domain.entities.productionmanager.ProductionManager;
+import domain.exceptions.InvalidOptionException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -121,9 +122,10 @@ public class StorageMenu extends Submenu {
             }
 
             try {
+                Menu.validarOpcao(opcao, opcoesExpandidas.length, "Dessa vez não é! Opção de lote inválida!");
                 opcoesExpandidas[opcao - 1] ^= 1; // Inverte a flag usando bitwise XOR
-            } catch (IndexOutOfBoundsException e) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção de lote inválida!"));
+            } catch (InvalidOptionException e) {
+                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }
     }

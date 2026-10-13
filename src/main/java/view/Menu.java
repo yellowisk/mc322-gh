@@ -1,6 +1,8 @@
 package view;
 
 import domain.entities.report.Report;
+import domain.exceptions.InvalidOptionException;
+import domain.exceptions.PlantaException;
 import domain.utils.ScenarioConfig;
 import domain.entities.conveyor.Conveyor;
 import domain.entities.machine.InspectionMachine;
@@ -75,14 +77,13 @@ public class Menu {
 
             if (option == 0) break;
 
-            Submenu chosen;
             try {
-                chosen = submenus.get(option - 1);
-            } catch (IndexOutOfBoundsException e) {
-                setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
-                continue;
+                validarOpcao(option, submenus.size(), "Dessa vez não é! Opção inválida!");
+                submenus.get(option - 1).exibir();
+            } catch (PlantaException e) {
+                // Qualquer erro de domínio que um submenu não tratou volta pro menu principal
+                setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
-            chosen.exibir();
         }
     }
 
@@ -196,16 +197,31 @@ public class Menu {
             if (option == 0) System.exit(0);
 
             try {
+                validarOpcao(option, scenariosList.length, "Dessa vez não é! Opção de cenário inválida!");
                 currScenario = scenariosList[option - 1];
                 break;
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println("\n" + ConsolePrinter.textoFalha("Dessa vez não é! Opção de cenário inválida!"));
+            } catch (InvalidOptionException e) {
+                System.out.println("\n" + ConsolePrinter.textoFalha("%s", e.getMessage()));
                 waitEnter();
             }
         }
     }
 
     // === Stuff the submenus use ===
+
+    /**
+     * Confere se a opção escolhida existe numa lista numerada de 1 até {@code quantidade}
+     *
+     * @param opcao opção digitada pelo usuário
+     * @param quantidade quantas opções a lista tem
+     * @param mensagem mensagem de erro p/ mostrar se a opção não existir
+     * @throws InvalidOptionException se a opção estiver fora da lista
+     */
+    static void validarOpcao(int opcao, int quantidade, String mensagem) {
+        if (opcao < 1 || opcao > quantidade) {
+            throw new InvalidOptionException(mensagem);
+        }
+    }
 
     int readInt(String prompt) {
         while (true) {

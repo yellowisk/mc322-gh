@@ -1,6 +1,7 @@
 package view;
 
 import domain.entities.productionmanager.ProductionManager;
+import domain.exceptions.InvalidOptionException;
 
 /**
  * Submenu da velocidade da animação da produção. A escolhida vale p/ o resto da sessão
@@ -54,14 +55,13 @@ public class SpeedMenu extends Submenu {
             int escolha = menu.readInt("Qual velocidade deseja " + ConsolePrinter.colorir(cor, "USAR") + "? ");
 
             if (escolha == 0) break;
-
-            ProductionSpeed escolhida;
             try {
-                escolhida = velocidades[escolha - 1];
-            } catch (IndexOutOfBoundsException e) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
+                Menu.validarOpcao(escolha, velocidades.length, "Dessa vez não é! Opção inválida!");
+            } catch (InvalidOptionException e) {
+                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }
+            ProductionSpeed escolhida = velocidades[escolha - 1];
 
             ConsolePrinter.setVelocidadeProducao(escolhida);
             menu.setLastBuffer(ConsolePrinter.textoOk("Eitcha, como é ligeiro! Velocidade da produção alterada para %s!", escolhida.getDescricao()));

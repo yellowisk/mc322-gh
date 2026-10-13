@@ -2,6 +2,8 @@ package view;
 
 import domain.entities.machine.Machine;
 import domain.entities.productionmanager.ProductionManager;
+import domain.exceptions.InvalidOptionException;
+import domain.exceptions.MachineUnavailableException;
 
 import java.util.List;
 
@@ -63,13 +65,12 @@ public class RepairMenu extends Submenu {
 
             // Processo principal
             try {
+                Menu.validarOpcao(opcao, maquinas.size(), "Dessa vez não é! Máquina inválida!");
                 maquinaEscolhida = maquinas.get(opcao - 1);
                 gerenciadorProducao.repairMachine(maquinaEscolhida);
                 animarReparo(maquinaEscolhida.getNome()); // Animação
                 menu.setLastBuffer(ConsolePrinter.textoOk("%s reparada!", maquinaEscolhida.getNome().toUpperCase()));
-            } catch (IndexOutOfBoundsException e) { // Caso o índice seja inválido
-                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Máquina inválida!"));
-            } catch (IllegalArgumentException | IllegalStateException e) {
+            } catch (InvalidOptionException | MachineUnavailableException e) {
                 menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }

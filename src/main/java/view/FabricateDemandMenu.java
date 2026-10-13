@@ -2,10 +2,7 @@ package view;
 
 import domain.entities.demand.Demand;
 import domain.entities.productionmanager.ProductionManager;
-import domain.exceptions.InsufficientBudgetException;
-import domain.exceptions.MachineNeedsRepairException;
-import domain.exceptions.NoStrategySelectedException;
-import domain.exceptions.NullDemandException;
+import domain.exceptions.PlantaException;
 
 import java.util.List;
 
@@ -38,9 +35,10 @@ public class FabricateDemandMenu extends Submenu {
     }
 
     /**
-     * Loop do submenu. Depois de uma fabricação espera o ENTER e volta pro menu principal. Opção inválida,
-     * orçamento insuficiente, máquina quebrada, nenhuma estratégia ou nenhuma demanda elegível voltam pra
-     * lista c/ a mensagem no rodapé
+     * Loop do submenu. Depois de uma fabricação espera o ENTER e volta pro menu principal. Opção inválida
+     * ou qualquer erro de domínio antes da fabricação começar ({@link domain.exceptions.PlantaException}:
+     * orçamento insuficiente, máquina quebrada, demanda inválida...) voltam pra lista c/ a mensagem no rodapé,
+     * sem nada ter sido alterado
      */
     @Override
     public void exibir() {
@@ -75,17 +73,10 @@ public class FabricateDemandMenu extends Submenu {
                 if (opcao == proximaPelaEstrategia) {
                     gerenciadorProducao.iniciarProducao();
                 } else {
-                    Demand demandaEscolhida;
-                    try {
-                        demandaEscolhida = demandas.get(opcao - 1);
-                    } catch (IndexOutOfBoundsException e) {
-                        menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
-                        continue;
-                    }
-                    gerenciadorProducao.produzirDemanda(demandaEscolhida);
+                    Menu.validarOpcao(opcao, demandas.size(), "Dessa vez não é! Opção inválida!");
+                    gerenciadorProducao.produzirDemanda(demandas.get(opcao - 1));
                 }
-            } catch (InsufficientBudgetException | MachineNeedsRepairException
-                     | NoStrategySelectedException | NullDemandException e) {
+            } catch (PlantaException e) {
                 menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }
