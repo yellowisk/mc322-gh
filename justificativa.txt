@@ -16,17 +16,26 @@ HISTÓRICO
 =========
 
 Tarefa 4:
-- Migramos o build para Gradle (build.gradle, settings.gradle e Gradle Wrapper). Removemos o
-Makefile e o pom.xml.
-- Queremos deixar claro que a falha no meio da fabricação de uma demanda é uma regra de
-negócio nossa e não um estado inconsistente:
-	- A fabricação acontece unidade por unidade. Se no meio dela faltar orçamento, faltar
-	matéria-prima ou uma máquina quebrar, a produção é pausada e seus efeitos mantém no sistema
-	(matéria-prima e dinheiro continuam gastos).
-	- A demanda é marcada como CANCELADA, guardando quantas unidades já foram feitas. Ao fabricar
-	de novo, ela retoma de onde parou, e as novas unidades recebem um novo lote.
-	- Nada é marcado como concluído sem ter sido totalmente produzido (todas as unidades da demanda
-	terem sido executadas (com sucesso ou não)).
+- Migramos o build para Gradle (build.gradle, settings.gradle e Gradle Wrapper) e removemos o Makefile
+e o pom.xml. O projeto usa JDK 25, mas se a máquina não tiver, o foojay-resolver baixa ele sozinho.
+- Adicionamos o gradle.properties com console plain, porque a barra de progresso do Gradle ficava em
+cima do menu no ./gradlew run.
+- A seed agora é passada por ./gradlew run --args=42.
+- Documentamos todo o código com Javadoc (@param, @return, @throws e @author) e o ./gradlew javadoc
+roda sem warnings.
+- Traduzimos o código todo para português.
+- Criamos a PlantaException como base de todas as exceções de regra de negócio (domain.exceptions).
+- Antes de fabricar, conferimos tudo (máquinas, produto, quantidade, status da demanda, orçamento e
+matéria-prima de todas as unidades que faltam). Se algo falhar, nada é alterado.
+- Queremos deixar claro que a falha no meio da fabricação de uma demanda é uma regra de negócio nossa
+e não um estado inconsistente:
+	- Como orçamento e matéria-prima são conferidos antes, só uma máquina quebrando (desgaste é
+	aleatório) interrompe a fabricação no meio.
+	- A fabricação é unidade por unidade, então as unidades já feitas continuam gastando matéria-prima
+	e dinheiro, porque foram produzidas de verdade. A unidade que estava no meio da linha é descartada.
+	- A demanda fica CANCELADA, guardando quantas unidades já foram feitas. Ao fabricar de novo, ela
+	retoma de onde parou com um novo lote.
+	- Nada é marcado como concluído sem todas as unidades terem sido executadas (com sucesso ou não).
 Tarefa 3:
 - Adicionamos seed configurável para Random.
 - Os status de demanda são: EM_PRODUCAO, PENDENTE, CONCLUIDA e CANCELADA.
