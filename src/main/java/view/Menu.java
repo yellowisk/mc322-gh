@@ -1,17 +1,19 @@
 package view;
 
-import domain.entities.report.Report;
-import domain.utils.ScenarioConfig;
-import domain.entities.conveyor.Conveyor;
-import domain.entities.machine.InspectionMachine;
-import domain.entities.machine.PackingMachine;
-import domain.entities.machine.ProcessingMachine;
+import domain.entities.report.Relatorio;
+import domain.exceptions.OpcaoInvalidaException;
+import domain.exceptions.PlantaException;
+import domain.utils.ConfiguracaoCenario;
+import domain.entities.conveyor.Esteira;
+import domain.entities.machine.MaquinaInspecao;
+import domain.entities.machine.MaquinaEmpacotamento;
+import domain.entities.machine.MaquinaProcessamento;
 import domain.entities.product.CopoDeVidro;
 import domain.entities.product.KitCopoDeVidro;
 import domain.entities.product.PoteDeVidro;
 import domain.entities.product.Produto;
-import domain.entities.productionmanager.ProductionManager;
-import domain.entities.rawmaterial.RawMaterial;
+import domain.entities.productionmanager.GerenciadorProducao;
+import domain.entities.rawmaterial.MateriaPrima;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,126 +24,127 @@ import java.util.Scanner;
  * das telas da fábrica e é a partir daqui que os submenus são chamados
  */
 public class Menu {
-    private ScenarioConfig currScenario;
-    private ProductionManager productionManager;
-    private Report report = new Report();
+    private ConfiguracaoCenario cenarioAtual;
+    private GerenciadorProducao gerenciadorProducao;
+    private Relatorio relatorio = new Relatorio();
 
-    private final Scanner scanner = new Scanner(System.in);
-    private String lastBuffer; // last message, shows up in the next footer
-    private StrategyMenu strategyMenu;
+    private final Scanner leitor = new Scanner(System.in);
+    private String ultimaMensagem; // last mensagem, shows up in the next footer
+    private MenuEstrategia menuEstrategia;
     private List<Submenu> submenus;
 
 
     /**
      * Método de inicialização do menu, chamado na main
      */
-    public void start() {
-        boolean running = true;
+    public void iniciar() {
+        boolean rodando = true;
 
-        printIntroScreen();
-        scenarioChooserMenu();
+        imprimirTelaInicial();
+        if (!escolherCenario()) {
+            return;
+        }
 
-        productionManager = new ProductionManager(
-                new RawMaterial("Vidro", 50, "kg", 5, 1),
-                currScenario.getBudget(),
-                report
+        gerenciadorProducao = new GerenciadorProducao(
+                new MateriaPrima("Vidro", 50, "kg", 5, 1),
+                cenarioAtual.getVerba(),
+                relatorio
         );
 
-        initProductionManager();
+        iniciarGerenciadorProducao();
 
         // Menu: lista de submenus
-        List<String> optionsList = new ArrayList<>(
+        List<String> listaOpcoes = new ArrayList<>(
                 submenus.stream()
                     .map(submenu -> submenu.icone() + " " + submenu.rotulo())
                     .toList()
         );
-        optionsList.add("Sair");
-        String[] options = optionsList.toArray(new String[0]);
+        listaOpcoes.add("Sair");
+        String[] opcoes = listaOpcoes.toArray(new String[0]);
 
         /**
          * Lppp principal
          */
-        while (running) {
+        while (rodando) {
             ConsolePrinter.limparTela();
             ConsolePrinter.cartao(ConsolePrinter.colorir(ConsolePrinter.CINZA, "⌂") + " FÁBRICA IDEAL");
             System.out.println();
-            System.out.println(" Cenário atual:    " + currScenario.getDisplayName());
-            System.out.println(" Estratégia atual: " + productionManager.getCurrEstrategia().getNomeEstrategia() + "\n");
+            System.out.println(" Cenário atual:    " + cenarioAtual.getNomeExibicao());
+            System.out.println(" Estratégia atual: " + gerenciadorProducao.getEstrategiaAtual().getNomeEstrategia() + "\n");
 
-            ConsolePrinter.listaOpcoes(options);
+            ConsolePrinter.listaOpcoes(opcoes);
 
-            printFooter();
-            int option = readInt("Escolha: ");
+            imprimirRodape();
+            int opcao = lerInteiro("Escolha: ");
 
-            if (option == 0) break;
+            if (opcao == 0) break;
 
-            Submenu chosen;
             try {
-                chosen = submenus.get(option - 1);
-            } catch (IndexOutOfBoundsException e) {
-                setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
-                continue;
+                validarOpcao(opcao, submenus.size(), "Dessa vez não é! Opção inválida!");
+                submenus.get(opcao - 1).exibir();
+            } catch (PlantaException e) {
+                // Qualquer erro de domínio que um submenu não tratou volta pro menu principal
+                setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
-            chosen.exibir();
         }
     }
 
     /**
-     * Método para iniciar o productionManager. Rotina transformada em método
+     * Método para iniciar o gerenciadorProducao. Rotina transformada em método
      * para simplificar o loop principal do menu
      */
-    private void initProductionManager() {
+    private void iniciarGerenciadorProducao() {
         // Produtos hardcoded
-        productionManager.adicionarNovoProduto(new CopoDeVidro("Copo", 0.5));
-        productionManager.adicionarNovoProduto(new PoteDeVidro("Pote", 1.2));
-        productionManager.adicionarNovoProduto(new KitCopoDeVidro("Kit Copo", 3));
+        gerenciadorProducao.adicionarNovoProduto(new CopoDeVidro("Copo", 0.5));
+        gerenciadorProducao.adicionarNovoProduto(new PoteDeVidro("Pote", 1.2));
+        gerenciadorProducao.adicionarNovoProduto(new KitCopoDeVidro("Kit Copo", 3));
         Produto.resetarContadorId();
 
         // Esteira hardcoded
-        productionManager.addNewConveyor(new Conveyor("Esteira Ligeira", 20));
+        gerenciadorProducao.adicionarEsteira(new Esteira("Esteira Ligeira", 20));
 
         // Máquinas hardcoded
-        productionManager.adicionarMaquina(new ProcessingMachine(
+        gerenciadorProducao.adicionarMaquina(new MaquinaProcessamento(
                         "Máquina de Processamento", 20, 0.25,
-                        0.78, currScenario.getScenarioMultiplier(),
-                        currScenario.getWearDamage()
+                        0.78, cenarioAtual.getMultiplicadorCenario(),
+                        cenarioAtual.getDesgasteMaximo()
                 )
         );
-        productionManager.adicionarMaquina(new PackingMachine(
+        gerenciadorProducao.adicionarMaquina(new MaquinaEmpacotamento(
                         "Máquina de Empacotamento", 20, 0.15,
-                        0.5, currScenario.getScenarioMultiplier(),
-                        currScenario.getWearDamage()
+                        0.5, cenarioAtual.getMultiplicadorCenario(),
+                        cenarioAtual.getDesgasteMaximo()
                 )
         );
-        productionManager.adicionarMaquina(new InspectionMachine(
+        gerenciadorProducao.adicionarMaquina(new MaquinaInspecao(
                         "Máquina de Inspeção", 20, 0.10,
-                        0.43, currScenario.getScenarioMultiplier(),
-                        currScenario.getWearDamage()
+                        0.43, cenarioAtual.getMultiplicadorCenario(),
+                        cenarioAtual.getDesgasteMaximo()
                 )
         );
 
-        strategyMenu = new StrategyMenu(this, productionManager);
+        menuEstrategia = new MenuEstrategia(this, gerenciadorProducao);
 
-        // List order = option number on the main menu
+        // List order = opcao number on the main menu
         submenus = List.of(
-                new UpdateDemandMenu(this, productionManager),
-                new FabricateDemandMenu(this, productionManager),
-                new StorageMenu(this, productionManager),
-                new BuyRawMaterialMenu(this, productionManager),
-                strategyMenu,
-                new RepairMenu(this, productionManager),
-                new AuditMenu(this, productionManager),
-                new RawMaterialStorageMenu(this, productionManager),
-                new SpeedMenu(this, productionManager)
+                new MenuAtualizarDemandas(this, gerenciadorProducao),
+                new MenuFabricarDemandas(this, gerenciadorProducao),
+                new MenuArmazem(this, gerenciadorProducao),
+                new MenuComprarMateriaPrima(this, gerenciadorProducao),
+                menuEstrategia,
+                new MenuReparo(this, gerenciadorProducao),
+                new MenuAuditoria(this, gerenciadorProducao),
+                new MenuArmazemMateriaPrima(this, gerenciadorProducao),
+                new MenuVelocidade(this, gerenciadorProducao)
         );
 
-        productionManager.setCurrEstrategia(strategyMenu.estrategiaPadrao());
+        gerenciadorProducao.setEstrategiaAtual(menuEstrategia.estrategiaPadrao());
     }
 
     /**
      * Tela inicial
      */
-    private void printIntroScreen() {
+    private void imprimirTelaInicial() {
         ConsolePrinter.limparTela();
         ConsolePrinter.linha();
         System.out.println(ConsolePrinter.NEGRITO + ConsolePrinter.LARANJA
@@ -163,25 +166,27 @@ public class Menu {
         ConsolePrinter.linha();
         System.out.println();
         System.out.println(ConsolePrinter.colorir(ConsolePrinter.AMARELO, "Pressione ENTER para começar..."));
-        scanner.nextLine();
+        lerLinha();
     }
 
     /**
      * Tela de seleção de cenário
+     *
+     * @return true se um cenário foi escolhido, false se o usuário escolheu sair
      */
-    private void scenarioChooserMenu() {
+    private boolean escolherCenario() {
 
-        ScenarioConfig[] scenariosList = {
-                new ScenarioConfig("Mercadinho Ideal", "Ideal", 1000, 0.5, 1),
-                new ScenarioConfig("Mercadinho Razoável", "Intermediário", 500, 1, 2),
-                new ScenarioConfig("Mercadinho Precário", "Apocalíptico", 250, 1.5, 4)
+        ConfiguracaoCenario[] cenarios = {
+                new ConfiguracaoCenario("Mercadinho Ideal", "Ideal", 1000, 0.5, 1),
+                new ConfiguracaoCenario("Mercadinho Razoável", "Intermediário", 500, 1, 2),
+                new ConfiguracaoCenario("Mercadinho Precário", "Apocalíptico", 250, 1.5, 4)
         };
 
         // Lista de strings para o ConsolePrinter.listaOpcoes
-        String[] scenariosStringList = {
-                scenariosList[0].getDisplayName(),
-                scenariosList[1].getDisplayName(),
-                scenariosList[2].getDisplayName(),
+        String[] nomesCenarios = {
+                cenarios[0].getNomeExibicao(),
+                cenarios[1].getNomeExibicao(),
+                cenarios[2].getNomeExibicao(),
                 "Sair"
         };
 
@@ -189,56 +194,98 @@ public class Menu {
             ConsolePrinter.limparTela();
             ConsolePrinter.cartao("SELECIONADOR DE CENÁRIO");
 
-            ConsolePrinter.listaOpcoes(scenariosStringList);
+            ConsolePrinter.listaOpcoes(nomesCenarios);
 
-            int option = readInt("Escolha: ");
+            int opcao = lerInteiro("Escolha: ");
 
-            if (option == 0) System.exit(0);
+            if (opcao == 0) return false;
 
             try {
-                currScenario = scenariosList[option - 1];
-                break;
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println("\n" + ConsolePrinter.textoFalha("Dessa vez não é! Opção de cenário inválida!"));
-                waitEnter();
+                validarOpcao(opcao, cenarios.length, "Dessa vez não é! Opção de cenário inválida!");
+                cenarioAtual = cenarios[opcao - 1];
+                return true;
+            } catch (OpcaoInvalidaException e) {
+                System.out.println("\n" + ConsolePrinter.textoFalha("%s", e.getMessage()));
+                esperarEnter();
             }
         }
     }
 
     // === Stuff the submenus use ===
 
-    int readInt(String prompt) {
+    /**
+     * Confere se a opção escolhida existe numa lista numerada de 1 até {@code quantidade}
+     *
+     * @param opcao opção digitada pelo usuário
+     * @param quantidade quantas opções a lista tem
+     * @param mensagem mensagem de erro p/ mostrar se a opção não existir
+     * @throws OpcaoInvalidaException se a opção estiver fora da lista
+     */
+    static void validarOpcao(int opcao, int quantidade, String mensagem) {
+        if (opcao < 1 || opcao > quantidade) {
+            throw new OpcaoInvalidaException(mensagem);
+        }
+    }
+
+    /**
+     * Lê um inteiro do usuário. Se ele digitar algo que não é número, avisa e pergunta de novo.
+     * Se a entrada do terminal acabar (ex.: Ctrl+D), retorna 0, que em todo menu é "voltar/sair",
+     * então o programa vai saindo dos menus e termina normalmente
+     *
+     * @param texto texto mostrado antes da entrada
+     * @return o número digitado, ou 0 se a entrada acabou
+     */
+    int lerInteiro(String texto) {
         while (true) {
-            System.out.print(prompt);
-            if (scanner.hasNextInt()) {
-                return scanner.nextInt();
+            System.out.print(texto);
+            if (!leitor.hasNext()) {
+                return 0;
             }
-            scanner.next();
+            if (leitor.hasNextInt()) {
+                return leitor.nextInt();
+            }
+            leitor.next();
             System.out.println(ConsolePrinter.textoFalha("Dessa vez não é! Digite um número."));
         }
     }
 
-    /** Waits for ENTER, but first eats the leftover line nextInt() leaves behind */
-    void waitEnter() {
+    /** Espera o ENTER, mas antes consome a linha que sobra depois do nextInt() */
+    void esperarEnter() {
         System.out.println("\n" + ConsolePrinter.colorir(ConsolePrinter.AMARELO, "Pressione ENTER para voltar..."));
-        scanner.nextLine();
-        scanner.nextLine();
+        lerLinha();
+        lerLinha();
     }
 
-    void setLastBuffer(String message) {
-        this.lastBuffer = message;
+    /** Lê uma linha inteira da entrada. Se a entrada já acabou, não faz nada */
+    private void lerLinha() {
+        if (leitor.hasNextLine()) {
+            leitor.nextLine();
+        }
     }
 
-    void printFooter() {
-        if (this.lastBuffer != null) {
-            ConsolePrinter.cartao("%s", this.lastBuffer);
-            this.lastBuffer = null;
+    /**
+     * Guarda uma mensagem p/ aparecer no próximo rodapé, ex.: o resultado de uma operação
+     *
+     * @param mensagem mensagem já formatada, normalmente vinda de {@link ConsolePrinter#textoOk} ou {@link ConsolePrinter#textoFalha}
+     */
+    void setUltimaMensagem(String mensagem) {
+        this.ultimaMensagem = mensagem;
+    }
+
+    /**
+     * Imprime o rodapé dos menus: a última mensagem guardada (se tiver, e depois apaga ela) e o resumo
+     * c/ verba, matéria-prima e produtos no armazém
+     */
+    void imprimirRodape() {
+        if (this.ultimaMensagem != null) {
+            ConsolePrinter.cartao("%s", this.ultimaMensagem);
+            this.ultimaMensagem = null;
         } else {
             ConsolePrinter.linha();
         }
-        ConsolePrinter.imprimirResumo(productionManager.getVerba(),
-                productionManager.getMateriaPrima().getQuantity(),
-                productionManager.getProdutosFabricados().size());
+        ConsolePrinter.imprimirResumo(gerenciadorProducao.getVerba(),
+                gerenciadorProducao.getMateriaPrima().getQuantidade(),
+                gerenciadorProducao.getProdutosFabricados().size());
         System.out.println();
     }
 }

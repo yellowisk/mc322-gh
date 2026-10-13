@@ -23,19 +23,19 @@ negócio nossa e não um estado inconsistente:
 	- A fabricação acontece unidade por unidade. Se no meio dela faltar orçamento, faltar
 	matéria-prima ou uma máquina quebrar, a produção é pausada e seus efeitos mantém no sistema
 	(matéria-prima e dinheiro continuam gastos).
-	- A demanda é marcada como CANCELADO, guardando quantas unidades já foram feitas. Ao fabricar
+	- A demanda é marcada como CANCELADA, guardando quantas unidades já foram feitas. Ao fabricar
 	de novo, ela retoma de onde parou, e as novas unidades recebem um novo lote.
 	- Nada é marcado como concluído sem ter sido totalmente produzido (todas as unidades da demanda
 	terem sido executadas (com sucesso ou não)).
 Tarefa 3:
 - Adicionamos seed configurável para Random.
-- Os status de demanda são: EM_PRODUÇÃO, PENDENTE, CONCLUIDO e CANCELADO.
+- Os status de demanda são: EM_PRODUCAO, PENDENTE, CONCLUIDA e CANCELADA.
 - Criamos as estratégias de produção:
 	- Fila do Caixa: FIFO.
 	- Ferrari: Demanda com maior quantidade de produtos sem checar orçamento.
 	- Joãozinho: Demanda com maior quantidade de produtos checando orçamento.
 - Dividimos os submenus em subclasses de `Submenu` ao invés de deixá-los como métodos da classe Menu.
-- Adicionamos a classe ScenarioConfig com 3 instanciações de cenários:
+- Adicionamos a classe ConfiguracaoCenario com 3 instanciações de cenários:
 	- Mercadinho Ideal: budget farto, chance de falha reduzida e desgaste reduzido.
 	- Mercadinho Razoável: budget médio, chance de falha normal e desgaste normal.
 	- Mercadinho Precário: budget reduzido, chance de falha aumentada e desgaste maior.
@@ -45,9 +45,9 @@ Tarefa 3:
 	do mercadinho em um cenário comum, sem muitas vantagens ou desvantagens.
 - O menu principal mostra no topo o cenário e a estratégia atual, mantivemos o budget no footer por
 curtimos.
-- Deixamos a auditoria geral e a visualização do armazém nos menus (AuditMenu e StorageMenu), e não
-no ProductionManager como o pdf sugere (gerarAuditoriaGeral e exibirArmazem). Fizemos isso para tentar
-manter SRP (Single Responsability Principle), tendo o ProductionManager como responsável pela produção
+- Deixamos a auditoria geral e a visualização do armazém nos menus (MenuAuditoria e MenuArmazem), e não
+no GerenciadorProducao como o pdf sugere (gerarAuditoriaGeral e exibirArmazem). Fizemos isso para tentar
+manter SRP (Single Responsability Principle), tendo o GerenciadorProducao como responsável pela produção
 e só entregando as listas de máquinas e produtos, enquanto quem decide como mostrar isso no terminal
 permanecem sendo os menus. Assim o gerenciador não fica cheio de print.
 - Desgaste das máquinas:

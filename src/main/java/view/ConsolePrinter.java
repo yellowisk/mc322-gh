@@ -1,8 +1,8 @@
 package view;
 
-import domain.entities.demand.Demand;
-import domain.entities.machine.Machine;
-import domain.entities.productionmanager.ProductionManager;
+import domain.entities.demand.Demanda;
+import domain.entities.machine.Maquina;
+import domain.entities.productionmanager.GerenciadorProducao;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class ConsolePrinter {
     public static final String CINZA = "\u001B[38;5;246m";
     public static final String VERMELHO = "\033[38;2;234;67;53m";
     private static final int ATRASO_LINHA_ARVORE_MS = 125;
-    private static ProductionSpeed velocidadeProducao = ProductionSpeed.NORMAL;
+    private static VelocidadeProducao velocidadeProducao = VelocidadeProducao.NORMAL;
 
     private static final String FORMATO_LINHA_DEMANDA = "%-16s  %-12s  %-16s  %-16s  %-18s  %-10s";
     private static final int LARGURA_TABELA_DEMANDA = 16 + 12 + 16 + 16 + 18 + 10 + 2 * 5;
@@ -47,7 +47,7 @@ public class ConsolePrinter {
     }
 
     /**
-     * Log de sucesso c/ um ✓ verde, retornado p/ o lastBuffer do {@link Menu}
+     * Log de sucesso c/ um ✓ verde, retornado p/ a ultimaMensagem do {@link Menu}
      *
      * @param formato formato, igual ao do {@link String#format}
      * @param argumentos argumentos do formato
@@ -58,7 +58,7 @@ public class ConsolePrinter {
     }
 
     /**
-     * Log de falha c/ um ✗ vermelho, retornado p/ o lastBuffer do {@link Menu}
+     * Log de falha c/ um ✗ vermelho, retornado p/ a ultimaMensagem do {@link Menu}
      *
      * @param formato formato, igual ao do {@link String#format}
      * @param argumentos argumentos do formato
@@ -96,7 +96,7 @@ public class ConsolePrinter {
      * @param formato nome da etapa, sai em caixa alta
      * @param argumentos argumentos do formato
      */
-    public static void cabecalhoEtapa(Machine maquina, String formato, Object... argumentos) {
+    public static void cabecalhoEtapa(Maquina maquina, String formato, Object... argumentos) {
         String titulo = ROXO + "▸ " + String.format(formato.toUpperCase(), argumentos) + RESET;
         String saude = String.format("%d/%d", maquina.getSaude(), maquina.getSaudeMaxima());
         String chanceFalha = "";
@@ -157,7 +157,7 @@ public class ConsolePrinter {
      *
      * @return velocidade atual
      */
-    public static ProductionSpeed getVelocidadeProducao() {
+    public static VelocidadeProducao getVelocidadeProducao() {
         return velocidadeProducao;
     }
 
@@ -166,7 +166,7 @@ public class ConsolePrinter {
      *
      * @param velocidade nova velocidade
      */
-    public static void setVelocidadeProducao(ProductionSpeed velocidade) {
+    public static void setVelocidadeProducao(VelocidadeProducao velocidade) {
         velocidadeProducao = velocidade;
     }
 
@@ -288,30 +288,30 @@ public class ConsolePrinter {
      *
      * @param gerenciador gerenciador da produção, de onde vêm as demandas e o orçamento
      */
-    public static void listarDemandas(ProductionManager gerenciador) {
-        List<Demand> demandas = gerenciador.getDemandas();
-        double custoProjetadoTotal = gerenciador.getProjectedCost(); // also refreshes each demand's cost btw
+    public static void listarDemandas(GerenciadorProducao gerenciador) {
+        List<Demanda> demandas = gerenciador.getDemandas();
+        double custoProjetadoTotal = gerenciador.getCustoProjetado(); // also refreshes each demand's cost btw
 
         System.out.printf("    " + CINZA + FORMATO_LINHA_DEMANDA + RESET + "\n",
                 "Produto", "Demanda", "MP", "Custo", "Status", "Tempo");
         linhaRecuada(LARGURA_TABELA_DEMANDA);
 
         for (int i = 0; i < demandas.size(); i++) {
-            Demand demanda = demandas.get(i);
-            double custoDemanda = demanda.getEstimatedCost();
+            Demanda demanda = demandas.get(i);
+            double custoDemanda = demanda.getCustoEstimado();
 
             /* Padding the plain text to the Status column's visible width yah */
             String rotuloStatus;
             String corStatus;
             switch (demanda.getStatus()) {
-                case COMPLETED -> {
+                case CONCLUIDA -> {
                     rotuloStatus = "Concluída";
                     corStatus = VERDE;
                 }
-                case CANCELLED -> {
+                case CANCELADA -> {
                     // shows the progress when it got somewhere before stopping
-                    rotuloStatus = demanda.getProducedAmount() > 0
-                            ? String.format("Cancelada (%d/%d)", demanda.getProducedAmount(), demanda.getAmount())
+                    rotuloStatus = demanda.getQuantidadeProduzida() > 0
+                            ? String.format("Cancelada (%d/%d)", demanda.getQuantidadeProduzida(), demanda.getQuantidade())
                             : "Cancelada";
                     corStatus = VERMELHO;
                 }
@@ -321,16 +321,16 @@ public class ConsolePrinter {
                 }
             }
             String status = corStatus + String.format("%-18s", rotuloStatus) + RESET;
-            String tempo = demanda.getProducedAmount() == 0
+            String tempo = demanda.getQuantidadeProduzida() == 0
                     ? "-"
-                    : String.format("%.2fs", demanda.getTotalProductionTime());
+                    : String.format("%.2fs", demanda.getTempoTotalProducao());
 
             // status already comes colored + padded, so it goes in as a plain %s instead of %-18s
             System.out.printf(CINZA + " %-1s." + RESET + " " + FORMATO_LINHA_DEMANDA.replace("%-18s", "%s") + RESET + "\n",
                     (i + 1),
-                    demanda.getProductName(),
-                    demanda.getAmount() + " un",
-                    String.format("%.2f kg", demanda.getTotalRawMaterial()),
+                    demanda.getNomeProduto(),
+                    demanda.getQuantidade() + " un",
+                    String.format("%.2f kg", demanda.getMateriaPrimaTotal()),
                     String.format("R$ %.2f", custoDemanda),
                     status,
                     tempo

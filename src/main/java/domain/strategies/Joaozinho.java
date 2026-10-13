@@ -1,7 +1,7 @@
 package domain.strategies;
 
-import domain.entities.demand.Demand;
-import domain.interfaces.ProductionStrategy;
+import domain.entities.demand.Demanda;
+import domain.interfaces.EstrategiaProducao;
 
 import java.util.Comparator;
 import java.util.List;
@@ -15,23 +15,23 @@ import java.util.List;
  *
  * @author Glayson Oliveira
  */
-public class Joaozinho implements ProductionStrategy {
+public class Joaozinho implements EstrategiaProducao {
     private final String nome = "Joãozinho";
 
     /**
      * Pega a demanda elegível c/ a maior quantidade entre as que cabem no orçamento.
-     * Usa o custo estimado de cada demanda, que o ProductionManager atualiza antes de chamar
+     * Usa o custo estimado de cada demanda, que o GerenciadorProducao atualiza antes de chamar
      *
      * @param demandas todas as demandas cadastradas
      * @param orcamentoDisponivel orçamento disponível, em R$
      * @return demanda viável c/ mais unidades, ou null se nenhuma couber no orçamento
      */
     @Override
-    public Demand selecionarDemanda(List<Demand> demandas, double orcamentoDisponivel) {
+    public Demanda selecionarDemanda(List<Demanda> demandas, double orcamentoDisponivel) {
         // Entre as demandas que cabem no orçamento, pega a de maior quantidade de produtos
         return selecionaveis(demandas).stream()
-                .filter(d -> d.isViable(orcamentoDisponivel))
-                .max(Comparator.comparingInt(Demand::getAmount))
+                .filter(d -> d.ehViavel(orcamentoDisponivel))
+                .max(Comparator.comparingInt(Demanda::getQuantidade))
                 .orElse(null);
     }
 
