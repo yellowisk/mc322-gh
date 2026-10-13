@@ -55,11 +55,11 @@ public class ConsolePrinter {
         String title = PURPLE + "▸ " + String.format(format.toUpperCase(), args) + RESET;
         String saude = String.format("%d/%d", machine.getSaude(), machine.getSaudeMaxima());
         String chanceFalha = "";
-        if (machine.getRawChanceFalha() == machine.getFailureOdd()) {
-            chanceFalha = String.format("%.2f", machine.getFailureOdd());
+        if (machine.getChanceFalhaBase() == machine.getChanceFalha()) {
+            chanceFalha = String.format("%.2f", machine.getChanceFalha());
         } else {
-            double diffChanceFalha = machine.getFailureOdd() - machine.getRawChanceFalha();
-            chanceFalha = String.format("%.2f " + GRAY +"(▴ %.2f)", machine.getFailureOdd(), diffChanceFalha);
+            double diffChanceFalha = machine.getChanceFalha() - machine.getChanceFalhaBase();
+            chanceFalha = String.format("%.2f " + GRAY +"(▴ %.2f)", machine.getChanceFalha(), diffChanceFalha);
         }
         System.out.printf(title + " [ " + RED + "❤ %s"+ RESET + " | " + BLUE + "⚂ %s" + RESET + " ]\n", saude, chanceFalha);
     }

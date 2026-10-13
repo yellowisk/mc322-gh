@@ -1,10 +1,10 @@
 package domain.interfaces;
 
 public interface Auditable {
-    String generateDiagnosticReport();
+    String gerarRelatorioDiagnostico();
 
     /** Uma linha identificando o componente e o motivo do alerta, para a lista de problemas da auditoria */
-    String generateIssueSummary();
+    String gerarResumoProblema();
 
-    boolean needsMaintenance();
+    boolean precisaManutencao();
 }

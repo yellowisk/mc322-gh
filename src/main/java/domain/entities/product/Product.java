@@ -98,7 +98,7 @@ public abstract class Product implements Auditable {
     }
 
     @Override
-    public boolean needsMaintenance() {
+    public boolean precisaManutencao() {
         return REPAIR_RISK_LIMIT <= getRejectionRisk() && getRejectionRisk() <= DISCARD_RISK_LIMIT;
     }
 
@@ -108,12 +108,12 @@ public abstract class Product implements Auditable {
     }
 
     @Override
-    public String generateIssueSummary() {
+    public String gerarResumoProblema() {
         return String.format("[Produto] %s #%d (Risco de Rejeição: %.0f%%)", getName(), getId(), getRejectionRisk() * 100);
     }
 
     @Override
-    public String generateDiagnosticReport() {
+    public String gerarRelatorioDiagnostico() {
         String reset = view.ConsolePrinter.RESET;
         String blue = view.ConsolePrinter.BLUE;
         String green = view.ConsolePrinter.GREEN;
@@ -127,11 +127,11 @@ public abstract class Product implements Auditable {
         String qualStr = yellow + String.format("%-10.2f", this.quality) + reset;
         String riscoAcumStr = yellow + String.format("%-12.2f", this.cumulativeFailureOdd) + reset;
 
-        String corRisco = needsMaintenance() ? red : green;
+        String corRisco = precisaManutencao() ? red : green;
         String riscoRejStr = corRisco + String.format("%-10s", String.format("%.0f%%", getRejectionRisk() * 100)) + reset;
 
-        String statusTexto = needsMaintenance() ? "✗ Inspeção" : "✓ OK";
-        String corStatus = needsMaintenance() ? red : green;
+        String statusTexto = precisaManutencao() ? "✗ Inspeção" : "✓ OK";
+        String corStatus = precisaManutencao() ? red : green;
         String statusStr = corStatus + String.format("%-20s", statusTexto) + reset;
 
         // Retorna a linha completa formatada

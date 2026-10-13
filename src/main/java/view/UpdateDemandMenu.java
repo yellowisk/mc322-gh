@@ -2,6 +2,7 @@ package view;
 
 import domain.entities.demand.Demand;
 import domain.entities.productionmanager.ProductionManager;
+import domain.exceptions.InvalidDemandAmountException;
 
 public class UpdateDemandMenu extends Submenu {
 
@@ -43,7 +44,7 @@ public class UpdateDemandMenu extends Submenu {
             try {
                 productionManager.updateDemand(selectedDemand, newValue);
                 menu.setLastBuffer(ConsolePrinter.okText("Demanda de %s atualizada para %d!", selectedDemand.getProductName(), newValue));
-            } catch (IllegalArgumentException e) {
+            } catch (InvalidDemandAmountException e) {
                 menu.setLastBuffer(ConsolePrinter.failText("Dessa vez não é! %s", e.getMessage()));
             }
         }

@@ -116,7 +116,7 @@ public class ProductionManager {
     public double getUnitOperationCost() {
         double unitOperationCost = 0;
         for (Machine m : this.machines) {
-            unitOperationCost += m.getOperationCost();
+            unitOperationCost += m.getCustoOperacao();
         }
         return unitOperationCost;
     }
@@ -190,7 +190,7 @@ public class ProductionManager {
 
         this.getConveyor().turnOn();
         for (Machine m: this.getMachines()) {
-            m.turnOn();
+            m.ligar();
         }
 
         System.out.printf("Eitcha!!! Iniciando produção de: %s (lote %d)\n", chosenProduct.getName(), batch);
@@ -218,10 +218,10 @@ public class ProductionManager {
                     ConsolePrinter.stageHeader(currentMachine, "%s", etapaAtual.getNome());
 
                     if (!calcProductionCost(currentMachine)) {
-                        String mensagem = String.format("Dessa vez não é! Orçamento insuficiente para operar a máquina de %s!", currentMachine.getType());
+                        String mensagem = String.format("Dessa vez não é! Orçamento insuficiente para operar a máquina de %s!", currentMachine.getTipo());
                         throw new InsufficientBudgetException(mensagem);
                     }
-                    sectionMoneySpent += currentMachine.getOperationCost(); // Auditoria
+                    sectionMoneySpent += currentMachine.getCustoOperacao(); // Auditoria
 
                     if (etapaAtual == ProductionStages.PROCESSING) {
                         conveyor.addRawMaterial(chosenProduct.getRawMaterialPerUnit());
@@ -229,19 +229,19 @@ public class ProductionManager {
                         ConsolePrinter.treeInfo(false, "%s carregado para a esteira.", this.rawMaterial.getName());
 
                         this.rawMaterial.consume(conveyor.removeRawMaterial());
-                        ConsolePrinter.treeInfo(false, "%s transportado até a máquina de %s. E é ligeiro!", this.rawMaterial.getName(), currentMachine.getType());
+                        ConsolePrinter.treeInfo(false, "%s transportado até a máquina de %s. E é ligeiro!", this.rawMaterial.getName(), currentMachine.getTipo());
 
                         ConsolePrinter.treeInfo(false, "Máquina %s %.2f %s de %s...", etapaAtual.getGerundio(), this.chosenProduct.getRawMaterialPerUnit(), this.rawMaterial.getUnit(), this.rawMaterial.getName());
-                        currentProduct = currentMachine.process(this.chosenProduct);
+                        currentProduct = currentMachine.processar(this.chosenProduct);
                         currentProduct.setBatch(batch);
 
                         ConsolePrinter.treeOk(true, "Tu não acredita! Sabe o que é? \"%s\" #%d criado.", currentProduct.getName(), currentProduct.getId());
                         this.conveyor.addProduct(currentProduct);
                     } else {
-                        ConsolePrinter.treeInfo(false, "%s #%d transportado até a máquina de %s. E é ligeiro!", currentProduct.getName(), currentProduct.getId(), currentMachine.getType());
+                        ConsolePrinter.treeInfo(false, "%s #%d transportado até a máquina de %s. E é ligeiro!", currentProduct.getName(), currentProduct.getId(), currentMachine.getTipo());
 
                         ConsolePrinter.treeInfo(false, "Máquina %s o produto %s #%d...", etapaAtual.getGerundio(), currentProduct.getName(), currentProduct.getId());
-                        currentProduct = currentMachine.process(this.conveyor.removeProduct());
+                        currentProduct = currentMachine.processar(this.conveyor.removeProduct());
 
                         ConsolePrinter.treeOk(true, "Produto %s #%d foi %s com sucesso.", currentProduct.getName(), currentProduct.getId(), etapaAtual.getVerboParticipio());
                         this.conveyor.addProduct(currentProduct);
@@ -302,15 +302,15 @@ public class ProductionManager {
         // Desliga as máquinas
         this.getConveyor().turnOff();
         for (Machine m: this.getMachines()) {
-            m.turnOff();
+            m.desligar();
         }
     }
 
     private boolean calcProductionCost(Machine machine) {
         // for those who just entered the stream: calc is short for _calculate_
         // yellowisk: lol, good one
-        if (this.budget >= machine.getOperationCost()) {
-            this.budget -= (float) machine.getOperationCost();
+        if (this.budget >= machine.getCustoOperacao()) {
+            this.budget -= (float) machine.getCustoOperacao();
             return true;
         }
         return false;
@@ -340,7 +340,7 @@ public class ProductionManager {
      */
     public void repairMachine(Machine m) {
         if (!(m.getSaude() < m.getSaudeMaxima())) {
-            throw new IllegalStateException("Não foi dessa vez! A " + m.getName() + " não precisa de reparo");
+            throw new IllegalStateException("Não foi dessa vez! A " + m.getNome() + " não precisa de reparo");
         }
         m.reparar();
         setTemMaquinaQuebrada(false);

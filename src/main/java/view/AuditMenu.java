@@ -92,7 +92,7 @@ public class AuditMenu extends Submenu {
             System.out.println(ConsolePrinter.BOLD + " Relatório da Fábrica" + ConsolePrinter.RESET);
 
             for (Auditable auditable : auditables) {
-                if (auditable.needsMaintenance()) {
+                if (auditable.precisaManutencao()) {
                     issuesCount++;
                 }
             }
@@ -107,10 +107,10 @@ public class AuditMenu extends Submenu {
 
             boolean foundIssues = false;
             for (Auditable auditable : auditables) {
-                if (auditable.needsMaintenance()) {
+                if (auditable.precisaManutencao()) {
                     foundIssues = true;
                     /* Cada Auditable sabe se descrever, então não precisamos saber se é máquina ou produto */
-                    System.out.println(ConsolePrinter.RED + " ✗ " + ConsolePrinter.RESET + auditable.generateIssueSummary());
+                    System.out.println(ConsolePrinter.RED + " ✗ " + ConsolePrinter.RESET + auditable.gerarResumoProblema());
                 }
             }
 
@@ -156,10 +156,10 @@ public class AuditMenu extends Submenu {
             for (Machine m : machineList) {
                 System.out.printf(
                         ConsolePrinter.GRAY + "  %d." + ConsolePrinter.RESET + " %s " + ConsolePrinter.GRAY + "(%s)" + ConsolePrinter.RESET + "\n",
-                        (i + 1), m.getName(), m.getType());
+                        (i + 1), m.getNome(), m.getTipo());
 
                 if (expandedOptions[i] == 1) { // Expansão
-                    System.out.print(m.generateDiagnosticReport());
+                    System.out.print(m.gerarRelatorioDiagnostico());
                 }
                 i++;
             }
@@ -214,7 +214,7 @@ public class AuditMenu extends Submenu {
 
                 // Imprime as linhas da tabela
                 for (Product p : productList) {
-                    System.out.println(p.generateDiagnosticReport());
+                    System.out.println(p.gerarRelatorioDiagnostico());
                 }
             }
 

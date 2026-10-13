@@ -75,7 +75,7 @@ public class StorageMenu extends Submenu {
                             System.out.printf("    " + ConsolePrinter.GRAY + " %s %s #%d, Risco %s, %s\n" + ConsolePrinter.RESET,
                                     treeSymbol,
                                     p.getName(), p.getId(), String.format("%.0f%%", p.getRejectionRisk() * 100),
-                                    p.needsMaintenance()
+                                    p.precisaManutencao()
                                             ? ConsolePrinter.color(ConsolePrinter.RED, "✗ Alto risco")
                                             : ConsolePrinter.color(ConsolePrinter.GREEN, "✓ OK")
                                     );
