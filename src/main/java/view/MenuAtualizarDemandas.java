@@ -2,8 +2,8 @@ package view;
 
 import domain.entities.demand.Demanda;
 import domain.entities.productionmanager.GerenciadorProducao;
-import domain.exceptions.InvalidDemandAmountException;
-import domain.exceptions.InvalidOptionException;
+import domain.exceptions.QuantidadeDemandaInvalidaException;
+import domain.exceptions.OpcaoInvalidaException;
 
 /**
  * Submenu de atualização de demandas. Escolhe uma demanda e define a nova quantidade, que reseta
@@ -50,7 +50,7 @@ public class MenuAtualizarDemandas extends Submenu {
 
             try {
                 Menu.validarOpcao(opcao, gerenciadorProducao.getDemandas().size(), "Dessa vez não é! Opção inválida!");
-            } catch (InvalidOptionException e) {
+            } catch (OpcaoInvalidaException e) {
                 menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }
@@ -60,7 +60,7 @@ public class MenuAtualizarDemandas extends Submenu {
             try {
                 gerenciadorProducao.atualizarDemanda(demandaEscolhida, novoValor);
                 menu.setUltimaMensagem(ConsolePrinter.textoOk("Demanda de %s atualizada para %d!", demandaEscolhida.getNomeProduto(), novoValor));
-            } catch (InvalidDemandAmountException e) {
+            } catch (QuantidadeDemandaInvalidaException e) {
                 menu.setUltimaMensagem(ConsolePrinter.textoFalha("Dessa vez não é! %s", e.getMessage()));
             }
         }

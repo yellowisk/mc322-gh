@@ -4,7 +4,7 @@ import domain.entities.machine.Maquina;
 import domain.entities.product.Produto;
 import domain.entities.productionmanager.GerenciadorProducao;
 import domain.entities.report.Relatorio;
-import domain.exceptions.InvalidOptionException;
+import domain.exceptions.OpcaoInvalidaException;
 import domain.interfaces.Auditavel;
 
 import java.util.ArrayList;
@@ -202,7 +202,7 @@ public class MenuAuditoria extends Submenu {
             try {
                 Menu.validarOpcao(opcao, opcoesExpandidas.length, "Dessa vez não é! Máquina inválida!");
                 opcoesExpandidas[opcao - 1] = opcoesExpandidas[opcao - 1] ^ 1; // Inverte a flag usando bitwise XOR
-            } catch (InvalidOptionException e) {
+            } catch (OpcaoInvalidaException e) {
                 menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }

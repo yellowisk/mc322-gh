@@ -6,7 +6,7 @@ package domain.exceptions;
  *
  * @author Glayson Oliveira
  */
-public class InvalidDemandException extends PlantaException {
+public class DemandaInvalidaException extends PlantaException {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -14,7 +14,7 @@ public class InvalidDemandException extends PlantaException {
      *
      * @param message o motivo da demanda ser inválida
      */
-    public InvalidDemandException(String message) {
+    public DemandaInvalidaException(String message) {
         super(message);
     }
 }

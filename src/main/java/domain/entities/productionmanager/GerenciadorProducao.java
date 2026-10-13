@@ -8,14 +8,14 @@ import domain.entities.product.Produto;
 import domain.entities.product.StatusProduto;
 import domain.entities.rawmaterial.MateriaPrima;
 import domain.entities.report.Relatorio;
-import domain.exceptions.InsufficientBudgetException;
-import domain.exceptions.InsufficientRawMaterialException;
-import domain.exceptions.InvalidDemandException;
-import domain.exceptions.InvalidDemandTransitionException;
-import domain.exceptions.MachineNeedsRepairException;
-import domain.exceptions.MachineUnavailableException;
-import domain.exceptions.NoStrategySelectedException;
-import domain.exceptions.NullDemandException;
+import domain.exceptions.OrcamentoInsuficienteException;
+import domain.exceptions.MateriaPrimaInsuficienteException;
+import domain.exceptions.DemandaInvalidaException;
+import domain.exceptions.TransicaoDemandaInvalidaException;
+import domain.exceptions.MaquinaPrecisaReparoException;
+import domain.exceptions.MaquinaIndisponivelException;
+import domain.exceptions.EstrategiaNaoSelecionadaException;
+import domain.exceptions.NenhumaDemandaElegivelException;
 import domain.exceptions.PlantaException;
 import domain.interfaces.EstrategiaProducao;
 import view.ConsolePrinter;
@@ -146,13 +146,13 @@ public class GerenciadorProducao {
     /**
      * Inicia a produção da próxima demanda. A demanda é escolhida pela estratégia atual.
      *
-     * @throws NoStrategySelectedException se nenhuma estratégia tiver sido escolhida
-     * @throws NullDemandException se a estratégia não encontrar nenhuma demanda elegível
+     * @throws EstrategiaNaoSelecionadaException se nenhuma estratégia tiver sido escolhida
+     * @throws NenhumaDemandaElegivelException se a estratégia não encontrar nenhuma demanda elegível
      * @throws domain.exceptions.PlantaException qualquer erro de {@link #produzirDemanda(Demanda)}
      */
     public void iniciarProducao() {
         if (this.estrategiaAtual == null) {
-            throw new NoStrategySelectedException("Nenhuma estratégia de produção selecionada.\n");
+            throw new EstrategiaNaoSelecionadaException("Nenhuma estratégia de produção selecionada.\n");
         }
 
         Demanda proximaDemanda = espiarProximaDemanda();
@@ -160,7 +160,7 @@ public class GerenciadorProducao {
         if (proximaDemanda == null) {
             String mensagem = String.format("Dessa vez não é! %s não encontrou nenhuma demanda elegível.\n",
                     this.estrategiaAtual.getNomeEstrategia());
-            throw new NullDemandException(mensagem);
+            throw new NenhumaDemandaElegivelException(mensagem);
         }
 
         System.out.printf("%s escolheu: %s (%d un)\n",
@@ -228,38 +228,38 @@ public class GerenciadorProducao {
      * nada é alterado (estoque, verba e status da demanda continuam iguais).
      *
      * @param demanda A demanda que será fabricada.
-     * @throws MachineNeedsRepairException se alguma máquina precisar de reparo
-     * @throws InvalidDemandException se o produto da demanda não existir ou se ela não tiver unidades pedidas
-     * @throws InvalidDemandTransitionException se o status da demanda não permitir fabricar
-     * @throws InsufficientBudgetException se o orçamento não cobrir o custo estimado
+     * @throws MaquinaPrecisaReparoException se alguma máquina precisar de reparo
+     * @throws DemandaInvalidaException se o produto da demanda não existir ou se ela não tiver unidades pedidas
+     * @throws TransicaoDemandaInvalidaException se o status da demanda não permitir fabricar
+     * @throws OrcamentoInsuficienteException se o orçamento não cobrir o custo estimado
      */
     public void produzirDemanda(Demanda demanda) {
         // VERIFICAÇÕES
         if (temMaquinaQuebrada()) {
-            throw new MachineNeedsRepairException("Não podemos iniciar a fabricação. Há máquinas precisando de reparo.");
+            throw new MaquinaPrecisaReparoException("Não podemos iniciar a fabricação. Há máquinas precisando de reparo.");
         }
 
         this.produtoAtual = this.getProdutoPeloNome(demanda.getNomeProduto());
 
         if (produtoAtual == null) {
-            throw new InvalidDemandException("Dessa vez não é! Produto sem demanda cadastrada.");
+            throw new DemandaInvalidaException("Dessa vez não é! Produto sem demanda cadastrada.");
         }
 
         if (demanda.getQuantidade() <= 0) {
-            throw new InvalidDemandException(String.format(
+            throw new DemandaInvalidaException(String.format(
                     "Dessa vez não é! Nenhuma unidade de %s foi demandada. Atualize a demanda antes de fabricar.",
                     produtoAtual.getNome()));
         }
 
         if (!demanda.getStatus().podeSerFabricada()) {
-            throw new InvalidDemandTransitionException(String.format(
+            throw new TransicaoDemandaInvalidaException(String.format(
                     "Dessa vez não é! Demanda de %s está %s e não pode ser fabricada. Atualize a demanda para reativá-la.",
                     produtoAtual.getNome(), demanda.getStatus().getDescricao()));
         }
 
         atualizarCustoEstimadoTodasDemandas();
         if (!demanda.ehViavel(this.verba)) {
-            throw new InsufficientBudgetException(String.format(
+            throw new OrcamentoInsuficienteException(String.format(
                     "Dessa vez não é! Orçamento insuficiente para fabricar %s: custo R$ %.2f, orçamento R$ %.2f.",
                     produtoAtual.getNome(), demanda.getCustoEstimado(), this.verba));
         }
@@ -307,7 +307,7 @@ public class GerenciadorProducao {
                     maquinaAtual.verificarDisponivel();
                     double materiaPrimaPorUnidade = produtoAtual.getQuantidadeMateriaPrimaPorUnidade();
                     if (etapaAtual == EtapaProducao.PROCESSAMENTO && !this.materiaPrima.estaDisponivel(materiaPrimaPorUnidade)) {
-                        throw new InsufficientRawMaterialException(String.format(
+                        throw new MateriaPrimaInsuficienteException(String.format(
                                 "Cadê a força? Estoque insuficiente para fabricar mais um %s: precisa de %.2f %s. "
                                         + "Compre matéria-prima e fabrique de novo para continuar de onde parou.",
                                 produtoAtual.getNome(), materiaPrimaPorUnidade, this.materiaPrima.getUnidade()));
@@ -315,7 +315,7 @@ public class GerenciadorProducao {
 
                     if (!descontarCustoOperacao(maquinaAtual)) {
                         String mensagem = String.format("Dessa vez não é! Orçamento insuficiente para operar a máquina de %s!", maquinaAtual.getTipo());
-                        throw new InsufficientBudgetException(mensagem);
+                        throw new OrcamentoInsuficienteException(mensagem);
                     }
                     dinheiroGastoNaRodada += maquinaAtual.getCustoOperacao(); // Auditoria
 
@@ -418,8 +418,6 @@ public class GerenciadorProducao {
      * @return true se o custo foi descontado, false se a verba não cobre (e nada é descontado)
      */
     private boolean descontarCustoOperacao(Maquina maquina) {
-        // for those who just entered the stream: calc is short for _calculate_
-        // yellowisk: lol, good one
         if (this.verba >= maquina.getCustoOperacao()) {
             this.verba -= (float) maquina.getCustoOperacao();
             return true;
@@ -432,12 +430,12 @@ public class GerenciadorProducao {
      *
      * @param quantidade quantidade a comprar, na unidade da matéria-prima
      * @return quanto a compra custou no total, em R$
-     * @throws InsufficientBudgetException se a verba não cobrir a compra
+     * @throws OrcamentoInsuficienteException se a verba não cobrir a compra
      */
     public float comprarMateriaPrima(int quantidade) {
         float custoTotal = quantidade * this.materiaPrima.getPreco();
         if (this.verba < custoTotal) {
-            throw new InsufficientBudgetException("Dessa vez não é! Orçamento insuficiente para comprar matéria-prima!");
+            throw new OrcamentoInsuficienteException("Dessa vez não é! Orçamento insuficiente para comprar matéria-prima!");
         }
         verba -= custoTotal;
         this.materiaPrima.adicionarEstoque(quantidade);
@@ -449,11 +447,11 @@ public class GerenciadorProducao {
     /**
      * Função que repara a máquina escolhida.
      * @param m A máquina a ser reparada
-     * @throws MachineUnavailableException se a máquina estiver c/ a saúde cheia e não precisar de reparo
+     * @throws MaquinaIndisponivelException se a máquina estiver c/ a saúde cheia e não precisar de reparo
      */
     public void repararMaquina(Maquina m) {
         if (!(m.getSaude() < m.getSaudeMaxima())) {
-            throw new MachineUnavailableException("Não foi dessa vez! A " + m.getNome() + " não precisa de reparo.");
+            throw new MaquinaIndisponivelException("Não foi dessa vez! A " + m.getNome() + " não precisa de reparo.");
         }
         m.reparar();
     }

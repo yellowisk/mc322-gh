@@ -1,7 +1,7 @@
 package domain.entities.rawmaterial;
 
-import domain.exceptions.InsufficientRawMaterialException;
-import domain.exceptions.InvalidDemandException;
+import domain.exceptions.MateriaPrimaInsuficienteException;
+import domain.exceptions.DemandaInvalidaException;
 
 import java.util.UUID;
 
@@ -49,15 +49,15 @@ public class MateriaPrima {
      * Tira a quantidade do estoque
      *
      * @param quantidadePedida quantidade a consumir, maior que 0
-     * @throws InvalidDemandException se a quantidade não for positiva
-     * @throws InsufficientRawMaterialException se o consumo deixar o estoque abaixo do mínimo
+     * @throws DemandaInvalidaException se a quantidade não for positiva
+     * @throws MateriaPrimaInsuficienteException se o consumo deixar o estoque abaixo do mínimo
      */
     public void consumir(double quantidadePedida) {
         if (quantidadePedida <= 0) {
-            throw new InvalidDemandException("Cadê a força? A demanda para consumo deve ser maior que zero.");
+            throw new DemandaInvalidaException("Cadê a força? A demanda para consumo deve ser maior que zero.");
         }
         if (!estaDisponivel(quantidadePedida)) {
-            throw new InsufficientRawMaterialException("Cadê a força? Estoque insuficiente para atender à demanda de " + quantidadePedida + " " + unidade + ".");
+            throw new MateriaPrimaInsuficienteException("Cadê a força? Estoque insuficiente para atender à demanda de " + quantidadePedida + " " + unidade + ".");
         }
         this.quantidade -= quantidadePedida;
     }

@@ -1,8 +1,8 @@
 package domain.entities.machine;
 
 import domain.entities.product.Produto;
-import domain.exceptions.MachineNeedsRepairException;
-import domain.exceptions.MachineUnavailableException;
+import domain.exceptions.MaquinaPrecisaReparoException;
+import domain.exceptions.MaquinaIndisponivelException;
 import domain.interfaces.Auditavel;
 import domain.utils.GeradorAleatorio;
 import view.ConsolePrinter;
@@ -66,18 +66,18 @@ public abstract class Maquina implements Auditavel {
      * Confere se a máquina pode processar agora, sem mexer em nada. A produção chama isso antes de cobrar
      * a etapa, p/ não pagar por uma operação que não vai acontecer
      *
-     * @throws MachineUnavailableException se a máquina estiver desligada
-     * @throws MachineNeedsRepairException se a saúde estiver abaixo do limiar crítico
+     * @throws MaquinaIndisponivelException se a máquina estiver desligada
+     * @throws MaquinaPrecisaReparoException se a saúde estiver abaixo do limiar crítico
      */
     public void verificarDisponivel() {
         if (!estaLigada()) {
             String mensagem = String.format("Eitcha, João! A %s não pode processar nada, ela tá desligada!", getNome().toLowerCase());
-            throw new MachineUnavailableException(mensagem);
+            throw new MaquinaIndisponivelException(mensagem);
         }
 
         if (precisaManutencao()) {
             String mensagem = String.format("A %s quebrou!", getNome().toLowerCase());
-            throw new MachineNeedsRepairException(mensagem);
+            throw new MaquinaPrecisaReparoException(mensagem);
         }
     }
 
@@ -87,8 +87,8 @@ public abstract class Maquina implements Auditavel {
      *
      * @param produto modelo do catálogo ou unidade vinda da etapa anterior
      * @return o produto depois da etapa
-     * @throws MachineUnavailableException se a máquina estiver desligada
-     * @throws MachineNeedsRepairException se a saúde estiver abaixo do limiar crítico
+     * @throws MaquinaIndisponivelException se a máquina estiver desligada
+     * @throws MaquinaPrecisaReparoException se a saúde estiver abaixo do limiar crítico
      */
     public Produto processar(Produto produto) {
         verificarDisponivel();

@@ -2,7 +2,7 @@ package view;
 
 import domain.entities.demand.Demanda;
 import domain.entities.productionmanager.GerenciadorProducao;
-import domain.exceptions.InvalidOptionException;
+import domain.exceptions.OpcaoInvalidaException;
 import domain.interfaces.EstrategiaProducao;
 import domain.strategies.Ferrari;
 import domain.strategies.FilaDoCaixa;
@@ -80,7 +80,7 @@ public class MenuEstrategia extends Submenu {
             if (escolha == 0) break;
             try {
                 Menu.validarOpcao(escolha, estrategias.size(), "Dessa vez não é! Opção inválida!");
-            } catch (InvalidOptionException e) {
+            } catch (OpcaoInvalidaException e) {
                 menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }

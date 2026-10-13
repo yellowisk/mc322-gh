@@ -7,7 +7,7 @@ package domain.exceptions;
  * @author Heitor Almeida
  * @author Glayson Oliveira
  */
-public class MachineUnavailableException extends PlantaException {
+public class MaquinaIndisponivelException extends PlantaException {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -15,7 +15,7 @@ public class MachineUnavailableException extends PlantaException {
      *
      * @param message o motivo do equipamento estar indisponível
      */
-    public MachineUnavailableException(String message) {
+    public MaquinaIndisponivelException(String message) {
         super(message);
     }
 }

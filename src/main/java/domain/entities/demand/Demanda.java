@@ -1,8 +1,8 @@
 package domain.entities.demand;
 
 import domain.entities.product.Produto;
-import domain.exceptions.InvalidDemandAmountException;
-import domain.exceptions.InvalidDemandTransitionException;
+import domain.exceptions.QuantidadeDemandaInvalidaException;
+import domain.exceptions.TransicaoDemandaInvalidaException;
 
 /**
  * Pedido de um produto do Mercadinho com infos como: quantas unidades fabricar, quanto já saiu
@@ -49,7 +49,6 @@ public class Demanda {
      * @return matéria-prima total
      */
     private double calcularMateriaPrimaNecessaria(Produto produto) {
-        // for those who just joined the stream: "calc" is short for "calculate"
         return (produto.getQuantidadeMateriaPrimaPorUnidade() * this.quantidade);
     }
 
@@ -112,11 +111,11 @@ public class Demanda {
      *
      * @param produto modelo do catálogo, p/ recalcular a matéria-prima
      * @param novaQuantidade nova quantidade, 0 ou mais
-     * @throws InvalidDemandAmountException se {@code novaQuantidade} for negativo
+     * @throws QuantidadeDemandaInvalidaException se {@code novaQuantidade} for negativo
      */
     public void atualizarQuantidade(Produto produto, int novaQuantidade) {
         if (novaQuantidade < 0) {
-            throw new InvalidDemandAmountException("A demanda não pode ser negativa!");
+            throw new QuantidadeDemandaInvalidaException("A demanda não pode ser negativa!");
         }
         this.quantidade = novaQuantidade;
         this.materiaPrimaTotal = calcularMateriaPrimaNecessaria(produto);
@@ -173,7 +172,7 @@ public class Demanda {
     /**
      * Passa a demanda pra {@link StatusDemanda#EM_PRODUCAO}
      *
-     * @throws InvalidDemandTransitionException se o status atual não permitir
+     * @throws TransicaoDemandaInvalidaException se o status atual não permitir
      */
     public void iniciarProducao() {
         transicionarPara(StatusDemanda.EM_PRODUCAO);
@@ -184,7 +183,7 @@ public class Demanda {
      *
      * @param produzidasAgora unidades fabricadas nesta rodada
      * @param tempoProducaoAgora tempo gasto nesta rodada, em segundos
-     * @throws InvalidDemandTransitionException se o status atual não permitir
+     * @throws TransicaoDemandaInvalidaException se o status atual não permitir
      */
     public void concluir(int produzidasAgora, double tempoProducaoAgora) {
         transicionarPara(StatusDemanda.CONCLUIDA);
@@ -196,7 +195,7 @@ public class Demanda {
      *
      * @param produzidasAgora unidades fabricadas antes de parar
      * @param tempoProducaoAgora tempo gasto antes de parar, em segundos
-     * @throws InvalidDemandTransitionException se o status atual não permitir
+     * @throws TransicaoDemandaInvalidaException se o status atual não permitir
      */
     public void cancelar(int produzidasAgora, double tempoProducaoAgora) {
         transicionarPara(StatusDemanda.CANCELADA);
@@ -225,11 +224,11 @@ public class Demanda {
      * Troca o status, mas só se {@link StatusDemanda#podeTransicionarPara(StatusDemanda)} deixar
      *
      * @param alvo novo status
-     * @throws InvalidDemandTransitionException se a transição não for permitida
+     * @throws TransicaoDemandaInvalidaException se a transição não for permitida
      */
     private void transicionarPara(StatusDemanda alvo) {
         if (!this.status.podeTransicionarPara(alvo)) {
-            throw new InvalidDemandTransitionException("Transição de status inválida para "
+            throw new TransicaoDemandaInvalidaException("Transição de status inválida para "
                     + this.nomeProduto + ": " + this.status.getDescricao() + " -> " + alvo.getDescricao());
         }
         this.status = alvo;
