@@ -7,6 +7,9 @@ import domain.entities.rawmaterial.RawMaterial;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Submenu do armazém de matéria-prima
+ */
 public class RawMaterialStorageMenu extends Submenu {
 
     public RawMaterialStorageMenu(Menu menu, ProductionManager productionManager) {
