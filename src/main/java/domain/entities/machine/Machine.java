@@ -63,15 +63,13 @@ public abstract class Machine implements Auditable {
     public abstract Produto processarEtapa(Produto produto);
 
     /**
-     * Passa o produto pela etapa da máquina via {@link #processarEtapa(Produto)} e desgasta a máquina.
-     * As checagens e o desgaste ficam aqui, a etapa ({@link #processarEtapa(Produto)}) em si fica em cada subclasse
+     * Confere se a máquina pode processar agora, sem mexer em nada. A produção chama isso antes de cobrar
+     * a etapa, p/ não pagar por uma operação que não vai acontecer
      *
-     * @param produto modelo do catálogo ou unidade vinda da etapa anterior
-     * @return o produto depois da etapa
      * @throws MachineUnavailableException se a máquina estiver desligada
      * @throws MachineNeedsRepairException se a saúde estiver abaixo do limiar crítico
      */
-    public Produto processar(Produto produto) {
+    public void verificarDisponivel() {
         if (!estaLigada()) {
             String mensagem = String.format("Eitcha, João! A %s não pode processar nada, ela tá desligada!", getNome().toLowerCase());
             throw new MachineUnavailableException(mensagem);
@@ -81,6 +79,19 @@ public abstract class Machine implements Auditable {
             String mensagem = String.format("A %s quebrou!", getNome().toLowerCase());
             throw new MachineNeedsRepairException(mensagem);
         }
+    }
+
+    /**
+     * Passa o produto pela etapa da máquina via {@link #processarEtapa(Produto)} e desgasta a máquina.
+     * As checagens e o desgaste ficam aqui, a etapa ({@link #processarEtapa(Produto)}) em si fica em cada subclasse
+     *
+     * @param produto modelo do catálogo ou unidade vinda da etapa anterior
+     * @return o produto depois da etapa
+     * @throws MachineUnavailableException se a máquina estiver desligada
+     * @throws MachineNeedsRepairException se a saúde estiver abaixo do limiar crítico
+     */
+    public Produto processar(Produto produto) {
+        verificarDisponivel();
 
         Produto resultado = processarEtapa(produto);
         desgastar(); // Trecho que será rodado sempre que o 'processar()' for utilizado

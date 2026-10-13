@@ -9,12 +9,14 @@ import domain.entities.product.ProductStatus;
 import domain.entities.rawmaterial.RawMaterial;
 import domain.entities.report.Report;
 import domain.exceptions.InsufficientBudgetException;
+import domain.exceptions.InsufficientRawMaterialException;
 import domain.exceptions.InvalidDemandException;
 import domain.exceptions.InvalidDemandTransitionException;
 import domain.exceptions.MachineNeedsRepairException;
 import domain.exceptions.MachineUnavailableException;
 import domain.exceptions.NoStrategySelectedException;
 import domain.exceptions.NullDemandException;
+import domain.exceptions.PlantaException;
 import domain.interfaces.ProductionStrategy;
 import view.ConsolePrinter;
 
@@ -25,6 +27,9 @@ import java.util.List;
  * Essa classe é o administrador da produção. Ele é
  * responsável por guardar a lista de máquinas, verba atual,
  * lista de demandas, produtos produzidos, matéria-prima, etc.
+ *
+ * @author Heitor Almeida
+ * @author Glayson Oliveira
  */
 public class ProductionManager {
     /// ArrayList de demandas. Haverá uma demanda por produtosDisponiveisFabricacao
@@ -47,14 +52,18 @@ public class ProductionManager {
     private ProductionStrategy currEstrategia;
     /// número de lotes produzidos
     private int loteCount = 0;
-    /// booleano para se há máquina quebrada ou não. Essa flag impede a produção de
-    /// continuar caso true
-    private boolean temMaquinaQuebrada = false;
     /// objeto da classe Relatorio para salvar dados para log
     private Report relatorio;
     /// lista das etapas de produção instanciada para evitar laço 'for' otimizado direto no Enum.
     private static final ProductionStages[] etapasProducao = ProductionStages.values();
 
+    /**
+     * Cria o gerenciador sem máquinas, produtos, esteira nem estratégia, que são adicionados depois pelo menu
+     *
+     * @param rawMaterial matéria-prima da fábrica
+     * @param budget verba inicial, em R$, que vem do cenário escolhido
+     * @param rp relatório onde a auditoria vai acumulando os dados da produção
+     */
     public ProductionManager(RawMaterial rawMaterial, float budget, Report rp) {
         this.materiaPrima = rawMaterial;
         this.verba = budget;
@@ -96,8 +105,8 @@ public class ProductionManager {
     /**
      * Retorna o produto da lista de produtos disponíveis a partir
      * do nome fornecido
-     * @param nome
-     * @return Produto
+     * @param nome nome do produto, ex.: "Copo"
+     * @return o modelo do catálogo, ou null se nenhum produto tiver esse nome
      */
     public Produto getProdutoPeloNome(String nome) {
         for (Produto p: produtosDisponiveisFabricacao) {
@@ -116,10 +125,20 @@ public class ProductionManager {
         this.maquinas.add(m);
     }
     
+    /**
+     * Troca a estratégia que escolhe a próxima demanda
+     *
+     * @param s nova estratégia
+     */
     public void setCurrEstrategia(ProductionStrategy s) {
         this.currEstrategia = s;
     }
     
+    /**
+     * Estratégia que escolhe a próxima demanda
+     *
+     * @return estratégia atual, ou null se nenhuma tiver sido escolhida
+     */
     public ProductionStrategy getCurrEstrategia() {
         return this.currEstrategia;
     }
@@ -185,8 +204,10 @@ public class ProductionManager {
     }
 
     /**
-     * How much it'd cost to fabricate everything still in line (pending ones).
-     * Completed and cancelled ones are outta the projection.
+     * Quanto custaria fabricar todas as demandas pendentes. As concluídas e canceladas ficam fora da projeção.
+     * Também atualiza o custo estimado de cada demanda
+     *
+     * @return custo total projetado, em R$
      */
     public double getProjectedCost() {
         atualizarCustoEstimadoTodasDemandas();
@@ -282,6 +303,16 @@ public class ProductionManager {
 
                     ConsolePrinter.cabecalhoEtapa(currentMachine, "%s", etapaAtual.getNome());
 
+                    // Confere tudo antes de cobrar a etapa, p/ não pagar por uma operação que não vai acontecer
+                    currentMachine.verificarDisponivel();
+                    double materiaPrimaPorUnidade = currProduto.getQuantidadeMateriaPrimaPorUnidade();
+                    if (etapaAtual == ProductionStages.PROCESSING && !this.materiaPrima.isAvailable(materiaPrimaPorUnidade)) {
+                        throw new InsufficientRawMaterialException(String.format(
+                                "Cadê a força? Estoque insuficiente para fabricar mais um %s: precisa de %.2f %s. "
+                                        + "Compre matéria-prima e fabrique de novo para continuar de onde parou.",
+                                currProduto.getNome(), materiaPrimaPorUnidade, this.materiaPrima.getUnit()));
+                    }
+
                     if (!calcProductionCost(currentMachine)) {
                         String mensagem = String.format("Dessa vez não é! Orçamento insuficiente para operar a máquina de %s!", currentMachine.getTipo());
                         throw new InsufficientBudgetException(mensagem);
@@ -289,11 +320,11 @@ public class ProductionManager {
                     sectionMoneySpent += currentMachine.getCustoOperacao(); // Auditoria
 
                     if (etapaAtual == ProductionStages.PROCESSING) {
-                        esteira.addRawMaterial(currProduto.getQuantidadeMateriaPrimaPorUnidade());
-                        relatorio.increaseRawMaterialSpent(currProduto.getQuantidadeMateriaPrimaPorUnidade()); // Auditoria
+                        esteira.addRawMaterial(materiaPrimaPorUnidade);
                         ConsolePrinter.arvoreInfo(false, "%s carregado para a esteira.", this.materiaPrima.getName());
 
                         this.materiaPrima.consume(esteira.removeRawMaterial());
+                        relatorio.increaseRawMaterialSpent(materiaPrimaPorUnidade); // Auditoria, só depois do consumo
                         ConsolePrinter.arvoreInfo(false, "%s transportado até a máquina de %s. E é ligeiro!", this.materiaPrima.getName(), currentMachine.getTipo());
 
                         ConsolePrinter.arvoreInfo(false, "Máquina %s %.2f %s de %s...", etapaAtual.getGerundio(), this.currProduto.getQuantidadeMateriaPrimaPorUnidade(), this.materiaPrima.getUnit(), this.materiaPrima.getName());
@@ -334,12 +365,10 @@ public class ProductionManager {
                 sectionProductionTime += currProduto.calcularTempoProducao();
                 sectionFabricatedAmount++;
 
-            } catch (MachineNeedsRepairException e) {
-                setTemMaquinaQuebrada(true);
+            } catch (PlantaException e) {
+                // Máquina quebrou ou orçamento/matéria-prima acabaram no meio do lote: a demanda é cancelada c/ o progresso salvo
                 ConsolePrinter.arvoreFalha(true, e.getMessage());
-                break;
-            } catch (Exception e) {
-                ConsolePrinter.arvoreFalha(true, e.getMessage());
+                descartarUnidadeIncompleta();
                 break;
             }
         }
@@ -372,9 +401,21 @@ public class ProductionManager {
     }
 
     /**
-     * Desconta o valor da produção
-     * @param machine
-     * @return
+     * Tira da esteira a unidade que parou no meio da linha (ex.: a máquina de empacotamento quebrou c/ ela
+     * esperando), p/ a próxima produção começar c/ a esteira vazia. A matéria-prima e o custo das etapas que ela
+     * já passou continuam contados, porque foram gastos de verdade
+     */
+    private void descartarUnidadeIncompleta() {
+        if (this.esteira.getProduct() != null) {
+            Produto incompleto = this.esteira.removeProduct();
+            ConsolePrinter.arvoreInfo(true, "%s #%d ficou incompleto e foi descartado.", incompleto.getNome(), incompleto.getId());
+        }
+    }
+
+    /**
+     * Desconta da verba o custo de operar a máquina numa etapa, se a verba cobrir
+     * @param machine máquina da etapa
+     * @return true se o custo foi descontado, false se a verba não cobre (e nada é descontado)
      */
     private boolean calcProductionCost(Machine machine) {
         // for those who just entered the stream: calc is short for _calculate_
@@ -387,10 +428,11 @@ public class ProductionManager {
     }
 
     /**
-     * Buys raw material and takes it off the budget.
+     * Compra matéria-prima e desconta o valor da verba. Se a verba não cobrir, nada é alterado
      *
-     * @return how much the purchase cost in total
-     * @throws InsufficientBudgetException when the budget can't cover it
+     * @param amount quantidade a comprar, na unidade da matéria-prima
+     * @return quanto a compra custou no total, em R$
+     * @throws InsufficientBudgetException se a verba não cobrir a compra
      */
     public float buyRawMaterial(int amount) {
         float totalCost = amount * this.materiaPrima.getPrice();
@@ -414,48 +456,90 @@ public class ProductionManager {
             throw new MachineUnavailableException("Não foi dessa vez! A " + m.getNome() + " não precisa de reparo.");
         }
         m.reparar();
-        setTemMaquinaQuebrada(false);
     }
 
     // === GETTERS and SETTERS
 
+    /**
+     * Demandas cadastradas, uma por produto do catálogo
+     *
+     * @return lista de demandas
+     */
     public List<Demand> getDemandas() {
         return this.demandas;
     }
 
+    /**
+     * Produtos que passaram na inspeção e estão no armazém, incluindo os que precisam de manutenção
+     *
+     * @return lista de produtos fabricados
+     */
     public List<Produto> getProdutosFabricados() {
         return this.produtosFabricados;
     }
 
+    /**
+     * Máquinas da fábrica, na ordem das etapas da produção
+     *
+     * @return lista de máquinas
+     */
     public List<Machine> getMaquinas() {
         return this.maquinas;
     }
 
+    /**
+     * Relatório c/ os dados acumulados da produção, usado pela auditoria
+     *
+     * @return relatório
+     */
     public Report getRelatorio() {
         return this.relatorio;
     }
 
+    /**
+     * Matéria-prima da fábrica, c/ o estoque atual
+     *
+     * @return matéria-prima
+     */
     public RawMaterial getMateriaPrima() {
         return this.materiaPrima;
     }
 
+    /**
+     * Define a esteira que leva a matéria-prima e os produtos entre as máquinas
+     *
+     * @param conveyor esteira da fábrica
+     */
     public void addNewConveyor(Conveyor conveyor) {
         this.esteira = conveyor;
     }
 
+    /**
+     * Esteira da fábrica
+     *
+     * @return esteira
+     */
     public Conveyor getEsteira() {
         return this.esteira;
     }
 
+    /**
+     * Verba disponível
+     *
+     * @return verba atual, em R$
+     */
     public float getVerba() {
         return verba;
     }
 
+    /**
+     * Diz se alguma máquina está quebrada (saúde abaixo do limiar crítico). Enquanto for true, nenhuma
+     * fabricação começa. É calculado a partir das máquinas, então só volta a ser false quando todas
+     * as quebradas forem reparadas
+     *
+     * @return true se tiver máquina esperando reparo
+     */
     public boolean temMaquinaQuebrada() {
-        return temMaquinaQuebrada;
-    }
-
-    public void setTemMaquinaQuebrada(boolean temMaquinaQuebrada) {
-        this.temMaquinaQuebrada = temMaquinaQuebrada;
+        return this.maquinas.stream().anyMatch(Machine::precisaManutencao);
     }
 }
