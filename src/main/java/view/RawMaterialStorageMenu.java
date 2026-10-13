@@ -8,10 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Submenu do armazém de matéria-prima
+ * Submenu do armazém de matéria-prima. Mostra o estoque de matéria-prima, separado do armazém de
+ * produtos acabados
+ *
+ * @author Glayson Oliveira
  */
 public class RawMaterialStorageMenu extends Submenu {
 
+    /**
+     * Cria o submenu c/ a cor azul
+     *
+     * @param menu menu principal
+     * @param gerenciadorProducao gerenciador da produção, de onde vem a matéria-prima
+     */
     public RawMaterialStorageMenu(Menu menu, ProductionManager gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.AZUL);
     }

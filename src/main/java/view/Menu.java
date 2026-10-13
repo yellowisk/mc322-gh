@@ -223,6 +223,12 @@ public class Menu {
         }
     }
 
+    /**
+     * Lê um inteiro do usuário. Se ele digitar algo que não é número, avisa e pergunta de novo
+     *
+     * @param prompt texto mostrado antes da entrada
+     * @return o número digitado
+     */
     int readInt(String prompt) {
         while (true) {
             System.out.print(prompt);
@@ -234,17 +240,26 @@ public class Menu {
         }
     }
 
-    /** Waits for ENTER, but first eats the leftover line nextInt() leaves behind */
+    /** Espera o ENTER, mas antes consome a linha que sobra depois do nextInt() */
     void waitEnter() {
         System.out.println("\n" + ConsolePrinter.colorir(ConsolePrinter.AMARELO, "Pressione ENTER para voltar..."));
         scanner.nextLine();
         scanner.nextLine();
     }
 
+    /**
+     * Guarda uma mensagem p/ aparecer no próximo rodapé, ex.: o resultado de uma operação
+     *
+     * @param message mensagem já formatada, normalmente vinda de {@link ConsolePrinter#textoOk} ou {@link ConsolePrinter#textoFalha}
+     */
     void setLastBuffer(String message) {
         this.lastBuffer = message;
     }
 
+    /**
+     * Imprime o rodapé dos menus: a última mensagem guardada (se tiver, e depois apaga ela) e o resumo
+     * c/ verba, matéria-prima e produtos no armazém
+     */
     void printFooter() {
         if (this.lastBuffer != null) {
             ConsolePrinter.cartao("%s", this.lastBuffer);

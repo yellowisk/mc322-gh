@@ -12,10 +12,20 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Submenu de auditáveis
+ * Submenu de auditáveis. Mostra o relatório geral da produção e a lista de problemas (máquinas e
+ * produtos que precisam de manutenção), e deixa detalhar o diagnóstico de cada máquina e de cada produto
+ *
+ * @author Glayson Oliveira
+ * @author Heitor Almeida
  */
 public class AuditMenu extends Submenu {
 
+    /**
+     * Cria o submenu c/ a cor roxa
+     *
+     * @param menu menu principal
+     * @param gerenciadorProducao gerenciador da produção, de onde vêm as máquinas, os produtos e o relatório
+     */
     public AuditMenu(Menu menu, ProductionManager gerenciadorProducao) {
         super(menu, gerenciadorProducao, ConsolePrinter.ROXO);
     }
@@ -198,6 +208,10 @@ public class AuditMenu extends Submenu {
         }
     }
 
+    /**
+     * Submenu de detalhar produtos. Mostra a tabela de diagnóstico de todos os produtos do armazém
+     * (id, nome, lote, qualidade, risco acumulado, risco de rejeição e status)
+     */
     private void detalharProdutos() {
         boolean running = true;
 
