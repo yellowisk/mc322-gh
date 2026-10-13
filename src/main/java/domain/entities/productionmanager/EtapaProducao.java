@@ -6,15 +6,15 @@ package domain.entities.productionmanager;
  *
  * @author Glayson Oliveira
  */
-public enum ProductionStages {
+public enum EtapaProducao {
     /** Transforma a matéria-prima em produto */
-    PROCESSING(0, "processamento", "processando", "processado"),
+    PROCESSAMENTO(0, "processamento", "processando", "processado"),
     /** Empacota o produto */
-    PACKAGING(1, "empacotamento", "empacotando", "empacotado"),
+    EMPACOTAMENTO(1, "empacotamento", "empacotando", "empacotado"),
     /** Decide se o produto é aprovado, precisa de manutenção ou é rejeitado */
-    INSPECTION(2, "inspeção", "inspecionando", "inspecionado");
+    INSPECAO(2, "inspeção", "inspecionando", "inspecionado");
 
-    private final int code;
+    private final int codigo;
     private final String nome;
     private final String verboGerundio;
     private final String verboParticipio;
@@ -22,13 +22,13 @@ public enum ProductionStages {
     /**
      * Associa a etapa à máquina e aos textos dos logs
      *
-     * @param code posição da máquina da etapa na lista de máquinas do ProductionManager
+     * @param codigo posição da máquina da etapa na lista de máquinas do ProductionManager
      * @param nome nome da etapa, ex.: "empacotamento"
      * @param verboGerundio verbo no gerúndio, ex.: "empacotando"
      * @param verboParticipio verbo no particípio, ex.: "empacotado"
      */
-    ProductionStages(int code, String nome, String verboGerundio, String verboParticipio) {
-        this.code = code;
+    EtapaProducao(int codigo, String nome, String verboGerundio, String verboParticipio) {
+        this.codigo = codigo;
         this.nome = nome;
         this.verboGerundio = verboGerundio;
         this.verboParticipio = verboParticipio;
@@ -39,8 +39,8 @@ public enum ProductionStages {
      *
      * @return índice da máquina
      */
-    public int getCode() {
-        return code;
+    public int getCodigo() {
+        return codigo;
     }
 
     /**
@@ -57,7 +57,7 @@ public enum ProductionStages {
      *
      * @return verbo, ex.: "processando"
      */
-    public Object getGerundio() {
+    public String getGerundio() {
         return verboGerundio;
     }
 

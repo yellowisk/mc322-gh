@@ -2,12 +2,12 @@ package domain.entities.productionmanager;
 
 import domain.entities.demand.Demanda;
 import domain.entities.demand.StatusDemanda;
-import domain.entities.conveyor.Conveyor;
+import domain.entities.conveyor.Esteira;
 import domain.entities.machine.Machine;
 import domain.entities.product.Produto;
 import domain.entities.product.ProductStatus;
-import domain.entities.rawmaterial.RawMaterial;
-import domain.entities.report.Report;
+import domain.entities.rawmaterial.MateriaPrima;
+import domain.entities.report.Relatorio;
 import domain.exceptions.InsufficientBudgetException;
 import domain.exceptions.InsufficientRawMaterialException;
 import domain.exceptions.InvalidDemandException;
@@ -41,11 +41,11 @@ public class ProductionManager {
     /// ArrayList de máquinas existentes na fábrica
     private List<Machine> maquinas = new ArrayList<Machine>();
     /// esteira da fábrica
-    private Conveyor esteira;
+    private Esteira esteira;
     /// produto selecionado atualmente
     private Produto currProduto;
     /// matéria-prima da fábrica
-    private final RawMaterial materiaPrima;
+    private final MateriaPrima materiaPrima;
     /// verba atual da fábrica
     private float verba;
     /// estratégia selecionada atualmente
@@ -53,9 +53,9 @@ public class ProductionManager {
     /// número de lotes produzidos
     private int loteCount = 0;
     /// objeto da classe Relatorio para salvar dados para log
-    private Report relatorio;
+    private Relatorio relatorio;
     /// lista das etapas de produção instanciada para evitar laço 'for' otimizado direto no Enum.
-    private static final ProductionStages[] etapasProducao = ProductionStages.values();
+    private static final EtapaProducao[] etapasProducao = EtapaProducao.values();
 
     /**
      * Cria o gerenciador sem máquinas, produtos, esteira nem estratégia, que são adicionados depois pelo menu
@@ -64,7 +64,7 @@ public class ProductionManager {
      * @param budget verba inicial, em R$, que vem do cenário escolhido
      * @param rp relatório onde a auditoria vai acumulando os dados da produção
      */
-    public ProductionManager(RawMaterial rawMaterial, float budget, Report rp) {
+    public ProductionManager(MateriaPrima rawMaterial, float budget, Relatorio rp) {
         this.materiaPrima = rawMaterial;
         this.verba = budget;
         this.relatorio = rp;
@@ -274,7 +274,7 @@ public class ProductionManager {
         demand.iniciarProducao();
         int batch = ++this.loteCount;
 
-        this.getEsteira().turnOn();
+        this.getEsteira().ligar();
         for (Machine m: this.getMaquinas()) {
             m.ligar();
         }
@@ -298,19 +298,19 @@ public class ProductionManager {
             System.out.printf("(%d/%d) %s " + "─".repeat(24) + "\n", (alreadyProduced + sectionFabricatedAmount + 1), demand.getQuantidade(), currProduto.getNome());
 
             try {
-                for (ProductionStages etapaAtual : etapasProducao) {
-                    Machine currentMachine = this.maquinas.get(etapaAtual.getCode());
+                for (EtapaProducao etapaAtual : etapasProducao) {
+                    Machine currentMachine = this.maquinas.get(etapaAtual.getCodigo());
 
                     ConsolePrinter.cabecalhoEtapa(currentMachine, "%s", etapaAtual.getNome());
 
                     // Confere tudo antes de cobrar a etapa, p/ não pagar por uma operação que não vai acontecer
                     currentMachine.verificarDisponivel();
                     double materiaPrimaPorUnidade = currProduto.getQuantidadeMateriaPrimaPorUnidade();
-                    if (etapaAtual == ProductionStages.PROCESSING && !this.materiaPrima.isAvailable(materiaPrimaPorUnidade)) {
+                    if (etapaAtual == EtapaProducao.PROCESSAMENTO && !this.materiaPrima.estaDisponivel(materiaPrimaPorUnidade)) {
                         throw new InsufficientRawMaterialException(String.format(
                                 "Cadê a força? Estoque insuficiente para fabricar mais um %s: precisa de %.2f %s. "
                                         + "Compre matéria-prima e fabrique de novo para continuar de onde parou.",
-                                currProduto.getNome(), materiaPrimaPorUnidade, this.materiaPrima.getUnit()));
+                                currProduto.getNome(), materiaPrimaPorUnidade, this.materiaPrima.getUnidade()));
                     }
 
                     if (!calcProductionCost(currentMachine)) {
@@ -319,46 +319,46 @@ public class ProductionManager {
                     }
                     sectionMoneySpent += currentMachine.getCustoOperacao(); // Auditoria
 
-                    if (etapaAtual == ProductionStages.PROCESSING) {
-                        esteira.addRawMaterial(materiaPrimaPorUnidade);
-                        ConsolePrinter.arvoreInfo(false, "%s carregado para a esteira.", this.materiaPrima.getName());
+                    if (etapaAtual == EtapaProducao.PROCESSAMENTO) {
+                        esteira.adicionarMateriaPrima(materiaPrimaPorUnidade);
+                        ConsolePrinter.arvoreInfo(false, "%s carregado para a esteira.", this.materiaPrima.getNome());
 
-                        this.materiaPrima.consume(esteira.removeRawMaterial());
-                        relatorio.increaseRawMaterialSpent(materiaPrimaPorUnidade); // Auditoria, só depois do consumo
-                        ConsolePrinter.arvoreInfo(false, "%s transportado até a máquina de %s. E é ligeiro!", this.materiaPrima.getName(), currentMachine.getTipo());
+                        this.materiaPrima.consumir(esteira.removerMateriaPrima());
+                        relatorio.aumentarMateriaPrimaGasta(materiaPrimaPorUnidade); // Auditoria, só depois do consumo
+                        ConsolePrinter.arvoreInfo(false, "%s transportado até a máquina de %s. E é ligeiro!", this.materiaPrima.getNome(), currentMachine.getTipo());
 
-                        ConsolePrinter.arvoreInfo(false, "Máquina %s %.2f %s de %s...", etapaAtual.getGerundio(), this.currProduto.getQuantidadeMateriaPrimaPorUnidade(), this.materiaPrima.getUnit(), this.materiaPrima.getName());
+                        ConsolePrinter.arvoreInfo(false, "Máquina %s %.2f %s de %s...", etapaAtual.getGerundio(), this.currProduto.getQuantidadeMateriaPrimaPorUnidade(), this.materiaPrima.getUnidade(), this.materiaPrima.getNome());
                         currentProduct = currentMachine.processar(this.currProduto);
                         currentProduct.setLote(batch);
 
                         ConsolePrinter.arvoreOk(true, "Tu não acredita! Sabe o que é? \"%s\" #%d criado.", currentProduct.getNome(), currentProduct.getId());
-                        this.esteira.addProduct(currentProduct);
+                        this.esteira.adicionarProduto(currentProduct);
                     } else {
                         ConsolePrinter.arvoreInfo(false, "%s #%d transportado até a máquina de %s. E é ligeiro!", currentProduct.getNome(), currentProduct.getId(), currentMachine.getTipo());
 
                         ConsolePrinter.arvoreInfo(false, "Máquina %s o produto %s #%d...", etapaAtual.getGerundio(), currentProduct.getNome(), currentProduct.getId());
-                        currentProduct = currentMachine.processar(this.esteira.removeProduct());
+                        currentProduct = currentMachine.processar(this.esteira.removerProduto());
 
                         ConsolePrinter.arvoreOk(true, "Produto %s #%d foi %s com sucesso.", currentProduct.getNome(), currentProduct.getId(), etapaAtual.getVerboParticipio());
-                        this.esteira.addProduct(currentProduct);
+                        this.esteira.adicionarProduto(currentProduct);
                     }
                 }
 
                 // Validação final
                 if (currentProduct.getStatus() == ProductStatus.APPROVED) {
-                    this.produtosFabricados.add(this.esteira.removeProduct());
+                    this.produtosFabricados.add(this.esteira.removerProduto());
                     ConsolePrinter.arvoreOk(true, "Eitcha, como ele tem força! O produto %s #%d" + ConsolePrinter.VERDE + " foi aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getNome(), currentProduct.getId());
                     sectionApprovedAmount++;
-                    relatorio.increaseTotalApprovedProducts();
+                    relatorio.aumentarTotalProdutosAprovados();
                 } else if (currentProduct.getStatus() == ProductStatus.TO_REPAIR) {
-                    this.produtosFabricados.add(this.esteira.removeProduct());
+                    this.produtosFabricados.add(this.esteira.removerProduto());
                     ConsolePrinter.arvoreOk(true, "Cade a força? O produto %s #%d" + ConsolePrinter.AMARELO + " foi parcialmente aprovado" + ConsolePrinter.RESET + " e enviado ao armazém!", currentProduct.getNome(), currentProduct.getId());
                     sectionNeedsMaintenanceAmount++;
-                    relatorio.increaseTotalNeedsMaintenanceProducts();
+                    relatorio.aumentarTotalProdutosPrecisamManutencao();
                 } else {
-                    this.esteira.removeProduct();
+                    this.esteira.removerProduto();
                     ConsolePrinter.arvoreFalha(true, "Cade a força? O produto %s #%d" + ConsolePrinter.VERMELHO + " foi rejeitado" + ConsolePrinter.RESET + " na inspeção e descartado.", currentProduct.getNome(), currentProduct.getId());
-                    relatorio.increaseTotalRejectedProducts();
+                    relatorio.aumentarTotalProdutosRejeitados();
                     sectionRejectedAmount++;
                 }
 
@@ -373,9 +373,9 @@ public class ProductionManager {
             }
         }
 
-        relatorio.increaseMoneySpent(sectionMoneySpent);
-        relatorio.increaseTotalProductionTime(sectionProductionTime);
-        relatorio.calcProdSuccessRate();
+        relatorio.aumentarDinheiroGasto(sectionMoneySpent);
+        relatorio.aumentarTempoTotalProducao(sectionProductionTime);
+        relatorio.calcularTaxaSucesso();
 
         String infoText;
 
@@ -394,7 +394,7 @@ public class ProductionManager {
                 sectionNeedsMaintenanceAmount, sectionRejectedAmount);
 
         // Desliga as máquinas
-        this.getEsteira().turnOff();
+        this.getEsteira().desligar();
         for (Machine m: this.getMaquinas()) {
             m.desligar();
         }
@@ -406,8 +406,8 @@ public class ProductionManager {
      * já passou continuam contados, porque foram gastos de verdade
      */
     private void descartarUnidadeIncompleta() {
-        if (this.esteira.getProduct() != null) {
-            Produto incompleto = this.esteira.removeProduct();
+        if (this.esteira.getProduto() != null) {
+            Produto incompleto = this.esteira.removerProduto();
             ConsolePrinter.arvoreInfo(true, "%s #%d ficou incompleto e foi descartado.", incompleto.getNome(), incompleto.getId());
         }
     }
@@ -435,12 +435,12 @@ public class ProductionManager {
      * @throws InsufficientBudgetException se a verba não cobrir a compra
      */
     public float buyRawMaterial(int amount) {
-        float totalCost = amount * this.materiaPrima.getPrice();
+        float totalCost = amount * this.materiaPrima.getPreco();
         if (this.verba < totalCost) {
             throw new InsufficientBudgetException("Dessa vez não é! Orçamento insuficiente para comprar matéria-prima!");
         }
         verba -= totalCost;
-        this.materiaPrima.addStock(amount);
+        this.materiaPrima.adicionarEstoque(amount);
         return totalCost;
     }
 
@@ -492,7 +492,7 @@ public class ProductionManager {
      *
      * @return relatório
      */
-    public Report getRelatorio() {
+    public Relatorio getRelatorio() {
         return this.relatorio;
     }
 
@@ -501,7 +501,7 @@ public class ProductionManager {
      *
      * @return matéria-prima
      */
-    public RawMaterial getMateriaPrima() {
+    public MateriaPrima getMateriaPrima() {
         return this.materiaPrima;
     }
 
@@ -510,7 +510,7 @@ public class ProductionManager {
      *
      * @param conveyor esteira da fábrica
      */
-    public void addNewConveyor(Conveyor conveyor) {
+    public void addNewConveyor(Esteira conveyor) {
         this.esteira = conveyor;
     }
 
@@ -519,7 +519,7 @@ public class ProductionManager {
      *
      * @return esteira
      */
-    public Conveyor getEsteira() {
+    public Esteira getEsteira() {
         return this.esteira;
     }
 

@@ -9,57 +9,57 @@ import domain.exceptions.MachineUnavailableException;
  * @author Glayson Oliveira
  * @author Heitor Almeida
  */
-public class Conveyor {
+public class Esteira {
     // Mandatory attributes
-    private final String name;
-    private Produto product;
-    private double rawMaterial;
-    private boolean isOn; // emMovimento
-    private final int maxCapacity;
+    private final String nome;
+    private Produto produto;
+    private double materiaPrima;
+    private boolean ligada; // emMovimento
+    private final int capacidadeMaxima;
 
     /**
      * Cria a esteira desligada e vazia
      *
-     * @param name nome, ex.: "Esteira Ligeira"
-     * @param maxCapacity peso máximo que ela carrega, em kg
+     * @param nome nome, ex.: "Esteira Ligeira"
+     * @param capacidadeMaxima peso máximo que ela carrega, em kg
      * @throws IllegalArgumentException se a capacidade não for positiva
      */
-    public Conveyor(String name, int maxCapacity) {
-        if (maxCapacity <= 0) {
+    public Esteira(String nome, int capacidadeMaxima) {
+        if (capacidadeMaxima <= 0) {
             throw new IllegalArgumentException("Dessa vez não é! A conveyor can't have a negative capacity.");
         }
-        this.name = name;
-        this.maxCapacity = maxCapacity;
+        this.nome = nome;
+        this.capacidadeMaxima = capacidadeMaxima;
     }
 
     // Mandatory methods
     /**
      * Desliga a esteira
      */
-    public void turnOff() {
-        this.isOn = false;
+    public void desligar() {
+        this.ligada = false;
     }
 
     /**
      * Liga a esteira
      */
-    public void turnOn() {
-        this.isOn = true;
+    public void ligar() {
+        this.ligada = true;
     }
 
     /**
      * Verifica se a esteira consegue carregar a quantidade especificada de
      * matéria prima
-     * @param quantity quantidade
+     * @param quantidade quantidade
      */
-    private void checkCanCarry(double quantity) {
-        if (!this.isOn) {
+    private void verificarPodeCarregar(double quantidade) {
+        if (!this.ligada) {
             throw new IllegalStateException("Dessa vez não é! The conveyor is off.");
         }
-        if (this.rawMaterial > 0 || this.product != null) {
+        if (this.materiaPrima > 0 || this.produto != null) {
             throw new IllegalStateException("Dessa vez não é! The conveyor is already occupied.");
         }
-        if (!verifyCapacity(quantity)) {
+        if (!verificarCapacidade(quantidade)) {
             throw new IllegalArgumentException("Dessa vez não é! The conveyor can't take this weight.");
         }
     }
@@ -68,13 +68,13 @@ public class Conveyor {
     /**
      * Coloca matéria-prima na esteira
      *
-     * @param quantity quantidade a carregar
+     * @param quantidade quantidade a carregar
      * @throws IllegalStateException se a esteira estiver desligada ou já ocupada
      * @throws IllegalArgumentException se a quantidade passar da capacidade
      */
-    public void addRawMaterial(double quantity) {
-        checkCanCarry(quantity);
-        this.rawMaterial = quantity;
+    public void adicionarMateriaPrima(double quantidade) {
+        verificarPodeCarregar(quantidade);
+        this.materiaPrima = quantidade;
     }
 
     /**
@@ -84,17 +84,17 @@ public class Conveyor {
      * @throws domain.exceptions.MachineUnavailableException se a esteira estiver desligada
      * @throws IllegalStateException se não tiver matéria-prima na esteira
      */
-    public double removeRawMaterial() {
-        if (!isOn()) {
+    public double removerMateriaPrima() {
+        if (!estaLigada()) {
             throw new MachineUnavailableException("Dessa vez não é! The conveyor is off.");
         }
 
-        if (this.rawMaterial == 0) {
+        if (this.materiaPrima == 0) {
             throw new IllegalStateException("Dessa vez não é! There's no product on the conveyor.");
         }
 
-        double n = this.rawMaterial;
-        this.rawMaterial = 0;
+        double n = this.materiaPrima;
+        this.materiaPrima = 0;
         return n;
     }
 
@@ -102,13 +102,13 @@ public class Conveyor {
 
     /**
      * Adiciona o produto na esteira
-     * @param product o produto a ser adicionado
+     * @param produto o produto a ser adicionado
      * @throws IllegalStateException se a esteira estiver desligada ou já ocupada
      * @throws IllegalArgumentException se o produto passar da capacidade
      */
-    public void addProduct(Produto product) {
-        checkCanCarry(product.getQuantidadeMateriaPrimaPorUnidade());
-        this.product = product;
+    public void adicionarProduto(Produto produto) {
+        verificarPodeCarregar(produto.getQuantidadeMateriaPrimaPorUnidade());
+        this.produto = produto;
     }
 
     /**
@@ -117,32 +117,32 @@ public class Conveyor {
      * @throws domain.exceptions.MachineUnavailableException se a esteira estiver desligada
      * @throws IllegalArgumentException se não tiver produto na esteira
      */
-    public Produto removeProduct() {
-        if (!isOn()) {
+    public Produto removerProduto() {
+        if (!estaLigada()) {
             throw new MachineUnavailableException("Não é mais ligeira... A esteira está desligada.");
         }
 
-        if (this.product == null) {
+        if (this.produto == null) {
             throw new IllegalArgumentException("Dessa vez não é! There's no product on the conveyor.");
         }
 
 
-        Produto p = this.product;
-        this.product = null;
+        Produto p = this.produto;
+        this.produto = null;
         return p;
     }
 
     /**
      * Verifica se a esteira suporta o peso fornecido
-     * @param weight o peso a ser verificado
+     * @param peso o peso a ser verificado
      * @return true ou false
      */
-    private boolean verifyCapacity(double weight) {
-        if (weight < 0) {
+    private boolean verificarCapacidade(double peso) {
+        if (peso < 0) {
             throw new IllegalArgumentException("Dessa vez não é! The weight can't be negative");
         }
 
-        return (weight <= this.maxCapacity);
+        return (peso <= this.capacidadeMaxima);
     }
 
     /**
@@ -150,8 +150,8 @@ public class Conveyor {
      *
      * @return quantidade carregada, 0 se não tiver nada
      */
-    public double getRawMaterial() {
-        return rawMaterial;
+    public double getMateriaPrima() {
+        return materiaPrima;
     }
 
     /**
@@ -159,8 +159,8 @@ public class Conveyor {
      *
      * @return produto carregado, ou null se não tiver nenhum
      */
-    public Produto getProduct() {
-        return product;
+    public Produto getProduto() {
+        return produto;
     }
 
     /**
@@ -168,8 +168,8 @@ public class Conveyor {
      *
      * @return nome
      */
-    public String getName() {
-        return name;
+    public String getNome() {
+        return nome;
     }
 
     /**
@@ -177,7 +177,7 @@ public class Conveyor {
      *
      * @return true se estiver ligada
      */
-    public boolean isOn() {
-        return isOn;
+    public boolean estaLigada() {
+        return ligada;
     }
 }
