@@ -1,11 +1,11 @@
 package domain.entities.conveyor;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 
 public class Conveyor {
     // Mandatory attributes
     private final String name;
-    private Product product;
+    private Produto product;
     private double rawMaterial;
     private boolean isOn; // emMovimento
     private final int maxCapacity;
@@ -27,6 +27,11 @@ public class Conveyor {
         this.isOn = true;
     }
 
+    /**
+     * Verifica se a esteira consegue carregar a quantidade especificada de
+     * matéria prima
+     * @param quantity quantidade
+     */
     private void checkCanCarry(double quantity) {
         if (!this.isOn) {
             throw new IllegalStateException("Dessa vez não é! The conveyor is off.");
@@ -45,6 +50,11 @@ public class Conveyor {
         this.rawMaterial = quantity;
     }
 
+    /**
+     * Remove a matéria prima da esteira retornando a quantidade
+     * do material
+     * @return quantidade de matéria prima da esteira
+     */
     public double removeRawMaterial() {
         if (!isOn()) {
             throw new IllegalStateException("Dessa vez não é! The conveyor is off.");
@@ -60,12 +70,21 @@ public class Conveyor {
     }
 
     // >>>>> PRODUTO
-    public void addProduct(Product product) {
+
+    /**
+     * Adiciona o produto na esteira
+     * @param product o produto a ser adicionado
+     */
+    public void addProduct(Produto product) {
         checkCanCarry(product.getRawMaterialPerUnit());
         this.product = product;
     }
 
-    public Product removeProduct() {
+    /**
+     * Remove o produto da esteira, retornando-o
+     * @return o produto
+     */
+    public Produto removeProduct() {
         if (!isOn()) {
             throw new IllegalArgumentException("Não é mais ligeira... A esteira está desligada.");
         }
@@ -75,11 +94,16 @@ public class Conveyor {
         }
 
 
-        Product p = this.product;
+        Produto p = this.product;
         this.product = null;
         return p;
     }
 
+    /**
+     * Verifica se a esteira suporta o peso fornecido
+     * @param weight o peso a ser verificado
+     * @return true ou false
+     */
     private boolean verifyCapacity(double weight) {
         if (weight < 0) {
             throw new IllegalArgumentException("Dessa vez não é! The weight can't be negative");
@@ -92,7 +116,7 @@ public class Conveyor {
         return rawMaterial;
     }
 
-    public Product getProduct() {
+    public Produto getProduct() {
         return product;
     }
 

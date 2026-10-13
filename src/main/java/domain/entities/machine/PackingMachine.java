@@ -1,6 +1,6 @@
 package domain.entities.machine;
 
-import domain.entities.product.Product;
+import domain.entities.product.Produto;
 import domain.entities.product.ProductStatus;
 
 public class PackingMachine extends Machine {
@@ -12,7 +12,7 @@ public class PackingMachine extends Machine {
     }
 
     @Override
-    public Product processAux(Product product) {
+    public Produto processAux(Produto product) {
         tryIncreaseFailureOdd(product);
 
         product.setStatus(ProductStatus.PACKED);

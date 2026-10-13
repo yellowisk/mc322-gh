@@ -17,7 +17,7 @@ public class Joaozinho implements ProductionStrategy {
     private final String nome = "Joãozinho";
 
     @Override
-    public Demand selectDemand(List<Demand> demands, double availableBudget) {
+    public Demand escolherDemanda(List<Demand> demands, double availableBudget) {
         // Entre as demandas que cabem no orçamento, pega a de maior quantidade de produtos
         return selectable(demands).stream()
                 .filter(d -> d.isViable(availableBudget))

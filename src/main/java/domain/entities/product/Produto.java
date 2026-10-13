@@ -6,7 +6,7 @@ import domain.utils.RandomProvider;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public abstract class Product implements Auditable {
+public abstract class Produto implements Auditable {
     private static int globalUniqueId = 1;
 
     private final int id;
@@ -23,7 +23,7 @@ public abstract class Product implements Auditable {
     private final static double REPAIR_RISK_LIMIT = 0.25;
     private final static double DISCARD_RISK_LIMIT = 0.45;
 
-    public Product(String name, double rawMaterialPerUnit, double quality,
+    public Produto(String name, double rawMaterialPerUnit, double quality,
                    double cumulativeFailureOdd) {
         this.id = globalUniqueId++;
         this.name = name;
@@ -40,7 +40,7 @@ public abstract class Product implements Auditable {
         globalUniqueId = 1;
     }
 
-    public abstract Product process(Product model, ProductStatus newStatus);
+    public abstract Produto process(Produto model, ProductStatus newStatus);
 
     /* Will be used to showcase the time it has taken
     for the product to be processed by the processing machine */
