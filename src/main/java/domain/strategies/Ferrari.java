@@ -17,6 +17,10 @@ import java.util.List;
  */
 public class Ferrari implements EstrategiaProducao {
 
+    /** Cria a estratégia Ferrari. Não guarda estado */
+    public Ferrari() {
+    }
+
     /**
      * Pega a demanda elegível c/ a maior quantidade. Ignora o orçamento
      *

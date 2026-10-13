@@ -13,15 +13,27 @@ import java.util.List;
  * @author Heitor Almeida
  */
 public class ConsolePrinter {
+    /** Só tem métodos estáticos, não é p/ instanciar */
+    private ConsolePrinter() {
+    }
+
     /** Volta a cor e o estilo pro padrão do terminal */
     public static final String RESET = "\u001B[0m";
+    /** Deixa o texto em negrito */
     public static final String NEGRITO = "\u001B[1m";
+    /** Laranja, usado no título e no cenário */
     public static final String LARANJA = "\u001B[38;5;208m";
+    /** Azul, usado em menções e destaques */
     public static final String AZUL = "\u001B[38;5;75m";
+    /** Roxo, cor do submenu de velocidade */
     public static final String ROXO = "\u001B[38;5;141m";
+    /** Verde, usado nos logs de sucesso */
     public static final String VERDE = "\u001B[38;5;114m";
+    /** Amarelo, usado em avisos e produtos que precisam de manutenção */
     public static final String AMARELO = "\u001B[38;5;221m";
+    /** Cinza, usado em textos secundários */
     public static final String CINZA = "\u001B[38;5;246m";
+    /** Vermelho, usado nos logs de falha */
     public static final String VERMELHO = "\033[38;2;234;67;53m";
     private static final int ATRASO_LINHA_ARVORE_MS = 125;
     private static VelocidadeProducao velocidadeProducao = VelocidadeProducao.NORMAL;
