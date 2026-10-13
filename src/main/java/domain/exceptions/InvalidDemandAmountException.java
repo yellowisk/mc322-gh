@@ -1,17 +1,17 @@
 package domain.exceptions;
 
 /**
- * Lançada quando tentam atualizar uma demanda c/ uma quantidade inválida.
+ * Lançada quando tentam atualizar uma demanda c/ uma quantidade inválida, ex.: negativa
  *
  * @author Heitor Almeida
  */
-public class InvalidDemandAmountException extends RuntimeException {
+public class InvalidDemandAmountException extends PlantaException {
     private static final long serialVersionUID = 1L;
 
-    /**, ex.: negativo
-     * Cria a exceção c/ a mensagem que vai aparecer no menu
+    /**
+     * Cria a exceção c/ a mensagem que explica o problema
      *
-     * @param message motivo da quantidade ser inválida
+     * @param message a mensagem que vai aparecer no menu
      */
     public InvalidDemandAmountException(String message) {
         super(message);

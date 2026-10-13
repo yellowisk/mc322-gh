@@ -2,6 +2,7 @@ package view;
 
 import domain.entities.demand.Demand;
 import domain.entities.productionmanager.ProductionManager;
+import domain.exceptions.InvalidOptionException;
 import domain.interfaces.ProductionStrategy;
 import domain.strategies.Ferrari;
 import domain.strategies.FilaDoCaixa;
@@ -77,14 +78,13 @@ public class StrategyMenu extends Submenu {
             int escolha = menu.readInt("Qual estratégia deseja " + ConsolePrinter.colorir(cor, "USAR") + "? ");
 
             if (escolha == 0) break;
-
-            ProductionStrategy escolhida;
             try {
-                escolhida = estrategias.get(escolha - 1);
-            } catch (IndexOutOfBoundsException e) {
-                menu.setLastBuffer(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
+                Menu.validarOpcao(escolha, estrategias.size(), "Dessa vez não é! Opção inválida!");
+            } catch (InvalidOptionException e) {
+                menu.setLastBuffer(ConsolePrinter.textoFalha("%s", e.getMessage()));
                 continue;
             }
+            ProductionStrategy escolhida = estrategias.get(escolha - 1);
 
             gerenciadorProducao.setCurrEstrategia(escolhida);
             menu.setLastBuffer(ConsolePrinter.textoOk("Estratégia alterada para %s!", escolhida.getNomeEstrategia()));
