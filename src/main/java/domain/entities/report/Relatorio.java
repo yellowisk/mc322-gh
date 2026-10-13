@@ -16,6 +16,10 @@ public class Relatorio {
     private int totalProdutosPrecisamManutencao;
     private int totalProdutosRejeitados;
 
+    /** Cria o relatório zerado, no começo da sessão */
+    public Relatorio() {
+    }
+
     /**
      * Recalcula a taxa de sucesso: aprovados dividido pelo total. Os que precisam de manutenção
      * contam no total, mas não como sucesso. É chamado no fim de cada produção

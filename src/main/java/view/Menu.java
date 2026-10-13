@@ -22,6 +22,9 @@ import java.util.Scanner;
 /**
  * Classe principal para os menus. Aqui fica a lógica principal
  * das telas da fábrica e é a partir daqui que os submenus são chamados
+ *
+ * @author Heitor Almeida
+ * @author Glayson Oliveira
  */
 public class Menu {
     private ConfiguracaoCenario cenarioAtual;
@@ -32,6 +35,10 @@ public class Menu {
     private String ultimaMensagem; // last mensagem, shows up in the next footer
     private MenuEstrategia menuEstrategia;
     private List<Submenu> submenus;
+
+    /** Cria o menu. O cenário e o gerenciador da produção só são montados em {@link #iniciar()} */
+    public Menu() {
+    }
 
 
     /**

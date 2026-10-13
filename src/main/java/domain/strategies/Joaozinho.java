@@ -18,6 +18,10 @@ import java.util.List;
 public class Joaozinho implements EstrategiaProducao {
     private final String nome = "Joãozinho";
 
+    /** Cria a estratégia Joãozinho. O nome é fixo */
+    public Joaozinho() {
+    }
+
     /**
      * Pega a demanda elegível c/ a maior quantidade entre as que cabem no orçamento.
      * Usa o custo estimado de cada demanda, que o GerenciadorProducao atualiza antes de chamar
