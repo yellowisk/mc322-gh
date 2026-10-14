@@ -1,6 +1,7 @@
 package domain.entities.conveyor;
 
 import domain.entities.product.Produto;
+import domain.exceptions.CapacidadeEsteiraExcedidaException;
 import domain.exceptions.MaquinaIndisponivelException;
 
 /**
@@ -54,13 +55,15 @@ public class Esteira {
      */
     private void verificarPodeCarregar(double quantidade) {
         if (!this.ligada) {
-            throw new IllegalStateException("Dessa vez não é! A esteira está desligada.");
+            throw new MaquinaIndisponivelException("Dessa vez não é! A esteira está desligada.");
         }
         if (this.materiaPrima > 0 || this.produto != null) {
-            throw new IllegalStateException("Dessa vez não é! A esteira já está ocupada.");
+            throw new MaquinaIndisponivelException("Dessa vez não é! A esteira já está ocupada.");
         }
         if (!verificarCapacidade(quantidade)) {
-            throw new IllegalArgumentException("Dessa vez não é! A esteira não aguenta esse peso.");
+            throw new CapacidadeEsteiraExcedidaException(String.format(
+                    "Dessa vez não é! A %s não aguenta %.2f kg, a capacidade dela é %d kg.",
+                    this.nome, quantidade, this.capacidadeMaxima));
         }
     }
 
@@ -69,8 +72,9 @@ public class Esteira {
      * Coloca matéria-prima na esteira
      *
      * @param quantidade quantidade a carregar
-     * @throws IllegalStateException se a esteira estiver desligada ou já ocupada
-     * @throws IllegalArgumentException se a quantidade passar da capacidade
+     * @throws domain.exceptions.MaquinaIndisponivelException se a esteira estiver desligada
+     * @throws IllegalStateException se a esteira já estiver ocupada
+     * @throws domain.exceptions.CapacidadeEsteiraExcedidaException se a quantidade passar da capacidade
      */
     public void adicionarMateriaPrima(double quantidade) {
         verificarPodeCarregar(quantidade);
@@ -103,8 +107,9 @@ public class Esteira {
     /**
      * Adiciona o produto na esteira
      * @param produto o produto a ser adicionado
-     * @throws IllegalStateException se a esteira estiver desligada ou já ocupada
-     * @throws IllegalArgumentException se o produto passar da capacidade
+     * @throws domain.exceptions.MaquinaIndisponivelException se a esteira estiver desligada
+     * @throws IllegalStateException se a esteira já estiver ocupada
+     * @throws domain.exceptions.CapacidadeEsteiraExcedidaException se o produto passar da capacidade
      */
     public void adicionarProduto(Produto produto) {
         verificarPodeCarregar(produto.getQuantidadeMateriaPrimaPorUnidade());
@@ -135,9 +140,10 @@ public class Esteira {
     /**
      * Verifica se a esteira suporta o peso fornecido
      * @param peso o peso a ser verificado
-     * @return true ou false
+     * @return true se a esteira aguenta o peso
+     * @throws IllegalArgumentException se o peso for negativo
      */
-    private boolean verificarCapacidade(double peso) {
+    public boolean verificarCapacidade(double peso) {
         if (peso < 0) {
             throw new IllegalArgumentException("Dessa vez não é! O peso não pode ser negativo.");
         }

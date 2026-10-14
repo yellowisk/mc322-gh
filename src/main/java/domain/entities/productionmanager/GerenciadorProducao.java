@@ -8,6 +8,7 @@ import domain.entities.product.Produto;
 import domain.entities.product.StatusProduto;
 import domain.entities.rawmaterial.MateriaPrima;
 import domain.entities.report.Relatorio;
+import domain.exceptions.CapacidadeEsteiraExcedidaException;
 import domain.exceptions.OrcamentoInsuficienteException;
 import domain.exceptions.MateriaPrimaInsuficienteException;
 import domain.exceptions.DemandaInvalidaException;
@@ -233,6 +234,7 @@ public class GerenciadorProducao {
      * @throws TransicaoDemandaInvalidaException se o status da demanda não permitir fabricar
      * @throws OrcamentoInsuficienteException se o orçamento não cobrir o custo estimado
      * @throws MateriaPrimaInsuficienteException se o estoque não cobrir a matéria-prima das unidades que faltam
+     * @throws CapacidadeEsteiraExcedidaException se uma unidade do produto pesar mais do que a esteira aguenta
      */
     public void produzirDemanda(Demanda demanda) {
         // VERIFICAÇÕES
@@ -265,12 +267,19 @@ public class GerenciadorProducao {
                     produtoAtual.getNome(), demanda.getCustoEstimado(), this.verba));
         }
 
+        // Confere o peso antes de ligar a linha, senão a esteira só recusaria a unidade c/ a etapa já paga
+        double pesoPorUnidade = produtoAtual.getQuantidadeMateriaPrimaPorUnidade();
+        if (!this.esteira.verificarCapacidade(pesoPorUnidade)) {
+            throw new CapacidadeEsteiraExcedidaException(String.format(
+                    "Dessa vez não é! Cada %s pesa %.2f kg e a %s não aguenta esse peso.",
+                    produtoAtual.getNome(), pesoPorUnidade, this.esteira.getNome()));
+        }
+
         // Confere a matéria-prima de todas as unidades que faltam, p/ não parar no meio c/ estoque e verba já gastos
         double materiaPrimaNecessaria = demanda.getQuantidadeRestante() * produtoAtual.getQuantidadeMateriaPrimaPorUnidade();
         if (!this.materiaPrima.estaDisponivel(materiaPrimaNecessaria)) {
             throw new MateriaPrimaInsuficienteException(String.format(
-                    "Cadê a força? Estoque insuficiente para fabricar %d %s: precisa de %.2f %s, tem %.2f %s (mínimo %d %s). "
-                            + "Compre matéria-prima e fabrique de novo.",
+                    "Cadê a força? Estoque insuficiente para fabricar %d %s",
                     demanda.getQuantidadeRestante(), produtoAtual.getNome(),
                     materiaPrimaNecessaria, this.materiaPrima.getUnidade(),
                     this.materiaPrima.getQuantidade(), this.materiaPrima.getUnidade(),
