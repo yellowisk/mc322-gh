@@ -114,19 +114,19 @@ public class Menu {
         gerenciadorProducao.adicionarMaquina(new MaquinaProcessamento(
                         "Máquina de Processamento", 20, 0.25,
                         0.78, cenarioAtual.getMultiplicadorCenario(),
-                        cenarioAtual.getDesgasteMaximo()
+                        cenarioAtual.getDesgasteMaximo(), 2, 3 // 2 sensores, 3 resistências
                 )
         );
         gerenciadorProducao.adicionarMaquina(new MaquinaEmpacotamento(
                         "Máquina de Empacotamento", 20, 0.15,
                         0.5, cenarioAtual.getMultiplicadorCenario(),
-                        cenarioAtual.getDesgasteMaximo()
+                        cenarioAtual.getDesgasteMaximo(), 2 // 2 sensores
                 )
         );
         gerenciadorProducao.adicionarMaquina(new MaquinaInspecao(
                         "Máquina de Inspeção", 20, 0.10,
                         0.43, cenarioAtual.getMultiplicadorCenario(),
-                        cenarioAtual.getDesgasteMaximo()
+                        cenarioAtual.getDesgasteMaximo(), 2, 3 // 2 sensores, 3 câmeras
                 )
         );
 
