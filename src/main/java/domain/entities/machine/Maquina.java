@@ -277,7 +277,7 @@ public abstract class Maquina implements Auditavel {
 
     @Override
     public String gerarResumoProblema() {
-        return String.format("[Máquina] %s (Saúde: %d/%d)", getNome(), getSaude(), getSaudeMaxima());
+        return String.format("%s (Saúde: %d/%d)", getNome(), getSaude(), getSaudeMaxima());
     }
 
     // === DELEGAÇÃO P/ AS PARTES ===

@@ -77,14 +77,6 @@ public class LinhaDeProducao implements Auditavel {
     }
 
     /**
-     * Verifica se há alguma máquina quebrada na linha de produção.
-     * @return true se alguma máquina precisar de manutenção
-     */
-    public boolean temMaquinaQuebrada() {
-        return maquinas.stream().anyMatch(Maquina::precisaManutencao);
-    }
-
-    /**
      * Calcula o custo total de operação unitária da linha somando
      * o custo individual de cada máquina.
      * @return custo total de uma unidade de produto
@@ -123,10 +115,12 @@ public class LinhaDeProducao implements Auditavel {
 
     @Override
     public String gerarRelatorioDiagnostico() {
-        StringBuilder text = new StringBuilder(String.format("%s\n", nome));
-        int i = 0;
+        StringBuilder text = new StringBuilder();
+        int i = 1;
         for (Maquina m: maquinas) {
+            text.append(String.format("%d. %s\n", i++, m.getNome()));
             text.append(m.gerarRelatorioDiagnostico());
+            text.append("\n");
         }
         return text.toString();
     }
@@ -134,14 +128,18 @@ public class LinhaDeProducao implements Auditavel {
     @Override
     public String gerarResumoProblema() {
         StringBuilder text = new StringBuilder(String.format("%s\n", nome));
-        int i = 0;
+        int i = 1;
         for (Maquina m: maquinas) {
-            String temp = String.format(" %d. %s", i, m.gerarRelatorioDiagnostico());
+            String temp = String.format(" %d. %s\n", i++, m.gerarResumoProblema());
             text.append(temp);
         }
         return text.toString();
     }
 
+    /**
+     * Verifica se há alguma máquina quebrada na linha de produção.
+     * @return true se alguma máquina precisar de manutenção
+     */
     @Override
     public boolean precisaManutencao() {
         for (Maquina m: maquinas) {

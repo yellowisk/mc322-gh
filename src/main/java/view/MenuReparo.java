@@ -4,8 +4,6 @@ import domain.entities.machine.Maquina;
 import domain.entities.productionmanager.GerenciadorProducao;
 import domain.exceptions.PlantaException;
 
-import java.util.List;
-
 /**
  * Submenu de reparo. Lista as máquinas c/ a saúde de cada uma e repara a escolhida, deixando
  * a saúde cheia de novo
@@ -42,17 +40,8 @@ public class MenuReparo extends Submenu {
         while (true) {
             imprimirCabecalho();
 
-            // Lista de Máquinas
-            List<Maquina> maquinas = gerenciadorProducao.getMaquinas();
-            for (int i = 0; i < maquinas.size(); i++) {
-                Maquina m = maquinas.get(i);
-                String corSaude = m.precisaManutencao() ? ConsolePrinter.VERMELHO : ConsolePrinter.VERDE;
-                String saude = ConsolePrinter.colorir(corSaude, String.format("❤ %d/%d", m.getSaude(), m.getSaudeMaxima()));
-                String quebrada = m.precisaManutencao() ? " " + ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "(quebrada)") : "";
+            System.out.println(gerenciadorProducao.gerarResumoProblema());
 
-                System.out.printf(" %d. %-26s %s%s\n", i + 1, m.getNome(), saude, quebrada);
-            }
-            System.out.println();
             ConsolePrinter.imprimirOpcaoVoltar();
             menu.imprimirRodape();
 
@@ -64,7 +53,7 @@ public class MenuReparo extends Submenu {
 
             // Processo principal
             try {
-                Menu.validarOpcao(opcao, maquinas.size(), "Dessa vez não é! Máquina inválida!");
+                Menu.validarOpcao(opcao, gerenciadorProducao.getMaquinas().size(), "Dessa vez não é! Máquina inválida!");
                 gerenciadorProducao.repararMaquina(opcao - 1);
                 maquinaEscolhida = gerenciadorProducao.getMaquina(opcao - 1);
                 animarReparo(maquinaEscolhida.getNome()); // Animação

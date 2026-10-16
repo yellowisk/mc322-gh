@@ -239,7 +239,7 @@ public class GerenciadorProducao {
      */
     public void produzirDemanda(Demanda demanda) {
         // VERIFICAÇÕES
-        if (linha.temMaquinaQuebrada()) {
+        if (linha.precisaManutencao()) {
             throw new MaquinaPrecisaReparoException("Não podemos iniciar a fabricação. Há máquinas precisando de reparo.");
         }
 
@@ -281,10 +281,8 @@ public class GerenciadorProducao {
         if (!this.materiaPrima.estaDisponivel(materiaPrimaNecessaria)) {
             throw new MateriaPrimaInsuficienteException(String.format(
                     "Cadê a força? Estoque insuficiente para fabricar %d %s",
-                    demanda.getQuantidadeRestante(), produtoAtual.getNome(),
-                    materiaPrimaNecessaria, this.materiaPrima.getUnidade(),
-                    this.materiaPrima.getQuantidade(), this.materiaPrima.getUnidade(),
-                    this.materiaPrima.getQuantidadeMinima(), this.materiaPrima.getUnidade()));
+                    demanda.getQuantidadeRestante(), produtoAtual.getNome())
+            );
         }
 
         int jaProduzidas = demanda.getQuantidadeProduzida();
@@ -519,6 +517,14 @@ public class GerenciadorProducao {
         return this.relatorio;
     }
 
+    public String gerarRelatorioDiagnostico() {
+        return linha.gerarRelatorioDiagnostico();
+    }
+
+    public String gerarResumoProblema() {
+        return linha.gerarResumoProblema();
+    }
+
     /**
      * Matéria-prima da fábrica, c/ o estoque atual
      *
@@ -553,16 +559,5 @@ public class GerenciadorProducao {
      */
     public float getVerba() {
         return verba;
-    }
-
-    /**
-     * Diz se alguma máquina está quebrada (saúde abaixo do limiar crítico). Enquanto for true, nenhuma
-     * fabricação começa. É calculado a partir das máquinas, então só volta a ser false quando todas
-     * as quebradas forem reparadas
-     *
-     * @return true se tiver máquina esperando reparo
-     */
-    public boolean temMaquinaQuebrada() {
-        return linha.temMaquinaQuebrada();
     }
 }
