@@ -1,5 +1,6 @@
 package view;
 
+import domain.entities.productionline.LinhaDeProducao;
 import domain.entities.report.Relatorio;
 import domain.exceptions.OpcaoInvalidaException;
 import domain.exceptions.PlantaException;
@@ -55,7 +56,8 @@ public class Menu {
         gerenciadorProducao = new GerenciadorProducao(
                 new MateriaPrima("Vidro", 50, "kg", 5, 1),
                 cenarioAtual.getVerba(),
-                relatorio
+                relatorio,
+                new LinhaDeProducao("Linha de Produção")
         );
 
         iniciarGerenciadorProducao();

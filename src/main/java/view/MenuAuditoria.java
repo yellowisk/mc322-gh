@@ -1,14 +1,11 @@
 package view;
 
-import domain.entities.machine.Maquina;
 import domain.entities.product.Produto;
 import domain.entities.productionmanager.GerenciadorProducao;
 import domain.entities.report.Relatorio;
-import domain.exceptions.OpcaoInvalidaException;
 import domain.interfaces.Auditavel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -151,60 +148,19 @@ public class MenuAuditoria extends Submenu {
     private void detalharMaquinas() {
         boolean rodando = true;
 
-        // Array de máquinas
-        List<Maquina> maquinas = gerenciadorProducao.getMaquinas();
-        int[] opcoesExpandidas = new int[maquinas.size()]; // Flags de ativação (1 ou 0)
-        boolean expandirTodos = true; // Controle de estado para a opção de Expandir/Recolher tudo
-
         while (rodando) {
             imprimirCabecalho();
             System.out.println(ConsolePrinter.colorir(cor," Auditoria de máquinas\n"));
 
-            if (maquinas.isEmpty()) {
-                System.out.println(ConsolePrinter.CINZA + " Não há nenhuma máquina cadastrada." + ConsolePrinter.RESET);
-            }
+            System.out.println(gerenciadorProducao.gerarRelatorioDiagnostico());
 
-            // Menu: Lista expansível de máquinas
-            System.out.println(" Máquinas disponíveis:\n");
-            int i = 0;
-            for (Maquina m : maquinas) {
-                System.out.printf(
-                        ConsolePrinter.CINZA + "  %d." + ConsolePrinter.RESET + " %s " + ConsolePrinter.CINZA + "(%s)" + ConsolePrinter.RESET + "\n",
-                        (i + 1), m.getNome(), m.getTipo());
-
-                if (opcoesExpandidas[i] == 1) { // Expansão
-                    System.out.print(m.gerarRelatorioDiagnostico());
-                }
-                i++;
-            }
-
-            System.out.println();
-            if (!maquinas.isEmpty()) {
-                System.out.printf(ConsolePrinter.CINZA + " 99." + ConsolePrinter.RESET + " Expandir/Recolher todos\n\n");
-            }
             ConsolePrinter.imprimirOpcaoVoltar();
 
             menu.imprimirRodape();
 
             // Escolha da opção
             int opcao = menu.lerInteiro("Escolha: ");
-
             if (opcao == 0) break;
-
-            // Tratamento da opção Expandir/Recolher todos
-            if (opcao == 99 && !maquinas.isEmpty()) {
-                int novoEstado = expandirTodos ? 1 : 0;
-                Arrays.fill(opcoesExpandidas, novoEstado);
-                expandirTodos = !expandirTodos;
-                continue;
-            }
-
-            try {
-                Menu.validarOpcao(opcao, opcoesExpandidas.length, "Dessa vez não é! Máquina inválida!");
-                opcoesExpandidas[opcao - 1] = opcoesExpandidas[opcao - 1] ^ 1; // Inverte a flag usando bitwise XOR
-            } catch (OpcaoInvalidaException e) {
-                menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
-            }
         }
     }
 
