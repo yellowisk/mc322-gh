@@ -22,6 +22,7 @@ import domain.interfaces.EstrategiaProducao;
 import view.ConsolePrinter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -483,19 +484,19 @@ public class GerenciadorProducao {
     /**
      * Demandas cadastradas, uma por produto do catálogo
      *
-     * @return lista de demandas
+     * @return lista de demandas, somente leitura
      */
     public List<Demanda> getDemandas() {
-        return this.demandas;
+        return Collections.unmodifiableList(this.demandas);
     }
 
     /**
      * Produtos que passaram na inspeção e estão no armazém, incluindo os que precisam de manutenção
      *
-     * @return lista de produtos fabricados
+     * @return lista de produtos fabricados, somente leitura
      */
     public List<Produto> getProdutosFabricados() {
-        return this.produtosFabricados;
+        return Collections.unmodifiableList(this.produtosFabricados);
     }
 
     /**
