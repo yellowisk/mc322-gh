@@ -477,7 +477,7 @@ public class GerenciadorProducao {
     /**
      * Demandas cadastradas, uma por produto do catálogo
      *
-     * @return lista de demandas
+     * @return lista de demandas, somente leitura
      */
     public List<Demanda> getDemandas() {
         return Collections.unmodifiableList(this.demandas);
@@ -486,7 +486,7 @@ public class GerenciadorProducao {
     /**
      * Produtos que passaram na inspeção e estão no armazém, incluindo os que precisam de manutenção
      *
-     * @return lista de produtos fabricados
+     * @return lista de produtos fabricados, somente leitura
      */
     public List<Produto> getProdutosFabricados() {
         return Collections.unmodifiableList(this.produtosFabricados);
