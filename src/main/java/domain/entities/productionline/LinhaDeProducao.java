@@ -3,6 +3,7 @@ package domain.entities.productionline;
 import domain.entities.machine.Maquina;
 import domain.entities.productionmanager.EtapaProducao;
 import domain.exceptions.MaquinaIndisponivelException;
+import domain.interfaces.Auditavel;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * Classe da linha de produção da planta.
  */
-public class LinhaDeProducao {
+public class LinhaDeProducao implements Auditavel {
     /// Nome da linha de producao
     private final String nome;
     /// Lista de máquinas da linha de producao
@@ -116,5 +117,38 @@ public class LinhaDeProducao {
 
     public String getNome() {
         return nome;
+    }
+
+    // AUDITÁVEL
+
+    @Override
+    public String gerarRelatorioDiagnostico() {
+        StringBuilder text = new StringBuilder(String.format("%s\n", nome));
+        int i = 0;
+        for (Maquina m: maquinas) {
+            text.append(m.gerarRelatorioDiagnostico());
+        }
+        return text.toString();
+    }
+
+    @Override
+    public String gerarResumoProblema() {
+        StringBuilder text = new StringBuilder(String.format("%s\n", nome));
+        int i = 0;
+        for (Maquina m: maquinas) {
+            String temp = String.format(" %d. %s", i, m.gerarRelatorioDiagnostico());
+            text.append(temp);
+        }
+        return text.toString();
+    }
+
+    @Override
+    public boolean precisaManutencao() {
+        for (Maquina m: maquinas) {
+            if (m.precisaManutencao()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
