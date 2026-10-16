@@ -65,8 +65,8 @@ public class MenuReparo extends Submenu {
             // Processo principal
             try {
                 Menu.validarOpcao(opcao, maquinas.size(), "Dessa vez não é! Máquina inválida!");
-                maquinaEscolhida = maquinas.get(opcao - 1);
-                gerenciadorProducao.repararMaquina(maquinaEscolhida);
+                gerenciadorProducao.repararMaquina(opcao - 1);
+                maquinaEscolhida = gerenciadorProducao.getMaquina(opcao - 1);
                 animarReparo(maquinaEscolhida.getNome()); // Animação
                 menu.setUltimaMensagem(ConsolePrinter.textoOk("%s reparada!", maquinaEscolhida.getNome().toUpperCase()));
             } catch (PlantaException e) {

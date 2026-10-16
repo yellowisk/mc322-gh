@@ -6,6 +6,7 @@ import domain.entities.conveyor.Esteira;
 import domain.entities.machine.Maquina;
 import domain.entities.product.Produto;
 import domain.entities.product.StatusProduto;
+import domain.entities.productionline.LinhaDeProducao;
 import domain.entities.rawmaterial.MateriaPrima;
 import domain.entities.report.Relatorio;
 import domain.exceptions.CapacidadeEsteiraExcedidaException;
@@ -22,6 +23,7 @@ import domain.interfaces.EstrategiaProducao;
 import view.ConsolePrinter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,8 +41,6 @@ public class GerenciadorProducao {
     private List<Produto> produtosFabricados = new ArrayList<Produto>();
     /// Arraylist de produtos que servirão de moldes/exemplo para o menu e para a produção nas máquinas
     private List<Produto> produtosDisponiveisFabricacao = new ArrayList<Produto>();
-    /// ArrayList de máquinas existentes na fábrica
-    private List<Maquina> maquinas = new ArrayList<Maquina>();
     /// esteira da fábrica
     private Esteira esteira;
     /// produto selecionado atualmente
@@ -57,6 +57,8 @@ public class GerenciadorProducao {
     private Relatorio relatorio;
     /// lista das etapas de produção instanciada para evitar laço 'for' otimizado direto no Enum.
     private static final EtapaProducao[] etapasProducao = EtapaProducao.values();
+    /// linha de produção da planta
+    private final LinhaDeProducao linha;
 
     /**
      * Cria o gerenciador sem máquinas, produtos, esteira nem estratégia, que são adicionados depois pelo menu
@@ -64,13 +66,16 @@ public class GerenciadorProducao {
      * @param materiaPrima matéria-prima da fábrica
      * @param verba verba inicial, em R$, que vem do cenário escolhido
      * @param relatorio relatório onde a auditoria vai acumulando os dados da produção
+     * @param linha linha de producao
      */
-    public GerenciadorProducao(MateriaPrima materiaPrima, float verba, Relatorio relatorio) {
+    public GerenciadorProducao(MateriaPrima materiaPrima, float verba, Relatorio relatorio,
+                               LinhaDeProducao linha) {
         this.materiaPrima = materiaPrima;
         this.verba = verba;
         this.relatorio = relatorio;
+        this.linha = linha;
     }
-    
+
     /**
      * Adicina novo produto na lista de produtos.
      *
@@ -123,9 +128,9 @@ public class GerenciadorProducao {
      * @param m a máquina a ser adicionada
      */
     public void adicionarMaquina(Maquina m) {
-        this.maquinas.add(m);
+        linha.adicionarMaquina(m);
     }
-    
+
     /**
      * Troca a estratégia que escolhe a próxima demanda
      *
@@ -187,11 +192,7 @@ public class GerenciadorProducao {
      * @return custo total de operação
      */
     public double calcCustoTotalOperacao() {
-        double soma = 0;
-        for (Maquina m : this.maquinas) {
-            soma += m.getCustoOperacao();
-        }
-        return soma;
+        return linha.calcCustoOperacaoPorUnidade();
     }
 
     /**
@@ -238,7 +239,7 @@ public class GerenciadorProducao {
      */
     public void produzirDemanda(Demanda demanda) {
         // VERIFICAÇÕES
-        if (temMaquinaQuebrada()) {
+        if (linha.temMaquinaQuebrada()) {
             throw new MaquinaPrecisaReparoException("Não podemos iniciar a fabricação. Há máquinas precisando de reparo.");
         }
 
@@ -297,9 +298,7 @@ public class GerenciadorProducao {
         int lote = ++this.contadorLote;
 
         this.getEsteira().ligar();
-        for (Maquina m: this.getMaquinas()) {
-            m.ligar();
-        }
+        linha.ligar();
 
         System.out.printf("Eitcha!!! Iniciando produção de: %s (lote %d)\n", produtoAtual.getNome(), lote);
         ConsolePrinter.pausarProducao(1500);
@@ -321,7 +320,7 @@ public class GerenciadorProducao {
 
             try {
                 for (EtapaProducao etapaAtual : etapasProducao) {
-                    Maquina maquinaAtual = this.maquinas.get(etapaAtual.getCodigo());
+                    Maquina maquinaAtual = linha.getMaquinaDaEtapa(etapaAtual);
 
                     ConsolePrinter.cabecalhoEtapa(maquinaAtual, "%s", etapaAtual.getNome());
 
@@ -417,9 +416,7 @@ public class GerenciadorProducao {
 
         // Desliga as máquinas
         this.getEsteira().desligar();
-        for (Maquina m: this.getMaquinas()) {
-            m.desligar();
-        }
+        linha.desligar();
     }
 
     /**
@@ -467,15 +464,12 @@ public class GerenciadorProducao {
     // === REPAIR ===
 
     /**
-     * Função que repara a máquina escolhida.
-     * @param m A máquina a ser reparada
-     * @throws MaquinaIndisponivelException se a máquina estiver c/ a saúde cheia e não precisar de reparo
+     * Repara a máquina escolhida.
+     * @param indice O índice da máquina a ser reparada
+     * @throws MaquinaIndisponivelException se a máquina não precisar de reparo
      */
-    public void repararMaquina(Maquina m) {
-        if (!(m.getSaude() < m.getSaudeMaxima())) {
-            throw new MaquinaIndisponivelException("Não foi dessa vez! A " + m.getNome() + " não precisa de reparo.");
-        }
-        m.reparar();
+    public void repararMaquina(int indice) {
+        linha.repararMaquina(indice);
     }
 
     // === GETTERS and SETTERS
@@ -486,7 +480,7 @@ public class GerenciadorProducao {
      * @return lista de demandas
      */
     public List<Demanda> getDemandas() {
-        return this.demandas;
+        return Collections.unmodifiableList(this.demandas);
     }
 
     /**
@@ -495,7 +489,7 @@ public class GerenciadorProducao {
      * @return lista de produtos fabricados
      */
     public List<Produto> getProdutosFabricados() {
-        return this.produtosFabricados;
+        return Collections.unmodifiableList(this.produtosFabricados);
     }
 
     /**
@@ -504,7 +498,16 @@ public class GerenciadorProducao {
      * @return lista de máquinas
      */
     public List<Maquina> getMaquinas() {
-        return this.maquinas;
+        return linha.getMaquinas();
+    }
+
+    /**
+     * Retorna a máquina especificada pelo índice
+     * @param indice o índice da lista
+     * @return a maquina
+     */
+    public Maquina getMaquina(int indice) {
+        return linha.getMaquina(indice);
     }
 
     /**
@@ -560,6 +563,6 @@ public class GerenciadorProducao {
      * @return true se tiver máquina esperando reparo
      */
     public boolean temMaquinaQuebrada() {
-        return this.maquinas.stream().anyMatch(Maquina::precisaManutencao);
+        return linha.temMaquinaQuebrada();
     }
 }

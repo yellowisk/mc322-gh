@@ -44,6 +44,15 @@ public class LinhaDeProducao {
     }
 
     /**
+     * Retorna a máquina especificada pelo índice
+     * @param indice o índice da lista
+     * @return a maquina
+     */
+    public Maquina getMaquina(int indice) {
+        return maquinas.get(indice);
+    }
+
+    /**
      * Retorna a máquina de uma etapa específica.
      * @param etapa etapa
      * @return a máquina da etapa especificada
