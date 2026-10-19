@@ -90,7 +90,7 @@ public abstract class Maquina implements Auditavel {
     protected abstract boolean partesEspecificasQuebradas();
 
     /**
-     * Chance de falha que a parte específica do subtipo soma à da máquina (ex.: forno frio, lâmina gasta).
+     * Chance de falha que a parte específica do subtipo soma à da máquina.
      * Entra em {@link #getChanceFalha()}, então pesa no sorteio e aparece na auditoria
      *
      * @return chance extra, entre 0 e 1. 0 se a parte específica não muda a chance de falha
@@ -103,6 +103,14 @@ public abstract class Maquina implements Auditavel {
      * @return uma linha por parte
      */
     protected abstract List<String> diagnosticoPartesEspecificas();
+
+    /**
+     * Diagnóstico só das partes específicas do subtipo que não estão novas (gastas, sujas, queimadas...),
+     * Usado p/ dizer o que um reparo vai consertar
+     *
+     * @return uma linha por parte desgastada, vazia se todas estiverem novas
+     */
+    protected abstract List<String> diagnosticoPartesEspecificasDesgastadas();
 
     /**
      * Tipo da máquina, usado nos logs da produção
@@ -207,7 +215,6 @@ public abstract class Maquina implements Auditavel {
 
         // Chance de falha
         String chanceFalhaFormatada;
-        // Compara c/ a chance do cenário (partes novas), então a diferença mostra só o efeito das partes
         double diffChanceFalha = getChanceFalha() - getChanceFalhaCenario();
         if (Math.abs(diffChanceFalha) < 1e-9) {
             chanceFalhaFormatada = String.format("%s%.0f%%%s", azul, getChanceFalha() * 100, reset);
@@ -263,6 +270,38 @@ public abstract class Maquina implements Auditavel {
      */
     protected String linhaComponente(boolean ok, String diagnostico) {
         return ConsolePrinter.colorir(ok ? ConsolePrinter.VERDE : ConsolePrinter.VERMELHO, diagnostico);
+    }
+
+    /**
+     * Lista as partes c/ desgaste que vale mostrar ao uusário, p/ ele decidir se repara antes de a máquina
+     * quebrar (partes defeituosas). Sensores que perderam só um pouco de calibração ficam de fora da lista,
+     * mas ainda contam em {@link #temPartesDesgastadas()}.
+     *
+     * @return diagnóstico de cada parte desgastada, vazia se nada precisar de atenção
+     */
+    public List<String> listarPartesDesgastadas() {
+        List<String> desgastadas = new ArrayList<>();
+        if (!this.motor.estaNovo()) {
+            desgastadas.add(this.motor.diagnostico());
+        }
+        for (Sensor s : this.sensores) {
+            if (!s.estaCalibrado()) {
+                desgastadas.add(s.diagnostico());
+            }
+        }
+        desgastadas.addAll(diagnosticoPartesEspecificasDesgastadas());
+        return desgastadas;
+    }
+
+    /**
+     * Diz se alguma parte tem desgaste, por menor que seja. O reparo é por demanda: pode ser feito sempre
+     * que isso for true, sem esperar a máquina quebrar
+     *
+     * @return true se alguma parte não estiver nova
+     */
+    public boolean temPartesDesgastadas() {
+        boolean algumSensorUsado = this.sensores.stream().anyMatch(s -> !s.estaNovo());
+        return !this.motor.estaNovo() || algumSensorUsado || !diagnosticoPartesEspecificasDesgastadas().isEmpty();
     }
 
     /**

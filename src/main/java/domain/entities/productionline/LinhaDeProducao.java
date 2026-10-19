@@ -90,16 +90,18 @@ public class LinhaDeProducao implements Auditavel {
     }
 
     /**
-     * Repara a máquina escolhida.
+     * Repara a máquina escolhida. O reparo é por demanda: vale p/ qualquer máquina c/ alguma parte
+     * desgastada, sem esperar ela quebrar.
+     *
      * @param indice O índice da máquina a ser reparada
-     * @throws MaquinaIndisponivelException se a máquina não precisar de reparo
+     * @throws MaquinaIndisponivelException se todas as partes da máquina estiverem novas
      */
     public void repararMaquina(int indice) {
         if (indice < 0 || indice >= maquinas.size()) {
             throw new IllegalArgumentException("Índice de máquina inválido: " + indice);
         }
         Maquina m = maquinas.get(indice);
-        if (!m.precisaManutencao()) {
+        if (!m.temPartesDesgastadas()) {
             throw new MaquinaIndisponivelException("Não foi dessa vez! A " + m.getNome() + " não precisa de reparo.");
         }
         m.reparar();

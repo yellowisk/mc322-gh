@@ -51,6 +51,15 @@ class Motor {
     }
 
     /**
+     * Diz se o motor está c/ a saúde cheia, sem nenhum desgaste
+     *
+     * @return true se a saúde for a máxima
+     */
+    boolean estaNovo() {
+        return this.saude == SAUDE_MAXIMA;
+    }
+
+    /**
      * Quanto o desgaste piora a chance de falha da máquina
      *
      * @return 1.0 com saúde cheia, perto de 2.0 quando está quase quebrando

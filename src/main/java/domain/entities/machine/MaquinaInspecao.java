@@ -101,7 +101,7 @@ public class MaquinaInspecao extends Maquina {
     }
 
     /**
-     * Câmera suja não faz a máquina falhar: ela deixa defeitos passarem, o que já entra na chance de
+     * Câmera suja não faz a máquina falhar, mas deixa defeitos passarem, o que já entra na chance de
      * rejeição da inspeção
      *
      * @return sempre 0
@@ -132,6 +132,17 @@ public class MaquinaInspecao extends Maquina {
         List<String> linhas = new ArrayList<>();
         for (CameraDeInspecao c : this.cameras) {
             linhas.add(linhaComponente(c.estaFuncionando(), c.diagnostico()));
+        }
+        return linhas;
+    }
+
+    @Override
+    protected List<String> diagnosticoPartesEspecificasDesgastadas() {
+        List<String> linhas = new ArrayList<>();
+        for (CameraDeInspecao c : this.cameras) {
+            if (!c.estaFuncionando()) {
+                linhas.add(c.diagnostico());
+            }
         }
         return linhas;
     }

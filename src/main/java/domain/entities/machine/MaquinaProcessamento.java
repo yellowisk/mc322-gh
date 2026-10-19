@@ -116,6 +116,17 @@ public class MaquinaProcessamento extends Maquina {
     }
 
     @Override
+    protected List<String> diagnosticoPartesEspecificasDesgastadas() {
+        List<String> linhas = new ArrayList<>();
+        for (ResistenciaDoForno r : this.resistencias) {
+            if (r.estaQueimada()) {
+                linhas.add(r.diagnostico());
+            }
+        }
+        return linhas;
+    }
+
+    @Override
     public String getTipo() {
         return "Processamento";
     }

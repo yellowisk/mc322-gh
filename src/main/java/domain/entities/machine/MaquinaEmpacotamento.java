@@ -82,6 +82,11 @@ public class MaquinaEmpacotamento extends Maquina {
     }
 
     @Override
+    protected List<String> diagnosticoPartesEspecificasDesgastadas() {
+        return this.seladora.estaNova() ? List.of() : List.of(this.seladora.diagnostico());
+    }
+
+    @Override
     public String getTipo() {
         return "Empacotamento";
     }
