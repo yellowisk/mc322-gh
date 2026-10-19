@@ -44,10 +44,20 @@ public class MaquinaEmpacotamento extends Maquina {
     @Override
     protected Produto processarEtapa(Produto produto) {
         this.seladora.selar();
-        tentaAumentarRisco(produto, this.seladora.chanceSelagemRuim());
+        tentaAumentarRisco(produto);
 
         produto.setStatus(StatusProduto.EMPACOTADO);
         return produto;
+    }
+
+    /**
+     * Lâmina gasta deixa a embalagem mal selada
+     *
+     * @return chance de selagem ruim da seladora
+     */
+    @Override
+    protected double chanceExtraPartesEspecificas() {
+        return this.seladora.chanceSelagemRuim();
     }
 
     /** Troca a lâmina da seladora */
