@@ -18,6 +18,12 @@ public class LinhaDeProducao implements Auditavel {
     /// Lista de máquinas da linha de producao
     private final List<Maquina> maquinas = new ArrayList<>();
 
+    /**
+     * Cria a linha vazia.
+     *
+     * @param nome nome da linha, aparece na auditoria estrutural
+     * @throws IllegalArgumentException se o nome for nulo ou vazio
+     */
     public LinhaDeProducao(String nome) {
         if (nome == null || nome.isBlank()) {
             throw new IllegalArgumentException("O nome da linha de produção não pode ser nulo ou vazio.");
@@ -90,16 +96,18 @@ public class LinhaDeProducao implements Auditavel {
     }
 
     /**
-     * Repara a máquina escolhida.
+     * Repara a máquina escolhida. O reparo é por demanda: vale p/ qualquer máquina c/ alguma parte
+     * desgastada, sem esperar ela quebrar.
+     *
      * @param indice O índice da máquina a ser reparada
-     * @throws MaquinaIndisponivelException se a máquina não precisar de reparo
+     * @throws MaquinaIndisponivelException se todas as partes da máquina estiverem novas
      */
     public void repararMaquina(int indice) {
         if (indice < 0 || indice >= maquinas.size()) {
             throw new IllegalArgumentException("Índice de máquina inválido: " + indice);
         }
         Maquina m = maquinas.get(indice);
-        if (!m.precisaManutencao()) {
+        if (!m.temPartesDesgastadas()) {
             throw new MaquinaIndisponivelException("Não foi dessa vez! A " + m.getNome() + " não precisa de reparo.");
         }
         m.reparar();
@@ -107,20 +115,35 @@ public class LinhaDeProducao implements Auditavel {
 
     // GETTERS
 
+    /**
+     * Nome da linha.
+     *
+     * @return o nome
+     */
     public String getNome() {
         return nome;
     }
 
     // AUDITÁVEL
 
+    /**
+     * Auditoria em cascata: a linha lista suas máquinas e cada máquina se diagnostica (c/ as partes).
+     *
+     * @return árvore Linha > Máquina > Partes
+     */
     @Override
     public String gerarRelatorioDiagnostico() {
-        StringBuilder text = new StringBuilder();
-        int i = 1;
-        for (Maquina m: maquinas) {
-            text.append(String.format("%d. %s\n", i++, m.getNome()));
-            text.append(m.gerarRelatorioDiagnostico());
-            text.append("\n");
+        StringBuilder text = new StringBuilder(String.format("%s\n", nome));
+        for (int i = 0; i < maquinas.size(); i++) {
+            Maquina m = maquinas.get(i);
+            boolean ultima = (i == maquinas.size() - 1);
+            String conector = ultima ? "└─" : "├─";
+            String prefixo = ultima ? "   " : "│  ";
+
+            text.append(String.format("%s %s (%s)\n", conector, m.getNome(), m.getTipo()));
+            for (String linhaMaquina : m.gerarRelatorioDiagnostico().split("\n")) {
+                text.append(prefixo).append(linhaMaquina).append("\n");
+            }
         }
         return text.toString();
     }

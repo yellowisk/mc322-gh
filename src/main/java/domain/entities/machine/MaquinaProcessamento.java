@@ -60,7 +60,7 @@ public class MaquinaProcessamento extends Maquina {
         this.resistencias.forEach(ResistenciaDoForno::aquecer);
 
         Produto novoProduto = produto.processar(produto, StatusProduto.PROCESSADO);
-        tentaAumentarRisco(novoProduto, fracaoPotenciaPerdida() * CHANCE_EXTRA_FORNO_FRIO);
+        tentaAumentarRisco(novoProduto);
         return novoProduto;
     }
 
@@ -77,6 +77,16 @@ public class MaquinaProcessamento extends Maquina {
             entregue += r.potenciaEntregue();
         }
         return 1 - entregue / total;
+    }
+
+    /**
+     * Forno mais frio deixa o vidro mal derretido: a chance extra cresce c/ a potência perdida
+     *
+     * @return de 0 (todas funcionando) 0.3 (todas queimadas)
+     */
+    @Override
+    protected double chanceExtraPartesEspecificas() {
+        return fracaoPotenciaPerdida() * CHANCE_EXTRA_FORNO_FRIO;
     }
 
     /** Troca todas as resistências queimadas */
@@ -101,6 +111,17 @@ public class MaquinaProcessamento extends Maquina {
         List<String> linhas = new ArrayList<>();
         for (ResistenciaDoForno r : this.resistencias) {
             linhas.add(linhaComponente(!r.estaQueimada(), r.diagnostico()));
+        }
+        return linhas;
+    }
+
+    @Override
+    protected List<String> diagnosticoPartesEspecificasDesgastadas() {
+        List<String> linhas = new ArrayList<>();
+        for (ResistenciaDoForno r : this.resistencias) {
+            if (r.estaQueimada()) {
+                linhas.add(r.diagnostico());
+            }
         }
         return linhas;
     }

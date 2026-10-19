@@ -25,6 +25,15 @@ class Seladora {
         this.desgasteLamina = Math.min(1.0, this.desgasteLamina + GeradorAleatorio.sortearDouble() * DESGASTE_MAXIMO_POR_SELAGEM);
     }
 
+    /**
+     * Diz se a lâmina ainda não foi usada
+     *
+     * @return true se a lâmina não tiver desgaste nenhum
+     */
+    boolean estaNova() {
+        return this.desgasteLamina == 0;
+    }
+
     /** Troca a lâmina por uma nova */
     void trocarLamina() {
         this.desgasteLamina = 0;

@@ -50,6 +50,15 @@ class Sensor {
     }
 
     /**
+     * Diz se o sensor está c/ a calibração perfeita
+     *
+     * @return true se nunca perdeu calibração desde o último reparo
+     */
+    boolean estaNovo() {
+        return this.calibracao >= 1.0;
+    }
+
+    /**
      * Uma linha c/ o estado do sensor p/ a auditoria
      *
      * @return ex.: "Sensor 1: OK (95%)""

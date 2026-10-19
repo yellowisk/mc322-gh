@@ -517,12 +517,13 @@ public class GerenciadorProducao {
         return this.relatorio;
     }
 
+    /**
+     * Auditoria estrutural da linha de produção, em cascata (Linha > Máquina > Partes)
+     *
+     * @return árvore de diagnóstico da linha
+     */
     public String gerarRelatorioDiagnostico() {
         return linha.gerarRelatorioDiagnostico();
-    }
-
-    public String gerarResumoProblema() {
-        return linha.gerarResumoProblema();
     }
 
     /**

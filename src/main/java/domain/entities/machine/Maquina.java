@@ -90,11 +90,27 @@ public abstract class Maquina implements Auditavel {
     protected abstract boolean partesEspecificasQuebradas();
 
     /**
+     * Chance de falha que a parte específica do subtipo soma à da máquina.
+     * Entra em {@link #getChanceFalha()}, então pesa no sorteio e aparece na auditoria
+     *
+     * @return chance extra, entre 0 e 1. 0 se a parte específica não muda a chance de falha
+     */
+    protected abstract double chanceExtraPartesEspecificas();
+
+    /**
      * Linhas de diagnóstico da parte específica do subtipo, já formatadas c/ {@link #linhaComponente(boolean, String)}
      *
      * @return uma linha por parte
      */
     protected abstract List<String> diagnosticoPartesEspecificas();
+
+    /**
+     * Diagnóstico só das partes específicas do subtipo que não estão novas (gastas, sujas, queimadas...),
+     * Usado p/ dizer o que um reparo vai consertar
+     *
+     * @return uma linha por parte desgastada, vazia se todas estiverem novas
+     */
+    protected abstract List<String> diagnosticoPartesEspecificasDesgastadas();
 
     /**
      * Tipo da máquina, usado nos logs da produção
@@ -148,24 +164,14 @@ public abstract class Maquina implements Auditavel {
     }
 
     /**
-     * Sorteia se a máquina falhou nessa unidade, c/ a chance de {@link #getChanceFalha()}.
-     * Se falhou, o produto ganha 0.12 * multiplicador do cenário de risco acumulado, que pesa na inspeção
+     * Sorteia se a máquina falhou nessa unidade, c/ a chance de {@link #getChanceFalha()} (que já inclui
+     * a parte específica). Se falhou, o produto ganha 0.12 * multiplicador do cenário de risco acumulado,
+     * que pesa na inspeção
      *
      * @param produto produto que pode sair c/ defeito
      */
     protected void tentaAumentarRisco(Produto produto) {
-        tentaAumentarRisco(produto, 0);
-    }
-
-    /**
-     * Igual a {@link #tentaAumentarRisco(Produto)}, mas c/ uma chance extra de falha vinda da parte
-     * específica do subtipo (ex.: forno frio, lâmina gasta)
-     *
-     * @param produto produto que pode sair c/ defeito
-     * @param chanceExtra chance somada à de {@link #getChanceFalha()}, entre 0 e 1
-     */
-    protected void tentaAumentarRisco(Produto produto, double chanceExtra) {
-        if (GeradorAleatorio.chance(getChanceFalha() + chanceExtra)) {
+        if (GeradorAleatorio.chance(getChanceFalha())) {
             double incremento = 0.12 * multiplicadorCenario;
             produto.aumentarProbabilidadeFalha(incremento);
         }
@@ -209,12 +215,12 @@ public abstract class Maquina implements Auditavel {
 
         // Chance de falha
         String chanceFalhaFormatada;
-        if (getChanceFalhaBase() == getChanceFalha()) {
-            chanceFalhaFormatada = String.format("%s %.2f%s", azul, getChanceFalha(), reset);
+        double diffChanceFalha = getChanceFalha() - getChanceFalhaCenario();
+        if (Math.abs(diffChanceFalha) < 1e-9) {
+            chanceFalhaFormatada = String.format("%s%.0f%%%s", azul, getChanceFalha() * 100, reset);
         } else {
-            double diffChanceFalha = getChanceFalha() - getChanceFalhaBase();
             String simboloTriangulo = diffChanceFalha < 0 ? "▾" : "▴";
-            chanceFalhaFormatada = String.format("%s⚂ %.0f%% %s(%s %.0f%%)%s", azul, getChanceFalha() * 100, cinza, simboloTriangulo, diffChanceFalha * 100, reset);
+            chanceFalhaFormatada = String.format("%s%.0f%% %s(%s %.0f%%)%s", azul, getChanceFalha() * 100, cinza, simboloTriangulo, Math.abs(diffChanceFalha) * 100, reset);
         }
 
         // Status
@@ -264,6 +270,38 @@ public abstract class Maquina implements Auditavel {
      */
     protected String linhaComponente(boolean ok, String diagnostico) {
         return ConsolePrinter.colorir(ok ? ConsolePrinter.VERDE : ConsolePrinter.VERMELHO, diagnostico);
+    }
+
+    /**
+     * Lista as partes c/ desgaste que vale mostrar ao uusário, p/ ele decidir se repara antes de a máquina
+     * quebrar (partes defeituosas). Sensores que perderam só um pouco de calibração ficam de fora da lista,
+     * mas ainda contam em {@link #temPartesDesgastadas()}.
+     *
+     * @return diagnóstico de cada parte desgastada, vazia se nada precisar de atenção
+     */
+    public List<String> listarPartesDesgastadas() {
+        List<String> desgastadas = new ArrayList<>();
+        if (!this.motor.estaNovo()) {
+            desgastadas.add(this.motor.diagnostico());
+        }
+        for (Sensor s : this.sensores) {
+            if (!s.estaCalibrado()) {
+                desgastadas.add(s.diagnostico());
+            }
+        }
+        desgastadas.addAll(diagnosticoPartesEspecificasDesgastadas());
+        return desgastadas;
+    }
+
+    /**
+     * Diz se alguma parte tem desgaste, por menor que seja. O reparo é por demanda: pode ser feito sempre
+     * que isso for true, sem esperar a máquina quebrar
+     *
+     * @return true se alguma parte não estiver nova
+     */
+    public boolean temPartesDesgastadas() {
+        boolean algumSensorUsado = this.sensores.stream().anyMatch(s -> !s.estaNovo());
+        return !this.motor.estaNovo() || algumSensorUsado || !diagnosticoPartesEspecificasDesgastadas().isEmpty();
     }
 
     /**
@@ -319,19 +357,23 @@ public abstract class Maquina implements Auditavel {
     }
 
     /**
-     * Chance de falha atual, que piora c/ o desgaste do motor, c/ os sensores descalibrados e c/ o cenário:
+     * Chance de falha atual, que piora c/ o desgaste do motor, c/ os sensores descalibrados, c/ a parte
+     * específica do subtipo e c/ o cenário:
      * <pre>{@code
      * fracaoSensoresRuins = 1 - sensoresCalibrados / totalSensores
      * chanceFalha = chanceFalhaBase * fatorDesgaste * (1 + fracaoSensoresRuins) * multiplicadorCenario
+     *             + chanceExtraPartesEspecificas
      * }</pre>
      * O fatorDesgaste vem do {@link Motor}: vale 1 c/ saúde cheia (não muda a chance) e chega perto de 2
-     * quando o motor tá quase quebrando (quase dobra a chance). Sensores todos descalibrados também dobram
+     * quando o motor tá quase quebrando (quase dobra a chance). Sensores todos descalibrados também dobram.
+     * A chance extra vem de {@link #chanceExtraPartesEspecificas()}
      *
      * @return chance de falha atual, entre 0 e 1
      */
     public double getChanceFalha() {
         double fracaoSensoresRuins = 1 - (double) contarSensoresCalibrados() / this.sensores.size();
-        double chance = this.chanceFalhaBase * this.motor.fatorDesgaste() * (1 + fracaoSensoresRuins) * Maquina.multiplicadorCenario;
+        double chance = this.chanceFalhaBase * this.motor.fatorDesgaste() * (1 + fracaoSensoresRuins) * Maquina.multiplicadorCenario
+                + chanceExtraPartesEspecificas();
         return Math.min(1.0, chance);
     }
 
@@ -390,6 +432,16 @@ public abstract class Maquina implements Auditavel {
      */
     public double getChanceFalhaBase() {
         return this.chanceFalhaBase;
+    }
+
+    /**
+     * Chance de falha c/ o cenário aplicado mas c/ todas as partes novas (motor cheio, sensores calibrados e
+     * parte específica sem desgaste). É a referência p/ medir quanto o desgaste das partes aumentou a chance
+     *
+     * @return chance base vezes o multiplicador do cenário, entre 0 e 1
+     */
+    public double getChanceFalhaCenario() {
+        return Math.min(1.0, this.chanceFalhaBase * Maquina.multiplicadorCenario);
     }
 
     /**

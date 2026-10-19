@@ -13,6 +13,8 @@ class Motor {
     private static final int SAUDE_MAXIMA = 100;
     /** Abaixo disso o motor está quebrado */
     private static final int SAUDE_CRITICA = 15;
+    /** Abaixo disso o motor está perto de quebrar */
+    private static final int SAUDE_ALERTA = 40;
     private final int desgasteMaximo;
     private int saude = SAUDE_MAXIMA;
 
@@ -49,6 +51,15 @@ class Motor {
     }
 
     /**
+     * Diz se o motor está c/ a saúde cheia, sem nenhum desgaste
+     *
+     * @return true se a saúde for a máxima
+     */
+    boolean estaNovo() {
+        return this.saude == SAUDE_MAXIMA;
+    }
+
+    /**
      * Quanto o desgaste piora a chance de falha da máquina
      *
      * @return 1.0 com saúde cheia, perto de 2.0 quando está quase quebrando
@@ -76,14 +87,30 @@ class Motor {
     }
 
     /**
-     * Uma linha c/ o estado do motor para a auditoria
+     * Estado do motor pela faixa de saúde: novo (cheio), desgastado, crítico (abaixo de
+     * {@value #SAUDE_ALERTA}) ou quebrado (abaixo de {@value #SAUDE_CRITICA})
      *
-     * @return ex.: "Motor: 72/100""
+     * @return estado p/ o diagnóstico
+     */
+    private String estado() {
+        if (estaQuebrado()) {
+            return "QUEBRADO";
+        }
+        if (this.saude < SAUDE_ALERTA) {
+            return "Crítico";
+        }
+        if (this.saude < SAUDE_MAXIMA) {
+            return "Desgastado";
+        }
+        return "Novo";
+    }
+
+    /**
+     * Uma linha c/ o estado do motor para a auditoria, primeiro o estado e depois a saúde
+     *
+     * @return ex.: "Motor: Desgastado (72/100)"
      */
     String diagnostico() {
-        if (estaQuebrado()) {
-            return String.format("Motor: Quebrado (%d/%d)", this.saude, SAUDE_MAXIMA);
-        }
-        return String.format("Motor: %d/%d", this.saude, SAUDE_MAXIMA);
+        return String.format("Motor: %s (%d/%d)", estado(), this.saude, SAUDE_MAXIMA);
     }
 }

@@ -4,9 +4,12 @@ import domain.entities.machine.Maquina;
 import domain.entities.productionmanager.GerenciadorProducao;
 import domain.exceptions.PlantaException;
 
+import java.util.List;
+
 /**
- * Submenu de reparo. Lista as máquinas c/ a saúde de cada uma e repara a escolhida, deixando
- * a saúde cheia de novo
+ * Submenu de reparo. Lista as máquinas c/ o estado de cada uma (nova, desgastada ou quebrada) e as partes
+ * desgastadas, e repara a escolhida, deixando todas as partes novas. O reparo é por demanda: qualquer
+ * máquina c/ desgaste pode ser reparada mesmo que não esteja quebrada
  *
  * @author Heitor Almeida
  */
@@ -40,7 +43,7 @@ public class MenuReparo extends Submenu {
         while (true) {
             imprimirCabecalho();
 
-            System.out.println(gerenciadorProducao.gerarResumoProblema());
+            imprimirMaquinas();
 
             ConsolePrinter.imprimirOpcaoVoltar();
             menu.imprimirRodape();
@@ -62,6 +65,38 @@ public class MenuReparo extends Submenu {
                 menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }
+    }
+
+    /**
+     * Lista as máquinas da linha c/ o estado colorido e, embaixo de cada uma, a árvore das partes desgastadas:
+     * <pre>
+     *  2. Máquina de Empacotamento   ! Desgastada
+     *     ├─ Motor: Desgastado (78/100)
+     *     └─ Seladora: lâmina 30% gasta
+     * </pre>
+     */
+    private void imprimirMaquinas() {
+        List<Maquina> maquinas = gerenciadorProducao.getMaquinas();
+        for (int i = 0; i < maquinas.size(); i++) {
+            Maquina m = maquinas.get(i);
+            List<String> desgastadas = m.listarPartesDesgastadas();
+
+            String estado;
+            if (m.precisaManutencao()) {
+                estado = ConsolePrinter.colorir(ConsolePrinter.VERMELHO, "✗ Quebrada");
+            } else if (!desgastadas.isEmpty()) {
+                estado = ConsolePrinter.colorir(ConsolePrinter.AMARELO, "! Desgastada");
+            } else {
+                estado = ConsolePrinter.colorir(ConsolePrinter.VERDE, "✓ Nova");
+            }
+            System.out.printf(" %d. %-26s %s\n", i + 1, m.getNome(), estado);
+
+            for (int j = 0; j < desgastadas.size(); j++) {
+                String conector = (j == desgastadas.size() - 1) ? "└─" : "├─";
+                System.out.println("    " + ConsolePrinter.colorir(ConsolePrinter.CINZA, conector) + " " + desgastadas.get(j));
+            }
+        }
+        System.out.println();
     }
 
     /**

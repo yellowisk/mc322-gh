@@ -100,6 +100,17 @@ public class MaquinaInspecao extends Maquina {
         return produto;
     }
 
+    /**
+     * Câmera suja não faz a máquina falhar, mas deixa defeitos passarem, o que já entra na chance de
+     * rejeição da inspeção
+     *
+     * @return sempre 0
+     */
+    @Override
+    protected double chanceExtraPartesEspecificas() {
+        return 0;
+    }
+
     /** Limpa a lente de todas as câmeras */
     @Override
     protected void repararPartesEspecificas() {
@@ -121,6 +132,17 @@ public class MaquinaInspecao extends Maquina {
         List<String> linhas = new ArrayList<>();
         for (CameraDeInspecao c : this.cameras) {
             linhas.add(linhaComponente(c.estaFuncionando(), c.diagnostico()));
+        }
+        return linhas;
+    }
+
+    @Override
+    protected List<String> diagnosticoPartesEspecificasDesgastadas() {
+        List<String> linhas = new ArrayList<>();
+        for (CameraDeInspecao c : this.cameras) {
+            if (!c.estaFuncionando()) {
+                linhas.add(c.diagnostico());
+            }
         }
         return linhas;
     }
