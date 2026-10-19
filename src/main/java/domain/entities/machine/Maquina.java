@@ -188,15 +188,6 @@ public abstract class Maquina implements Auditavel {
         repararPartesEspecificas();
     }
 
-    /**
-     * Status físico da máquina, calculado a partir das partes
-     *
-     * @return {@link StatusDeMaquina#QUEBRADA} se precisar de reparo, senão {@link StatusDeMaquina#FUNCIONAL}
-     */
-    public StatusDeMaquina getStatus() {
-        return precisaManutencao() ? StatusDeMaquina.QUEBRADA : StatusDeMaquina.FUNCIONAL;
-    }
-
     // === AUDITÁVEL ===
 
     /**
@@ -209,7 +200,6 @@ public abstract class Maquina implements Auditavel {
         String reset = ConsolePrinter.RESET;
         String azul = ConsolePrinter.AZUL;
         String verde = ConsolePrinter.VERDE;
-        String vermelho = ConsolePrinter.VERMELHO;
         String amarelo = ConsolePrinter.AMARELO;
         String cinza = ConsolePrinter.CINZA;
 
@@ -223,9 +213,8 @@ public abstract class Maquina implements Auditavel {
             chanceFalhaFormatada = String.format("%s%.0f%% %s(%s %.0f%%)%s", azul, getChanceFalha() * 100, cinza, simboloTriangulo, Math.abs(diffChanceFalha) * 100, reset);
         }
 
-        // Status
+        // Energia da máquina. O estado físico (nova, desgastada, quebrada) fica no cabeçalho da máquina
         String statusEnergia = estaLigada() ? verde + "Ligada" + reset : cinza + "Desligada" + reset;
-        String statusFisico = (getStatus() == StatusDeMaquina.FUNCIONAL) ? verde + "✓ Funcional" + reset : vermelho + "✗ Quebrada" + reset;
 
         // Custo operacional
         String custo = String.format("%sR$ %.2f%s", amarelo, getCustoOperacao(), reset);
@@ -233,13 +222,13 @@ public abstract class Maquina implements Auditavel {
 
         StringBuilder relatorio = new StringBuilder(String.format(
                 """
-                ├─ ⏻ Status: %s | %s
+                ├─ ⏻ Energia: %s
                 ├─ ⚂ Chance de Falha: %s
                 ├─ $ Custo Operacional: %s
                 ├─ Capacidade Máx: %s
                 └─ ⚙ Componentes
                 """,
-                statusEnergia, statusFisico,
+                statusEnergia,
                 chanceFalhaFormatada,
                 custo,
                 capacidade
