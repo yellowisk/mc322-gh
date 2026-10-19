@@ -15,6 +15,23 @@ produtos reais do mercadinho.
 HISTÓRICO
 =========
 
+Tarefa 5:
+- Organizamos a fábrica em três níveis: a LinhaDeProducao (Agrupador) junta as máquinas na ordem das
+etapas, cada Maquina (Todo) processa uma etapa e as Partes fazem o trabalho. O GerenciadorProducao só
+fala com a linha de produção.
+- Toda máquina tem um Motor (1:1, guarda a saúde) e Sensores (1:N, perdem calibração com o uso).
+- Cada subtipo de máquina tem uma parte:
+    - ResistenciaDoForno (1:N) na processadora
+    - Seladora (1:1) na empacotadora
+    - CameraDeInspecao (1:N) na inspeção
+- Motor gasto e sensores descalibrados aumentam a chance de falha, resistência queimada e lâmina
+gasta somam até 30% nela. Câmera suja deixa produtos ruins passarem como APROVADO.
+- A máquina quebra com o motor abaixo de 15, todas as resistências queimadas, a lâmina 100% gasta
+ou todas as câmeras sujas.
+- Removemos o menu "Reparar Máquinas" para evitar redundâncias na UI. Agora as máquinas são reparadas
+pelo menu "Linha de Produção"
+- Removemos o Enum StatusDeMaquina, já que o estado da máquina agora vem das partes.
+
 Tarefa 4:
 - Migramos o build para Gradle (build.gradle, settings.gradle e Gradle Wrapper) e removemos o Makefile
 e o pom.xml. O projeto usa JDK 25, mas se a máquina não tiver, o foojay-resolver baixa ele sozinho.
@@ -36,6 +53,7 @@ e não um estado inconsistente:
 	- A demanda fica CANCELADA, guardando quantas unidades já foram feitas. Ao fabricar de novo, ela
 	retoma de onde parou com um novo lote.
 	- Nada é marcado como concluído sem todas as unidades terem sido executadas (com sucesso ou não).
+
 Tarefa 3:
 - Adicionamos seed configurável para Random.
 - Os status de demanda são: EM_PRODUCAO, PENDENTE, CONCLUIDA e CANCELADA.
