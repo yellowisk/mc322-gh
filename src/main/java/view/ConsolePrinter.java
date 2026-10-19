@@ -123,6 +123,22 @@ public class ConsolePrinter {
     }
 
     /**
+     * Estado da máquina p/ as listas de máquinas: quebrada, desgastada ou nova
+     *
+     * @param maquina máquina
+     * @return "✗ Quebrada" em vermelho, "! Desgastada" em amarelo ou "✓ Nova" em verde
+     */
+    public static String estadoMaquina(Maquina maquina) {
+        if (maquina.precisaManutencao()) {
+            return colorir(VERMELHO, "✗ Quebrada");
+        }
+        if (maquina.temPartesDesgastadas()) {
+            return colorir(AMARELO, "! Desgastada");
+        }
+        return colorir(VERDE, "✓ Nova");
+    }
+
+    /**
      * Imprime uma linha da árvore de logs da produção e retarda a animação
      *
      * @param icone ícone da linha, ex.: "✓"
