@@ -4,10 +4,12 @@ import domain.entities.machine.Maquina;
 import domain.entities.productionmanager.EtapaProducao;
 import domain.exceptions.MaquinaIndisponivelException;
 import domain.interfaces.Auditavel;
+import view.ConsolePrinter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.IntPredicate;
 
 /**
  * Classe da linha de produção da planta.
@@ -113,6 +115,26 @@ public class LinhaDeProducao implements Auditavel {
         m.reparar();
     }
 
+    /**
+     * Repara de uma vez todas as máquinas c/ alguma parte desgastada. As máquinas novas ficam como estão
+     *
+     * @return quantas máquinas foram reparadas
+     * @throws MaquinaIndisponivelException se nenhuma máquina tiver desgaste
+     */
+    public int repararTodas() {
+        int reparadas = 0;
+        for (Maquina m : maquinas) {
+            if (m.temPartesDesgastadas()) {
+                m.reparar();
+                reparadas++;
+            }
+        }
+        if (reparadas == 0) {
+            throw new MaquinaIndisponivelException("Não foi dessa vez! Todas as máquinas da " + nome.toLowerCase() + " estão novas.");
+        }
+        return reparadas;
+    }
+
     // GETTERS
 
     /**
@@ -127,12 +149,22 @@ public class LinhaDeProducao implements Auditavel {
     // AUDITÁVEL
 
     /**
-     * Auditoria em cascata: a linha lista suas máquinas e cada máquina se diagnostica (c/ as partes).
+     * Auditoria em cascata completa: a linha lista suas máquinas e cada máquina se diagnostica (c/ as partes)
      *
-     * @return árvore Linha > Máquina > Partes
+     * @return árvore Linha > Máquina > Partes, c/ todas as máquinas expandidas
      */
     @Override
     public String gerarRelatorioDiagnostico() {
+        return gerarRelatorioDiagnostico(indice -> true);
+    }
+
+    /**
+     * Auditoria em cascata c/ só algumas máquinas expandidas.
+     *
+     * @param expandir diz, pelo índice da máquina, se ela aparece expandida
+     * @return árvore Linha > Máquina > Partes
+     */
+    public String gerarRelatorioDiagnostico(IntPredicate expandir) {
         StringBuilder text = new StringBuilder(String.format("%s\n", nome));
         for (int i = 0; i < maquinas.size(); i++) {
             Maquina m = maquinas.get(i);
@@ -140,9 +172,11 @@ public class LinhaDeProducao implements Auditavel {
             String conector = ultima ? "└─" : "├─";
             String prefixo = ultima ? "   " : "│  ";
 
-            text.append(String.format("%s %s (%s)\n", conector, m.getNome(), m.getTipo()));
-            for (String linhaMaquina : m.gerarRelatorioDiagnostico().split("\n")) {
-                text.append(prefixo).append(linhaMaquina).append("\n");
+            text.append(String.format("%s %d. %-26s %s\n", conector, i + 1, m.getNome(), ConsolePrinter.estadoMaquina(m)));
+            if (expandir.test(i)) {
+                for (String linhaMaquina : m.gerarRelatorioDiagnostico().split("\n")) {
+                    text.append(prefixo).append("   ").append(linhaMaquina).append("\n");
+                }
             }
         }
         return text.toString();
