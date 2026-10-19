@@ -18,6 +18,12 @@ public class LinhaDeProducao implements Auditavel {
     /// Lista de máquinas da linha de producao
     private final List<Maquina> maquinas = new ArrayList<>();
 
+    /**
+     * Cria a linha vazia.
+     *
+     * @param nome nome da linha, aparece na auditoria estrutural
+     * @throws IllegalArgumentException se o nome for nulo ou vazio
+     */
     public LinhaDeProducao(String nome) {
         if (nome == null || nome.isBlank()) {
             throw new IllegalArgumentException("O nome da linha de produção não pode ser nulo ou vazio.");
@@ -109,6 +115,11 @@ public class LinhaDeProducao implements Auditavel {
 
     // GETTERS
 
+    /**
+     * Nome da linha.
+     *
+     * @return o nome
+     */
     public String getNome() {
         return nome;
     }
