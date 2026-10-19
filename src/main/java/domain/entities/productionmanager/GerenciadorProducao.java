@@ -15,7 +15,6 @@ import domain.exceptions.MateriaPrimaInsuficienteException;
 import domain.exceptions.DemandaInvalidaException;
 import domain.exceptions.TransicaoDemandaInvalidaException;
 import domain.exceptions.MaquinaPrecisaReparoException;
-import domain.exceptions.MaquinaIndisponivelException;
 import domain.exceptions.EstrategiaNaoSelecionadaException;
 import domain.exceptions.NenhumaDemandaElegivelException;
 import domain.exceptions.PlantaException;
@@ -459,17 +458,6 @@ public class GerenciadorProducao {
         return custoTotal;
     }
 
-    // === REPAIR ===
-
-    /**
-     * Repara a máquina escolhida.
-     * @param indice O índice da máquina a ser reparada
-     * @throws MaquinaIndisponivelException se a máquina não precisar de reparo
-     */
-    public void repararMaquina(int indice) {
-        linha.repararMaquina(indice);
-    }
-
     // === GETTERS and SETTERS
 
     /**
@@ -500,30 +488,12 @@ public class GerenciadorProducao {
     }
 
     /**
-     * Retorna a máquina especificada pelo índice
-     * @param indice o índice da lista
-     * @return a maquina
-     */
-    public Maquina getMaquina(int indice) {
-        return linha.getMaquina(indice);
-    }
-
-    /**
      * Relatório c/ os dados acumulados da produção, usado pela auditoria
      *
      * @return relatório
      */
     public Relatorio getRelatorio() {
         return this.relatorio;
-    }
-
-    /**
-     * Auditoria estrutural da linha de produção, em cascata (Linha > Máquina > Partes)
-     *
-     * @return árvore de diagnóstico da linha
-     */
-    public String gerarRelatorioDiagnostico() {
-        return linha.gerarRelatorioDiagnostico();
     }
 
     /**

@@ -30,6 +30,7 @@ import java.util.Scanner;
 public class Menu {
     private ConfiguracaoCenario cenarioAtual;
     private GerenciadorProducao gerenciadorProducao;
+    private LinhaDeProducao linha; // Agrupador das máquinas
     private Relatorio relatorio = new Relatorio();
 
     private final Scanner leitor = new Scanner(System.in);
@@ -53,11 +54,12 @@ public class Menu {
             return;
         }
 
+        linha = new LinhaDeProducao("Linha de Produção");
         gerenciadorProducao = new GerenciadorProducao(
                 new MateriaPrima("Vidro", 50, "kg", 5, 1),
                 cenarioAtual.getVerba(),
                 relatorio,
-                new LinhaDeProducao("Linha de Produção")
+                linha
         );
 
         iniciarGerenciadorProducao();
@@ -141,8 +143,8 @@ public class Menu {
                 new MenuArmazem(this, gerenciadorProducao),
                 new MenuComprarMateriaPrima(this, gerenciadorProducao),
                 menuEstrategia,
-                new MenuReparo(this, gerenciadorProducao),
-                new MenuAuditoria(this, gerenciadorProducao),
+                new MenuLinha(this, gerenciadorProducao, linha),
+                new MenuAuditoria(this, gerenciadorProducao, linha),
                 new MenuArmazemMateriaPrima(this, gerenciadorProducao),
                 new MenuVelocidade(this, gerenciadorProducao)
         );
