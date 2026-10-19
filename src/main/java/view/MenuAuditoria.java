@@ -1,11 +1,14 @@
 package view;
 
+import domain.entities.machine.Maquina;
 import domain.entities.product.Produto;
 import domain.entities.productionmanager.GerenciadorProducao;
 import domain.entities.report.Relatorio;
+import domain.exceptions.OpcaoInvalidaException;
 import domain.interfaces.Auditavel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -44,7 +47,7 @@ public class MenuAuditoria extends Submenu {
             imprimirCabecalho();
 
             // Lista de opções
-            String[] opcoes = {"Relatório geral", "Detalhar máquinas", "Detalhar produtos", "Voltar"};
+            String[] opcoes = {"Relatório geral", "Detalhar máquinas", "Detalhar produtos", "Auditoria estrutural da linha", "Voltar"};
             ConsolePrinter.listaOpcoes(opcoes);
 
             menu.imprimirRodape();
@@ -57,6 +60,7 @@ public class MenuAuditoria extends Submenu {
                 case 1 -> relatorioGeral();
                 case 2 -> detalharMaquinas();
                 case 3 -> detalharProdutos();
+                case 4 -> auditoriaEstrutural();
                 default -> menu.setUltimaMensagem(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
             }
         }
@@ -148,19 +152,85 @@ public class MenuAuditoria extends Submenu {
     private void detalharMaquinas() {
         boolean rodando = true;
 
+        List<Maquina> maquinas = gerenciadorProducao.getMaquinas();
+        int[] opcoesExpandidas = new int[maquinas.size()]; // Flags de ativação (1 ou 0)
+        boolean expandirTodos = true;
+
         while (rodando) {
             imprimirCabecalho();
             System.out.println(ConsolePrinter.colorir(cor," Auditoria de máquinas\n"));
 
-            System.out.println(gerenciadorProducao.gerarRelatorioDiagnostico());
+            if (maquinas.isEmpty()) {
+                System.out.println(ConsolePrinter.CINZA + " Não há nenhuma máquina cadastrada." + ConsolePrinter.RESET);
+            }
 
+            // Menu: Lista expansível de máquinas
+            System.out.println(" Máquinas disponíveis:\n");
+            int i = 0;
+            for (Maquina m : maquinas) {
+                System.out.printf(
+                        ConsolePrinter.CINZA + "  %d." + ConsolePrinter.RESET + " %s " + ConsolePrinter.CINZA + "(%s)" + ConsolePrinter.RESET + "\n",
+                        (i + 1), m.getNome(), m.getTipo());
+
+                if (opcoesExpandidas[i] == 1) {
+                    // O relatório da máquina vem sem indentação, então recuamos p/ ficar embaixo do nome
+                    for (String linha : m.gerarRelatorioDiagnostico().split("\n")) {
+                        System.out.println("     " + linha);
+                    }
+                }
+                i++;
+            }
+
+            System.out.println();
+            if (!maquinas.isEmpty()) {
+                System.out.printf(ConsolePrinter.CINZA + " 99." + ConsolePrinter.RESET + " Expandir/Recolher todos\n\n");
+            }
             ConsolePrinter.imprimirOpcaoVoltar();
 
             menu.imprimirRodape();
 
             // Escolha da opção
             int opcao = menu.lerInteiro("Escolha: ");
+
             if (opcao == 0) break;
+
+            // Tratamento da opção Expandir/Recolher todos
+            if (opcao == 99 && !maquinas.isEmpty()) {
+                int novoEstado = expandirTodos ? 1 : 0;
+                Arrays.fill(opcoesExpandidas, novoEstado);
+                expandirTodos = !expandirTodos;
+                continue;
+            }
+
+            try {
+                Menu.validarOpcao(opcao, opcoesExpandidas.length, "Dessa vez não é! Máquina inválida!");
+                opcoesExpandidas[opcao - 1] = opcoesExpandidas[opcao - 1] ^ 1; // Inverte a flag usando bitwise XOR
+            } catch (OpcaoInvalidaException e) {
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
+            }
+        }
+    }
+
+    /**
+     * Submenu da auditoria estrutural. Mostra a árvore em cascata da linha de produção:
+     * Linha > Máquina > Partes (motor, sensores e a parte específica de cada máquina)
+     */
+    private void auditoriaEstrutural() {
+        while (true) {
+            imprimirCabecalho();
+            System.out.println(ConsolePrinter.colorir(cor, " Auditoria estrutural da linha\n"));
+
+            System.out.println(gerenciadorProducao.gerarRelatorioDiagnostico());
+
+            ConsolePrinter.imprimirOpcaoVoltar();
+            menu.imprimirRodape();
+
+            int opcao = menu.lerInteiro("Escolha: ");
+            if (opcao == 0) {
+                break;
+            } else {
+                menu.setUltimaMensagem(ConsolePrinter.textoFalha("Dessa vez não é! Opção inválida!"));
+            }
         }
     }
 
@@ -181,7 +251,7 @@ public class MenuAuditoria extends Submenu {
             if (produtos.isEmpty()) {
                 System.out.println(ConsolePrinter.CINZA + " Nenhum produto foi produzido ainda." + ConsolePrinter.RESET);
             } else {
-                // Ccabeçalho alinhado da tabela
+                // Cabeçalho alinhado da tabela
                 System.out.println(" Produtos produzidos:\n");
                 System.out.printf("    " + ConsolePrinter.CINZA + "%-5s %-16s %-6s %-10s %-12s %-10s %-20s" + ConsolePrinter.RESET + "\n",
                         "ID", "Nome", "Lote", "Qualidade", "Risco Acum.", "Rejeição", "Status");

@@ -113,14 +113,24 @@ public class LinhaDeProducao implements Auditavel {
 
     // AUDITÁVEL
 
+    /**
+     * Auditoria em cascata: a linha lista suas máquinas e cada máquina se diagnostica (c/ as partes).
+     *
+     * @return árvore Linha > Máquina > Partes
+     */
     @Override
     public String gerarRelatorioDiagnostico() {
-        StringBuilder text = new StringBuilder();
-        int i = 1;
-        for (Maquina m: maquinas) {
-            text.append(String.format("%d. %s\n", i++, m.getNome()));
-            text.append(m.gerarRelatorioDiagnostico());
-            text.append("\n");
+        StringBuilder text = new StringBuilder(String.format("%s\n", nome));
+        for (int i = 0; i < maquinas.size(); i++) {
+            Maquina m = maquinas.get(i);
+            boolean ultima = (i == maquinas.size() - 1);
+            String conector = ultima ? "└─" : "├─";
+            String prefixo = ultima ? "   " : "│  ";
+
+            text.append(String.format("%s %s (%s)\n", conector, m.getNome(), m.getTipo()));
+            for (String linhaMaquina : m.gerarRelatorioDiagnostico().split("\n")) {
+                text.append(prefixo).append(linhaMaquina).append("\n");
+            }
         }
         return text.toString();
     }
