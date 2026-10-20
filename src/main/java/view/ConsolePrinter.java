@@ -102,7 +102,7 @@ public class ConsolePrinter {
 
     /**
      * Cabeçalho de uma etapa da produção c/ a saúde e a chance de falha da máquina.
-     * Se a chance atual for diferente da base, mostra a diferença entre parênteses
+     * Se o desgaste das partes mudou a chance do cenário, mostra a diferença entre parênteses
      *
      * @param maquina máquina da etapa
      * @param formato nome da etapa, sai em caixa alta
@@ -112,14 +112,30 @@ public class ConsolePrinter {
         String titulo = ROXO + "▸ " + String.format(formato.toUpperCase(), argumentos) + RESET;
         String saude = String.format("%d/%d", maquina.getSaude(), maquina.getSaudeMaxima());
         String chanceFalha = "";
-        if (maquina.getChanceFalhaBase() == maquina.getChanceFalha()) {
+        double diffChanceFalha = maquina.getChanceFalha() - maquina.getChanceFalhaCenario();
+        if (Math.abs(diffChanceFalha) < 1e-9) {
             chanceFalha = String.format("%.2f", maquina.getChanceFalha());
         } else {
-            double diffChanceFalha = maquina.getChanceFalha() - maquina.getChanceFalhaBase();
             String simboloTriangulo = diffChanceFalha < 0 ? "▾" : "▴";
-            chanceFalha = String.format("%.2f " + CINZA + "(%s %.2f)", maquina.getChanceFalha(), simboloTriangulo, diffChanceFalha);
+            chanceFalha = String.format("%.2f " + CINZA + "(%s %.2f)", maquina.getChanceFalha(), simboloTriangulo, Math.abs(diffChanceFalha));
         }
         System.out.printf(titulo + " [ " + VERMELHO + "❤ %s"+ RESET + " | " + AZUL + "⚂ %s" + RESET + " ]\n", saude, chanceFalha);
+    }
+
+    /**
+     * Estado da máquina p/ as listas de máquinas: quebrada, desgastada ou nova
+     *
+     * @param maquina máquina
+     * @return "✗ Quebrada" em vermelho, "! Desgastada" em amarelo ou "✓ Nova" em verde
+     */
+    public static String estadoMaquina(Maquina maquina) {
+        if (maquina.precisaManutencao()) {
+            return colorir(VERMELHO, "✗ Quebrada");
+        }
+        if (maquina.temPartesDesgastadas()) {
+            return colorir(AMARELO, "! Desgastada");
+        }
+        return colorir(VERDE, "✓ Nova");
     }
 
     /**

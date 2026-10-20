@@ -1,5 +1,6 @@
 package view;
 
+import domain.entities.productionline.LinhaDeProducao;
 import domain.entities.report.Relatorio;
 import domain.exceptions.OpcaoInvalidaException;
 import domain.exceptions.PlantaException;
@@ -29,6 +30,7 @@ import java.util.Scanner;
 public class Menu {
     private ConfiguracaoCenario cenarioAtual;
     private GerenciadorProducao gerenciadorProducao;
+    private LinhaDeProducao linha; // Agrupador das máquinas
     private Relatorio relatorio = new Relatorio();
 
     private final Scanner leitor = new Scanner(System.in);
@@ -52,10 +54,12 @@ public class Menu {
             return;
         }
 
+        linha = new LinhaDeProducao("Linha de Produção");
         gerenciadorProducao = new GerenciadorProducao(
                 new MateriaPrima("Vidro", 50, "kg", 5, 1),
                 cenarioAtual.getVerba(),
-                relatorio
+                relatorio,
+                linha
         );
 
         iniciarGerenciadorProducao();
@@ -114,19 +118,19 @@ public class Menu {
         gerenciadorProducao.adicionarMaquina(new MaquinaProcessamento(
                         "Máquina de Processamento", 20, 0.25,
                         0.78, cenarioAtual.getMultiplicadorCenario(),
-                        cenarioAtual.getDesgasteMaximo()
+                        cenarioAtual.getDesgasteMaximo(), 2, 3 // 2 sensores, 3 resistências
                 )
         );
         gerenciadorProducao.adicionarMaquina(new MaquinaEmpacotamento(
                         "Máquina de Empacotamento", 20, 0.15,
                         0.5, cenarioAtual.getMultiplicadorCenario(),
-                        cenarioAtual.getDesgasteMaximo()
+                        cenarioAtual.getDesgasteMaximo(), 2 // 2 sensores
                 )
         );
         gerenciadorProducao.adicionarMaquina(new MaquinaInspecao(
                         "Máquina de Inspeção", 20, 0.10,
                         0.43, cenarioAtual.getMultiplicadorCenario(),
-                        cenarioAtual.getDesgasteMaximo()
+                        cenarioAtual.getDesgasteMaximo(), 2, 3 // 2 sensores, 3 câmeras
                 )
         );
 
@@ -139,8 +143,8 @@ public class Menu {
                 new MenuArmazem(this, gerenciadorProducao),
                 new MenuComprarMateriaPrima(this, gerenciadorProducao),
                 menuEstrategia,
-                new MenuReparo(this, gerenciadorProducao),
-                new MenuAuditoria(this, gerenciadorProducao),
+                new MenuLinha(this, gerenciadorProducao, linha),
+                new MenuAuditoria(this, gerenciadorProducao, linha),
                 new MenuArmazemMateriaPrima(this, gerenciadorProducao),
                 new MenuVelocidade(this, gerenciadorProducao)
         );

@@ -7,9 +7,17 @@ import domain.interfaces.Auditavel;
 import domain.utils.GeradorAleatorio;
 import view.ConsolePrinter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Máquina de uma etapa da linha de produção. Cada {@link #processar(Produto)} desgasta a máquina,
- * e quanto menor a saúde, maior a chance de falha. Abaixo do limiar crítico ela quebra e precisa de reparo
+ * Máquina de uma etapa da linha de produção. É o Todo de uma composição: cria e controla as próprias
+ * partes, que ninguém fora dela enxerga. Toda máquina tem um {@link Motor} (1:1), que se desgasta a cada
+ * {@link #processar(Produto)}, e um ou mais {@link Sensor}es (1:N), que perdem calibração c/ o uso.
+ * Cada subtipo ainda adiciona uma parte específica da sua etapa.
+ * <p>
+ * Motor gasto e sensores descalibrados aumentam a chance de falha. Motor abaixo do limiar crítico, ou a
+ * parte específica parada, quebram a máquina até ela ser reparada
  *
  * @author Heitor Almeida
  * @author Glayson Oliveira
@@ -24,34 +32,43 @@ public abstract class Maquina implements Auditavel {
     private final double custoOperacao;
     /** Multiplicador de falha do cenário atual */
     private static double multiplicadorCenario;
-    private StatusDeMaquina status = StatusDeMaquina.FUNCIONAL;
-    /** Saúde máxima. */
-    private static final int saudeMaxima = 100;
-    private int saude = saudeMaxima;
-    /** Limiar crítico da saúde para manutenção. */
-    private final int saudeCritica = 15;
-    private final int desgasteMaximo;
+
+    // Partes
+    private final Motor motor;
+    private final List<Sensor> sensores;
 
     /**
-     * Cria a máquina desligada e c/ saúde máxima
+     * Cria a máquina desligada, c/ o motor novo e os sensores calibrados
      *
      * @param nome nome que aparece nos menus, ex.: "Máquina de Inspeção"
      * @param capacidadeMaxima unidades por ciclo
      * @param chanceFalhaBase chance base de falha, entre 0 e 1
      * @param custoOperacao custo p/ processar uma unidade, em R$
      * @param multiplicadorCenario multiplicador de falha do cenário. É static, então vale p/ todas as máquinas
-     * @param desgasteMaximo desgaste máximo por uso, cada uso tira de 1 a esse valor da saúde
+     * @param desgasteMaximo desgaste máximo do motor por uso, cada uso tira de 1 a esse valor da saúde
+     * @param qtdSensores quantos sensores a máquina tem
+     * @throws IllegalArgumentException se a quantidade de sensores ou o desgaste máximo não forem positivos
      */
     public Maquina(String nome, int capacidadeMaxima, double chanceFalhaBase,
                    double custoOperacao, double multiplicadorCenario,
-                   int desgasteMaximo) {
+                   int desgasteMaximo, int qtdSensores) {
+        if (qtdSensores < 1) {
+            throw new IllegalArgumentException("Dessa vez não é! A máquina precisa de pelo menos um sensor.");
+        }
         this.nome = nome;
         this.capacidadeMaxima = capacidadeMaxima;
         this.chanceFalhaBase = chanceFalhaBase;
         this.custoOperacao = custoOperacao;
         Maquina.multiplicadorCenario = multiplicadorCenario;
-        this.desgasteMaximo = desgasteMaximo;
+
+        this.motor = new Motor(desgasteMaximo);
+        this.sensores = new ArrayList<>();
+        for (int i = 1; i <= qtdSensores; i++) {
+            this.sensores.add(new Sensor(i));
+        }
     }
+
+    // === HOOKS DOS SUBTIPOS ===
 
     /**
      * Método auxiliar do método 'processar()'. Esse método será
@@ -60,43 +77,40 @@ public abstract class Maquina implements Auditavel {
      * @param produto O produto deverá ser fabricado.
      * @return Produto fabricado.
      */
-    public abstract Produto processarEtapa(Produto produto);
+    protected abstract Produto processarEtapa(Produto produto);
+
+    /** Conserta a parte específica do subtipo. Chamado por {@link #reparar()} */
+    protected abstract void repararPartesEspecificas();
 
     /**
-     * Confere se a máquina pode processar agora, sem mexer em nada. A produção chama isso antes de cobrar
-     * a etapa, p/ não pagar por uma operação que não vai acontecer
+     * Diz se a parte específica do subtipo parou de vez, o que impede a máquina de processar
      *
-     * @throws MaquinaIndisponivelException se a máquina estiver desligada
-     * @throws MaquinaPrecisaReparoException se a saúde estiver abaixo do limiar crítico
+     * @return true se a parte específica precisa de reparo
      */
-    public void verificarDisponivel() {
-        if (!estaLigada()) {
-            String mensagem = String.format("Eitcha, João! A %s não pode processar nada, ela tá desligada!", getNome().toLowerCase());
-            throw new MaquinaIndisponivelException(mensagem);
-        }
-
-        if (precisaManutencao()) {
-            String mensagem = String.format("A %s quebrou!", getNome().toLowerCase());
-            throw new MaquinaPrecisaReparoException(mensagem);
-        }
-    }
+    protected abstract boolean partesEspecificasQuebradas();
 
     /**
-     * Passa o produto pela etapa da máquina via {@link #processarEtapa(Produto)} e desgasta a máquina.
-     * As checagens e o desgaste ficam aqui, a etapa ({@link #processarEtapa(Produto)}) em si fica em cada subclasse
+     * Chance de falha que a parte específica do subtipo soma à da máquina.
+     * Entra em {@link #getChanceFalha()}, então pesa no sorteio e aparece na auditoria
      *
-     * @param produto modelo do catálogo ou unidade vinda da etapa anterior
-     * @return o produto depois da etapa
-     * @throws MaquinaIndisponivelException se a máquina estiver desligada
-     * @throws MaquinaPrecisaReparoException se a saúde estiver abaixo do limiar crítico
+     * @return chance extra, entre 0 e 1. 0 se a parte específica não muda a chance de falha
      */
-    public Produto processar(Produto produto) {
-        verificarDisponivel();
+    protected abstract double chanceExtraPartesEspecificas();
 
-        Produto resultado = processarEtapa(produto);
-        desgastar(); // Trecho que será rodado sempre que o 'processar()' for utilizado
-        return resultado;
-    }
+    /**
+     * Linhas de diagnóstico da parte específica do subtipo, já formatadas c/ {@link #linhaComponente(boolean, String)}
+     *
+     * @return uma linha por parte
+     */
+    protected abstract List<String> diagnosticoPartesEspecificas();
+
+    /**
+     * Diagnóstico só das partes específicas do subtipo que não estão novas (gastas, sujas, queimadas...),
+     * Usado p/ dizer o que um reparo vai consertar
+     *
+     * @return uma linha por parte desgastada, vazia se todas estiverem novas
+     */
+    protected abstract List<String> diagnosticoPartesEspecificasDesgastadas();
 
     /**
      * Tipo da máquina, usado nos logs da produção
@@ -105,16 +119,59 @@ public abstract class Maquina implements Auditavel {
      */
     public abstract String getTipo();
 
-    /* ====== Métodos concretos ======*/
+    // === PROCESSAMENTO ===
 
     /**
-     * Sorteia se a máquina falhou nessa unidade, c/ a chance de {@link #getChanceFalha()}.
-     * Se falhou, o produto ganha 0.12 * multiplicador do cenário de risco acumulado, que pesa na inspeção
+     * Confere se a máquina pode processar agora, sem mexer em nada. A produção chama isso antes de cobrar
+     * a etapa, p/ não pagar por uma operação que não vai acontecer
+     *
+     * @throws MaquinaIndisponivelException se a máquina estiver desligada
+     * @throws MaquinaPrecisaReparoException se o motor ou a parte específica estiverem quebrados
+     */
+    public void verificarDisponivel() {
+        if (!estaLigada()) {
+            String mensagem = String.format("Eitcha, João! A %s não pode processar nada, ela tá desligada!", getNome().toLowerCase());
+            throw new MaquinaIndisponivelException(mensagem);
+        }
+
+        if (this.motor.estaQuebrado()) {
+            String mensagem = String.format("O motor da %s quebrou! Eitcha!", getNome().toLowerCase());
+            throw new MaquinaPrecisaReparoException(mensagem);
+        }
+
+        if (partesEspecificasQuebradas()) {
+            String mensagem = String.format("Eitcha! A %s quebrou! Os componentes dela pararam de funcionar.", getNome().toLowerCase());
+            throw new MaquinaPrecisaReparoException(mensagem);
+        }
+    }
+
+    /**
+     * Passa o produto pela etapa da máquina via {@link #processarEtapa(Produto)}, desgasta o motor e registra
+     * o ciclo nos sensores. As checagens e o desgaste ficam aqui, a etapa em si fica em cada subclasse
+     *
+     * @param produto modelo do catálogo ou unidade vinda da etapa anterior
+     * @return o produto depois da etapa
+     * @throws MaquinaIndisponivelException se a máquina estiver desligada
+     * @throws MaquinaPrecisaReparoException se o motor ou a parte específica estiverem quebrados
+     */
+    public Produto processar(Produto produto) {
+        verificarDisponivel();
+
+        Produto resultado = processarEtapa(produto);
+        this.motor.desgastar();
+        this.sensores.forEach(Sensor::registrarCiclo);
+        return resultado;
+    }
+
+    /**
+     * Sorteia se a máquina falhou nessa unidade, c/ a chance de {@link #getChanceFalha()} (que já inclui
+     * a parte específica). Se falhou, o produto ganha 0.12 * multiplicador do cenário de risco acumulado,
+     * que pesa na inspeção
      *
      * @param produto produto que pode sair c/ defeito
      */
     protected void tentaAumentarRisco(Produto produto) {
-        if (sorteiaFalha()) {
+        if (GeradorAleatorio.chance(getChanceFalha())) {
             double incremento = 0.12 * multiplicadorCenario;
             produto.aumentarProbabilidadeFalha(incremento);
         }
@@ -123,29 +180,19 @@ public abstract class Maquina implements Auditavel {
     // === SAÚDE DA MÁQUINA ===
 
     /**
-     * Diminui a saúde da máquina em um valor sorteado em [1, desgasteMaximo], que vem do cenário.
-     * Se a saúde cair abaixo de saudeCritica, a máquina fica {@link StatusDeMaquina#QUEBRADA}
-     */
-    private void desgastar() {
-        this.saude -= GeradorAleatorio.sortearInt(this.desgasteMaximo) + 1;
-        if (this.saude < this.saudeCritica) {
-            this.status = StatusDeMaquina.QUEBRADA;
-        }
-    }
-
-    /**
-     * Restaura a saúde pra saudeMaxima e volta o status pra {@link StatusDeMaquina#FUNCIONAL}.
+     * Repara a máquina inteira: motor c/ saúde máxima, sensores recalibrados e parte específica consertada
      */
     public void reparar() {
-        setSaude(saudeMaxima);
-        this.status = StatusDeMaquina.FUNCIONAL;
+        this.motor.reparar();
+        this.sensores.forEach(Sensor::recalibrar);
+        repararPartesEspecificas();
     }
 
     // === AUDITÁVEL ===
 
     /**
-     * Retorna um relatório de diagnóstico formatado com o estado completo
-     * da máquina, incluindo saúde, status, custos, etc.
+     * Retorna um relatório de diagnóstico formatado c/ o estado da máquina (status, chance de falha, custos).
+     *
      * @return String formatada com o diagnóstico.
      */
     @Override
@@ -153,80 +200,182 @@ public abstract class Maquina implements Auditavel {
         String reset = ConsolePrinter.RESET;
         String azul = ConsolePrinter.AZUL;
         String verde = ConsolePrinter.VERDE;
-        String vermelho = ConsolePrinter.VERMELHO;
         String amarelo = ConsolePrinter.AMARELO;
         String cinza = ConsolePrinter.CINZA;
 
-        // Saúde
-        String corSaude = precisaManutencao() ? vermelho : verde;
-        String saudeFormatada = String.format("%s%d/%d%s", corSaude, getSaude(), getSaudeMaxima(), reset);
-
         // Chance de falha
         String chanceFalhaFormatada;
-        if (getChanceFalhaBase() == getChanceFalha()) {
-            chanceFalhaFormatada = String.format("%s %.2f%s", azul, getChanceFalha(), reset);
+        double diffChanceFalha = getChanceFalha() - getChanceFalhaCenario();
+        if (Math.abs(diffChanceFalha) < 1e-9) {
+            chanceFalhaFormatada = String.format("%s%.0f%%%s", azul, getChanceFalha() * 100, reset);
         } else {
-            double diffChanceFalha = getChanceFalha() - getChanceFalhaBase();
             String simboloTriangulo = diffChanceFalha < 0 ? "▾" : "▴";
-            chanceFalhaFormatada = String.format("%s⚂ %.0f%% %s(%s %.0f%%)%s", azul, getChanceFalha() * 100, cinza, simboloTriangulo, diffChanceFalha * 100, reset);
+            chanceFalhaFormatada = String.format("%s%.0f%% %s(%s %.0f%%)%s", azul, getChanceFalha() * 100, cinza, simboloTriangulo, Math.abs(diffChanceFalha) * 100, reset);
         }
 
-        // Status
+        // Energia da máquina. O estado físico (nova, desgastada, quebrada) fica no cabeçalho da máquina
         String statusEnergia = estaLigada() ? verde + "Ligada" + reset : cinza + "Desligada" + reset;
-        String statusFisico = (this.status == StatusDeMaquina.FUNCIONAL) ? verde + "✓ Funcional" + reset : vermelho + "✗ Quebrada" + reset;
 
         // Custo operacional
         String custo = String.format("%sR$ %.2f%s", amarelo, getCustoOperacao(), reset);
         String capacidade = String.format("%s%d un/ciclo%s", azul, getCapacidadeMaxima(), reset);
 
-        // Texto
-        return String.format(
+        StringBuilder relatorio = new StringBuilder(String.format(
                 """
-                        ├─ ⏻ Status: %s | %s
-                        ├─ ❤ Saúde: %s
-                        ├─ ⚂ Chance de Falha: %s
-                        ├─ $ Custo Operacional: %s
-                        └─ Capacidade Máx: %s
+                ├─ ⏻ Energia: %s
+                ├─ ⚂ Chance de Falha: %s
+                ├─ $ Custo Operacional: %s
+                ├─ Capacidade Máx: %s
+                └─ ⚙ Componentes
                 """,
-                statusEnergia, statusFisico,
-                saudeFormatada,
+                statusEnergia,
                 chanceFalhaFormatada,
                 custo,
                 capacidade
-        );
+        ));
+
+        // Cada parte se diagnostica
+        List<String> componentes = new ArrayList<>();
+        componentes.add(linhaComponente(!this.motor.estaQuebrado(), this.motor.diagnostico()));
+        for (Sensor s : this.sensores) {
+            componentes.add(linhaComponente(s.estaCalibrado(), s.diagnostico()));
+        }
+        componentes.addAll(diagnosticoPartesEspecificas());
+
+        for (int i = 0; i < componentes.size(); i++) {
+            String conector = (i == componentes.size() - 1) ? "└─" : "├─";
+            relatorio.append("   ").append(conector).append(" ").append(componentes.get(i)).append("\n");
+        }
+
+        return relatorio.toString();
     }
 
     /**
-     * Indica se a saúde da máquina está abaixo do limiar crítico.
-     * @return true se a saúde estiver abaixo do limiar crítico.
+     * Formata uma linha do diagnóstico de uma parte
+     *
+     * @param ok se a parte está funcionando
+     * @param diagnostico texto da parte, ex.: "Sensor 1: OK (95%)"
+     * @return linha colorida
+     */
+    protected String linhaComponente(boolean ok, String diagnostico) {
+        return ConsolePrinter.colorir(ok ? ConsolePrinter.VERDE : ConsolePrinter.VERMELHO, diagnostico);
+    }
+
+    /**
+     * Lista as partes c/ desgaste que vale mostrar ao uusário, p/ ele decidir se repara antes de a máquina
+     * quebrar (partes defeituosas). Sensores que perderam só um pouco de calibração ficam de fora da lista,
+     * mas ainda contam em {@link #temPartesDesgastadas()}.
+     *
+     * @return diagnóstico de cada parte desgastada, vazia se nada precisar de atenção
+     */
+    public List<String> listarPartesDesgastadas() {
+        List<String> desgastadas = new ArrayList<>();
+        if (!this.motor.estaNovo()) {
+            desgastadas.add(this.motor.diagnostico());
+        }
+        for (Sensor s : this.sensores) {
+            if (!s.estaCalibrado()) {
+                desgastadas.add(s.diagnostico());
+            }
+        }
+        desgastadas.addAll(diagnosticoPartesEspecificasDesgastadas());
+        return desgastadas;
+    }
+
+    /**
+     * Diz se alguma parte tem desgaste, por menor que seja. O reparo é por demanda: pode ser feito sempre
+     * que isso for true, sem esperar a máquina quebrar
+     *
+     * @return true se alguma parte não estiver nova
+     */
+    public boolean temPartesDesgastadas() {
+        boolean algumSensorUsado = this.sensores.stream().anyMatch(s -> !s.estaNovo());
+        return !this.motor.estaNovo() || algumSensorUsado || !diagnosticoPartesEspecificasDesgastadas().isEmpty();
+    }
+
+    /**
+     * Indica se a máquina precisa de reparo: motor abaixo do limiar crítico ou parte específica parada.
+     * @return true se a máquina estiver quebrada.
      */
     @Override
     public boolean precisaManutencao() {
-        return this.saude < this.saudeCritica;
+        return this.motor.estaQuebrado() || partesEspecificasQuebradas();
     }
 
     @Override
     public String gerarResumoProblema() {
-        return String.format("[Máquina] %s (Saúde: %d/%d)", getNome(), getSaude(), getSaudeMaxima());
+        return String.format("%s (Saúde: %d/%d)", getNome(), getSaude(), getSaudeMaxima());
     }
 
+    // === DELEGAÇÃO P/ AS PARTES ===
+
     /**
-     * Saúde atual da máquina
+     * Saúde atual do motor da máquina
      *
      * @return saúde, de 0 até {@link #getSaudeMaxima()}
      */
     public int getSaude() {
-        return saude;
+        return this.motor.getSaude();
     }
 
     /**
-     * Sobrescreve a saúde direto, sem mexer no status
+     * Saúde de um motor novo ou recém-reparado
      *
-     * @param saude nova saúde
+     * @return saúde máxima
      */
-    public void setSaude(int saude) {
-        this.saude = saude;
+    public int getSaudeMaxima() {
+        return this.motor.getSaudeMaxima();
     }
+
+    /**
+     * Quantos sensores ainda estão calibrados
+     *
+     * @return número de sensores calibrados
+     */
+    public int contarSensoresCalibrados() {
+        return (int) this.sensores.stream().filter(Sensor::estaCalibrado).count();
+    }
+
+    /**
+     * Quantos sensores a máquina tem
+     *
+     * @return número de sensores
+     */
+    public int getQuantidadeSensores() {
+        return this.sensores.size();
+    }
+
+    /**
+     * Chance de falha atual, que piora c/ o desgaste do motor, c/ os sensores descalibrados, c/ a parte
+     * específica do subtipo e c/ o cenário:
+     * <pre>{@code
+     * fracaoSensoresRuins = 1 - sensoresCalibrados / totalSensores
+     * chanceFalha = chanceFalhaBase * fatorDesgaste * (1 + fracaoSensoresRuins) * multiplicadorCenario
+     *             + chanceExtraPartesEspecificas
+     * }</pre>
+     * O fatorDesgaste vem do {@link Motor}: vale 1 c/ saúde cheia (não muda a chance) e chega perto de 2
+     * quando o motor tá quase quebrando (quase dobra a chance). Sensores todos descalibrados também dobram.
+     * A chance extra vem de {@link #chanceExtraPartesEspecificas()}
+     *
+     * @return chance de falha atual, entre 0 e 1
+     */
+    public double getChanceFalha() {
+        double fracaoSensoresRuins = 1 - (double) contarSensoresCalibrados() / this.sensores.size();
+        double chance = this.chanceFalhaBase * this.motor.fatorDesgaste() * (1 + fracaoSensoresRuins) * Maquina.multiplicadorCenario
+                + chanceExtraPartesEspecificas();
+        return Math.min(1.0, chance);
+    }
+
+    /**
+     * Sorteia a falha c/ a chance atual de {@link #getChanceFalha()}
+     *
+     * @return true se a máquina falhou
+     */
+    protected boolean sorteiaFalha() {
+        return GeradorAleatorio.chance(getChanceFalha());
+    }
+
+    // === GETTERS E LIGA/DESLIGA ===
 
     /** Desliga a máquina, o que faz {@link #processar(Produto)} parar de funcionar */
     public void desligar() {
@@ -266,23 +415,7 @@ public abstract class Maquina implements Auditavel {
     }
 
     /**
-     * Chance de falha atual, que piora c/ o desgaste e c/ o cenário:
-     * <pre>{@code
-     * fatorDesgaste = 1 + (saudeMaxima - saude) / saudeMaxima
-     * chanceFalha = chanceFalhaBase * fatorDesgaste * multiplicadorCenario
-     * }</pre>
-     * O fatorDesgaste vale 1 c/ saúde cheia (não muda a chance) e chega perto de 2 quando a máquina
-     * tá quase quebrando (quase dobra a chance)
-     *
-     * @return chance de falha atual, entre 0 e 1
-     */
-    public double getChanceFalha() {
-        double fatorDesgaste = 1 + (double) (this.getSaudeMaxima() - this.saude) / this.getSaudeMaxima();
-        return this.chanceFalhaBase * fatorDesgaste * Maquina.multiplicadorCenario;
-    }
-
-    /**
-     * Chance base de falha, sem saúde e sem cenário
+     * Chance base de falha, sem desgaste, sensores e cenário
      *
      * @return chance base, entre 0 e 1
      */
@@ -291,12 +424,13 @@ public abstract class Maquina implements Auditavel {
     }
 
     /**
-     * Sorteia a falha c/ a chance atual de {@link #getChanceFalha()}
+     * Chance de falha c/ o cenário aplicado mas c/ todas as partes novas (motor cheio, sensores calibrados e
+     * parte específica sem desgaste). É a referência p/ medir quanto o desgaste das partes aumentou a chance
      *
-     * @return true se a máquina falhou
+     * @return chance base vezes o multiplicador do cenário, entre 0 e 1
      */
-    protected boolean sorteiaFalha() {
-        return GeradorAleatorio.chance(getChanceFalha());
+    public double getChanceFalhaCenario() {
+        return Math.min(1.0, this.chanceFalhaBase * Maquina.multiplicadorCenario);
     }
 
     /**
@@ -306,15 +440,6 @@ public abstract class Maquina implements Auditavel {
      */
     public double getCustoOperacao() {
         return custoOperacao;
-    }
-
-    /**
-     * Saúde de uma máquina nova ou recém-reparada
-     *
-     * @return saúde máxima
-     */
-    public int getSaudeMaxima() {
-        return saudeMaxima;
     }
 
     /**
