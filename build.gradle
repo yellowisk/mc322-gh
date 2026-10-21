@@ -9,6 +9,12 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
@@ -32,4 +38,13 @@ tasks.named('javadoc') {
 tasks.named('run') {
     // So that the menu reads from the terminal through Scanner
     standardInput = System.in
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    // Shows passed/failed tests in the terminal, besides the HTML report at build/reports/tests/test/index.html
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat = 'full'
+    }
 }
