@@ -170,6 +170,16 @@ public class Demanda {
     }
 
     /**
+     * Define a ordem de chegada da próxima demanda criada. Usado quando uma fábrica passa a ser usada,
+     * p/ as demandas novas chegarem depois das que ela já tem
+     *
+     * @param valor próxima ordem de chegada
+     */
+    public static void ajustarProximaChegada(long valor) {
+        proximaChegada = valor;
+    }
+
+    /**
      * Passa a demanda pra {@link StatusDemanda#EM_PRODUCAO}
      *
      * @throws TransicaoDemandaInvalidaException se o status atual não permitir

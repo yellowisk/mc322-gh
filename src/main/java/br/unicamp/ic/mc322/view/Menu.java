@@ -1,20 +1,11 @@
 package br.unicamp.ic.mc322.view;
 
-import br.unicamp.ic.mc322.model.productionline.LinhaDeProducao;
-import br.unicamp.ic.mc322.model.report.Relatorio;
 import br.unicamp.ic.mc322.exception.OpcaoInvalidaException;
 import br.unicamp.ic.mc322.exception.PlantaException;
 import br.unicamp.ic.mc322.model.scenario.ConfiguracaoCenario;
-import br.unicamp.ic.mc322.model.conveyor.Esteira;
-import br.unicamp.ic.mc322.model.machine.MaquinaInspecao;
-import br.unicamp.ic.mc322.model.machine.MaquinaEmpacotamento;
-import br.unicamp.ic.mc322.model.machine.MaquinaProcessamento;
-import br.unicamp.ic.mc322.model.product.CopoDeVidro;
-import br.unicamp.ic.mc322.model.product.KitCopoDeVidro;
-import br.unicamp.ic.mc322.model.product.PoteDeVidro;
-import br.unicamp.ic.mc322.model.product.Produto;
+import br.unicamp.ic.mc322.service.FabricaPlanta;
 import br.unicamp.ic.mc322.service.GerenciadorProducao;
-import br.unicamp.ic.mc322.model.rawmaterial.MateriaPrima;
+import br.unicamp.ic.mc322.service.Planta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +19,10 @@ import java.util.Scanner;
  * @author Glayson Oliveira
  */
 public class Menu {
-    private ConfiguracaoCenario cenarioAtual;
-    private GerenciadorProducao gerenciadorProducao;
-    private LinhaDeProducao linha; // Agrupador das máquinas
-    private Relatorio relatorio = new Relatorio();
+    private Planta planta; // fábrica em uso: cenário, gerenciador e linha
 
     private final Scanner leitor = new Scanner(System.in);
     private String ultimaMensagem; // last mensagem, shows up in the next footer
-    private MenuEstrategia menuEstrategia;
     private List<Submenu> submenus;
 
     /** Cria o menu. O cenário e o gerenciador da produção só são montados em {@link #iniciar()} */
@@ -50,19 +37,14 @@ public class Menu {
         boolean rodando = true;
 
         imprimirTelaInicial();
-        if (!escolherCenario()) {
+        ConfiguracaoCenario cenario = escolherCenario();
+        if (cenario == null) {
             return;
         }
 
-        linha = new LinhaDeProducao("Linha de Produção");
-        gerenciadorProducao = new GerenciadorProducao(
-                new MateriaPrima("Vidro", 50, "kg", 5, 1),
-                cenarioAtual.getVerba(),
-                relatorio,
-                linha
-        );
-
-        iniciarGerenciadorProducao();
+        planta = FabricaPlanta.criarPadrao(cenario);
+        planta.ativar();
+        montarSubmenus();
 
         // Menu: lista de submenus
         List<String> listaOpcoes = new ArrayList<>(
@@ -80,8 +62,8 @@ public class Menu {
             ConsolePrinter.limparTela();
             ConsolePrinter.cartao(ConsolePrinter.colorir(ConsolePrinter.CINZA, "⌂") + " FÁBRICA IDEAL");
             System.out.println();
-            System.out.println(" Cenário atual:    " + cenarioAtual.getNomeExibicao());
-            System.out.println(" Estratégia atual: " + gerenciadorProducao.getEstrategiaAtual().getNomeEstrategia() + "\n");
+            System.out.println(" Cenário atual:    " + planta.getCenario().getNomeExibicao());
+            System.out.println(" Estratégia atual: " + planta.getGerenciador().getEstrategiaAtual().getNomeEstrategia() + "\n");
 
             ConsolePrinter.listaOpcoes(opcoes);
 
@@ -101,55 +83,21 @@ public class Menu {
     }
 
     /**
-     * Método para iniciar o gerenciadorProducao. Rotina transformada em método
-     * para simplificar o loop principal do menu
+     * Cria os submenus apontando p/ a fábrica em uso. A ordem da lista é o número da opção no menu principal
      */
-    private void iniciarGerenciadorProducao() {
-        // Produtos hardcoded
-        gerenciadorProducao.adicionarNovoProduto(new CopoDeVidro("Copo", 0.5));
-        gerenciadorProducao.adicionarNovoProduto(new PoteDeVidro("Pote", 1.2));
-        gerenciadorProducao.adicionarNovoProduto(new KitCopoDeVidro("Kit Copo", 3));
-        Produto.resetarContadorId();
-
-        // Esteira hardcoded
-        gerenciadorProducao.adicionarEsteira(new Esteira("Esteira Ligeira", 20));
-
-        // Máquinas hardcoded
-        gerenciadorProducao.adicionarMaquina(new MaquinaProcessamento(
-                        "Máquina de Processamento", 20, 0.25,
-                        0.78, cenarioAtual.getMultiplicadorCenario(),
-                        cenarioAtual.getDesgasteMaximo(), 2, 3 // 2 sensores, 3 resistências
-                )
-        );
-        gerenciadorProducao.adicionarMaquina(new MaquinaEmpacotamento(
-                        "Máquina de Empacotamento", 20, 0.15,
-                        0.5, cenarioAtual.getMultiplicadorCenario(),
-                        cenarioAtual.getDesgasteMaximo(), 2 // 2 sensores
-                )
-        );
-        gerenciadorProducao.adicionarMaquina(new MaquinaInspecao(
-                        "Máquina de Inspeção", 20, 0.10,
-                        0.43, cenarioAtual.getMultiplicadorCenario(),
-                        cenarioAtual.getDesgasteMaximo(), 2, 3 // 2 sensores, 3 câmeras
-                )
-        );
-
-        menuEstrategia = new MenuEstrategia(this, gerenciadorProducao);
-
-        // List order = opcao number on the main menu
+    private void montarSubmenus() {
+        GerenciadorProducao gerenciador = planta.getGerenciador();
         submenus = List.of(
-                new MenuAtualizarDemandas(this, gerenciadorProducao),
-                new MenuFabricarDemandas(this, gerenciadorProducao),
-                new MenuArmazem(this, gerenciadorProducao),
-                new MenuComprarMateriaPrima(this, gerenciadorProducao),
-                menuEstrategia,
-                new MenuLinha(this, gerenciadorProducao, linha),
-                new MenuAuditoria(this, gerenciadorProducao, linha),
-                new MenuArmazemMateriaPrima(this, gerenciadorProducao),
-                new MenuVelocidade(this, gerenciadorProducao)
+                new MenuAtualizarDemandas(this, gerenciador),
+                new MenuFabricarDemandas(this, gerenciador),
+                new MenuArmazem(this, gerenciador),
+                new MenuComprarMateriaPrima(this, gerenciador),
+                new MenuEstrategia(this, gerenciador),
+                new MenuLinha(this, gerenciador, planta.getLinha()),
+                new MenuAuditoria(this, gerenciador, planta.getLinha()),
+                new MenuArmazemMateriaPrima(this, gerenciador),
+                new MenuVelocidade(this, gerenciador)
         );
-
-        gerenciadorProducao.setEstrategiaAtual(menuEstrategia.estrategiaPadrao());
     }
 
     /**
@@ -183,23 +131,16 @@ public class Menu {
     /**
      * Tela de seleção de cenário
      *
-     * @return true se um cenário foi escolhido, false se o usuário escolheu sair
+     * @return cenário escolhido, ou null se o usuário escolheu sair
      */
-    private boolean escolherCenario() {
+    private ConfiguracaoCenario escolherCenario() {
 
-        ConfiguracaoCenario[] cenarios = {
-                new ConfiguracaoCenario("Mercadinho Ideal", "Ideal", 1000, 0.5, 1),
-                new ConfiguracaoCenario("Mercadinho Razoável", "Intermediário", 500, 1, 2),
-                new ConfiguracaoCenario("Mercadinho Precário", "Apocalíptico", 250, 1.5, 4)
-        };
+        List<ConfiguracaoCenario> cenarios = ConfiguracaoCenario.CENARIOS;
 
         // Lista de strings para o ConsolePrinter.listaOpcoes
-        String[] nomesCenarios = {
-                cenarios[0].getNomeExibicao(),
-                cenarios[1].getNomeExibicao(),
-                cenarios[2].getNomeExibicao(),
-                "Sair"
-        };
+        List<String> nomes = new ArrayList<>(cenarios.stream().map(ConfiguracaoCenario::getNomeExibicao).toList());
+        nomes.add("Sair");
+        String[] nomesCenarios = nomes.toArray(new String[0]);
 
         while (true) {
             ConsolePrinter.limparTela();
@@ -209,12 +150,11 @@ public class Menu {
 
             int opcao = lerInteiro("Escolha: ");
 
-            if (opcao == 0) return false;
+            if (opcao == 0) return null;
 
             try {
-                validarOpcao(opcao, cenarios.length, "Dessa vez não é! Opção de cenário inválida!");
-                cenarioAtual = cenarios[opcao - 1];
-                return true;
+                validarOpcao(opcao, cenarios.size(), "Dessa vez não é! Opção de cenário inválida!");
+                return cenarios.get(opcao - 1);
             } catch (OpcaoInvalidaException e) {
                 System.out.println("\n" + ConsolePrinter.textoFalha("%s", e.getMessage()));
                 esperarEnter();
@@ -294,9 +234,10 @@ public class Menu {
         } else {
             ConsolePrinter.linha();
         }
-        ConsolePrinter.imprimirResumo(gerenciadorProducao.getVerba(),
-                gerenciadorProducao.getMateriaPrima().getQuantidade(),
-                gerenciadorProducao.getProdutosFabricados().size());
+        GerenciadorProducao gerenciador = planta.getGerenciador();
+        ConsolePrinter.imprimirResumo(gerenciador.getVerba(),
+                gerenciador.getMateriaPrima().getQuantidade(),
+                gerenciador.getProdutosFabricados().size());
         System.out.println();
     }
 }

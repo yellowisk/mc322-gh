@@ -3,10 +3,8 @@ package br.unicamp.ic.mc322.view;
 import br.unicamp.ic.mc322.model.demand.Demanda;
 import br.unicamp.ic.mc322.service.GerenciadorProducao;
 import br.unicamp.ic.mc322.exception.OpcaoInvalidaException;
+import br.unicamp.ic.mc322.strategy.CatalogoEstrategias;
 import br.unicamp.ic.mc322.strategy.EstrategiaProducao;
-import br.unicamp.ic.mc322.strategy.Ferrari;
-import br.unicamp.ic.mc322.strategy.FilaDoCaixa;
-import br.unicamp.ic.mc322.strategy.Joaozinho;
 
 import java.util.List;
 
@@ -18,11 +16,7 @@ import java.util.List;
  */
 public class MenuEstrategia extends Submenu {
     /** Estratégias disponíveis, na ordem do menu. */
-    private final List<EstrategiaProducao> estrategias = List.of(
-            new FilaDoCaixa(),
-            new Ferrari(),
-            new Joaozinho()
-    );
+    private final List<EstrategiaProducao> estrategias = CatalogoEstrategias.todas();
 
     /**
      * Cria o submenu c/ a cor laranja
@@ -42,15 +36,6 @@ public class MenuEstrategia extends Submenu {
     @Override
     public String rotulo() {
         return "Estratégia de produção";
-    }
-
-    /**
-     * Estratégia usada quando o simulador começa
-     *
-     * @return a primeira da lista: {@link br.unicamp.ic.mc322.strategy.FilaDoCaixa}
-     */
-    public EstrategiaProducao estrategiaPadrao() {
-        return estrategias.getFirst();
     }
 
     /**
