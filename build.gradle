@@ -16,7 +16,7 @@ java {
 }
 
 application {
-    mainClass = 'Main'
+    mainClass = 'br.unicamp.ic.mc322.Main'
 }
 
 tasks.withType(JavaCompile).configureEach {
