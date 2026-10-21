@@ -24,7 +24,9 @@ import br.unicamp.ic.mc322.view.ConsolePrinter;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Essa classe é o administrador da produção. Ele é
@@ -106,6 +108,32 @@ public class GerenciadorProducao {
     public void atualizarDemanda(Demanda d, int num) {
         Produto p = getProdutoPeloNome(d.getNomeProduto());
         d.atualizarQuantidade(p, num);
+    }
+
+    /**
+     * Troca todas as demandas, tem que vir exatamente uma demanda por produto
+     * do catálogo
+     *
+     * @param novas demandas que substituem as atuais
+     * @throws IllegalArgumentException se alguma demanda for de um produto fora do catálogo, se um produto
+     *         aparecer duas vezes ou se faltar demanda p/ algum produto
+     */
+    public void restaurarDemandas(List<Demanda> novas) {
+        Set<String> produtos = new HashSet<>();
+        for (Demanda d : novas) {
+            if (getProdutoPeloNome(d.getNomeProduto()) == null) {
+                throw new IllegalArgumentException("Demanda de um produto fora do catálogo: " + d.getNomeProduto());
+            }
+            if (!produtos.add(d.getNomeProduto().toLowerCase())) {
+                throw new IllegalArgumentException("Mais de uma demanda para o produto " + d.getNomeProduto());
+            }
+        }
+        if (produtos.size() != produtosDisponiveisFabricacao.size()) {
+            throw new IllegalArgumentException("Faltam demandas: são " + produtosDisponiveisFabricacao.size()
+                    + " produtos no catálogo e " + produtos.size() + " demandas");
+        }
+        this.demandas = new ArrayList<>(novas);
+        atualizarCustoEstimadoTodasDemandas();
     }
 
     /**

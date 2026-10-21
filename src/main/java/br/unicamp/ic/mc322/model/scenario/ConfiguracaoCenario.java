@@ -1,5 +1,8 @@
 package br.unicamp.ic.mc322.model.scenario;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Classe para armazenar as informações de um cenário. O cenário escolhido no começo define a verba
  * inicial, o multiplicador de falha das máquinas e o desgaste máximo por uso
@@ -12,6 +15,13 @@ public class ConfiguracaoCenario {
     private final float verba;
     private final double multiplicadorCenario;
     private final int desgasteMaximo;
+
+    /** Cenários disponíveis, na ordem do seletor de cenário */
+    public static final List<ConfiguracaoCenario> CENARIOS = List.of(
+            new ConfiguracaoCenario("Mercadinho Ideal", "Ideal", 1000, 0.5, 1),
+            new ConfiguracaoCenario("Mercadinho Razoável", "Intermediário", 500, 1, 2),
+            new ConfiguracaoCenario("Mercadinho Precário", "Apocalíptico", 250, 1.5, 4)
+    );
 
     /**
      * Cria o cenário
@@ -82,5 +92,17 @@ public class ConfiguracaoCenario {
      */
     public String getNomeExibicao() {
         return String.format("%s (%s)", this.nome, this.tipo);
+    }
+
+    /**
+     * Procura um dos {@link #CENARIOS} pelo tipo, ex.: p/ reconstruir o cenário salvo num arquivo
+     *
+     * @param tipo Tipo do cenário, ex.: "Intermediário"
+     * @return o cenário, ou vazio se nenhum tiver esse tipo
+     */
+    public static Optional<ConfiguracaoCenario> buscarPorTipo(String tipo) {
+        return CENARIOS.stream()
+                .filter(c -> c.tipo.equalsIgnoreCase(tipo))
+                .findFirst();
     }
 }
