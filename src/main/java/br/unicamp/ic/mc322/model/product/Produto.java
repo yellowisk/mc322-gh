@@ -25,7 +25,6 @@ public abstract class Produto implements Auditavel {
     private final double qualidade;
     private double probabilidadeFalhaAcumulada;
     private int lote; /* 0 = ainda não fabricado (modelos do catálogo) */
-    private static int totalProdutosFabricados;
 
     /* Abaixo de LIMITE_RISCO_MANUTENCAO é aprovado, entre os dois precisa
     de manutenção e acima de LIMITE_RISCO_DESCARTE é descartado */
@@ -48,9 +47,6 @@ public abstract class Produto implements Auditavel {
         this.qualidade = qualidade;
         this.probabilidadeFalhaAcumulada = probabilidadeFalhaAcumulada;
         this.status = StatusProduto.EM_PRODUCAO;
-
-        /* Toda subclasse de Produto chama esse construtor via super, então isso roda p/ toda instância criada */
-        totalProdutosFabricados++;
     }
 
     /**
@@ -155,15 +151,6 @@ public abstract class Produto implements Auditavel {
      */
     public void aumentarProbabilidadeFalha(double incremento) {
         this.probabilidadeFalhaAcumulada += incremento;
-    }
-
-    /**
-     * Quantos objetos de produto já foram criados, contando os modelos do catálogo
-     *
-     * @return total de produtos criados
-     */
-    public static int getTotalProdutosFabricados() {
-        return totalProdutosFabricados;
     }
 
     /**

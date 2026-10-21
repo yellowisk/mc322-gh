@@ -31,7 +31,7 @@ public abstract class Maquina implements Auditavel {
     private final double chanceFalhaBase;
     private final double custoOperacao;
     /** Multiplicador de falha do cenário atual */
-    private static double multiplicadorCenario;
+    private final double multiplicadorCenario;
 
     // Partes
     private final Motor motor;
@@ -44,7 +44,7 @@ public abstract class Maquina implements Auditavel {
      * @param capacidadeMaxima unidades por ciclo
      * @param chanceFalhaBase chance base de falha, entre 0 e 1
      * @param custoOperacao custo p/ processar uma unidade, em R$
-     * @param multiplicadorCenario multiplicador de falha do cenário. É static, então vale p/ todas as máquinas
+     * @param multiplicadorCenario multiplicador de falha do cenário
      * @param desgasteMaximo desgaste máximo do motor por uso, cada uso tira de 1 a esse valor da saúde
      * @param qtdSensores quantos sensores a máquina tem
      * @throws IllegalArgumentException se a quantidade de sensores ou o desgaste máximo não forem positivos
@@ -59,7 +59,7 @@ public abstract class Maquina implements Auditavel {
         this.capacidadeMaxima = capacidadeMaxima;
         this.chanceFalhaBase = chanceFalhaBase;
         this.custoOperacao = custoOperacao;
-        Maquina.multiplicadorCenario = multiplicadorCenario;
+        this.multiplicadorCenario = multiplicadorCenario;
 
         this.motor = new Motor(desgasteMaximo);
         this.sensores = new ArrayList<>();
@@ -361,7 +361,7 @@ public abstract class Maquina implements Auditavel {
      */
     public double getChanceFalha() {
         double fracaoSensoresRuins = 1 - (double) contarSensoresCalibrados() / this.sensores.size();
-        double chance = this.chanceFalhaBase * this.motor.fatorDesgaste() * (1 + fracaoSensoresRuins) * Maquina.multiplicadorCenario
+        double chance = this.chanceFalhaBase * this.motor.fatorDesgaste() * (1 + fracaoSensoresRuins) * this.multiplicadorCenario
                 + chanceExtraPartesEspecificas();
         return Math.min(1.0, chance);
     }
@@ -430,7 +430,7 @@ public abstract class Maquina implements Auditavel {
      * @return chance base vezes o multiplicador do cenário, entre 0 e 1
      */
     public double getChanceFalhaCenario() {
-        return Math.min(1.0, this.chanceFalhaBase * Maquina.multiplicadorCenario);
+        return Math.min(1.0, this.chanceFalhaBase * this.multiplicadorCenario);
     }
 
     /**
@@ -443,11 +443,11 @@ public abstract class Maquina implements Auditavel {
     }
 
     /**
-     * Multiplicador de falha do cenário atual, igual p/ todas as máquinas
+     * Multiplicador de falha do cenário em que a máquina foi criada
      *
      * @return multiplicador do cenário
      */
-    public static double getMultiplicadorCenario() {
+    public double getMultiplicadorCenario() {
         return multiplicadorCenario;
     }
 }
