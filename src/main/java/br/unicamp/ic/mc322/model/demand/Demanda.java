@@ -33,13 +33,66 @@ public class Demanda {
      * @param quantidade quantas unidades fabricar
      */
     public Demanda(Produto produto, int quantidade) {
+        this(produto, quantidade, proximaChegada++);
+    }
+
+    /**
+     * Cria a demanda como {@link StatusDemanda#PENDENTE} c/ uma ordem de chegada já conhecida
+     *
+     * @param produto modelo do catálogo, dá o nome e a matéria-prima por unidade
+     * @param quantidade quantas unidades fabricar
+     * @param ordemChegada ordem de chegada
+     */
+    private Demanda(Produto produto, int quantidade, long ordemChegada) {
         this.nomeProduto = produto.getNome();
         this.quantidade = quantidade;
         this.status = StatusDemanda.PENDENTE;
         this.quantidadeProduzida = 0;
         this.materiaPrimaTotal = calcularMateriaPrimaNecessaria(produto);
         this.tempoTotalProducao = 0.0;
-        this.ordemChegada = proximaChegada++;
+        this.ordemChegada = ordemChegada;
+    }
+
+    /**
+     * Recria uma demanda salva antes, c/ o progresso e o status dela.
+     * Não mexe no contador de chegada, quem ajusta ele é quem passa a usar as demandas
+     *
+     * @param produto modelo do catálogo
+     * @param quantidade quantas unidades fabricar
+     * @param quantidadeProduzida quantas já foram fabricadas
+     * @param status status salvo
+     * @param tempoTotalProducao tempo já gasto, em segundos
+     * @param ordemChegada ordem de chegada salva
+     * @return a demanda recriada
+     * @throws QuantidadeDemandaInvalidaException se a quantidade for negativa
+     * @throws IllegalArgumentException se o progresso, o tempo ou a ordem forem negativos, ou se não baterem c/ o status
+     */
+    public static Demanda restaurar(Produto produto, int quantidade, int quantidadeProduzida, StatusDemanda status,
+                                    double tempoTotalProducao, long ordemChegada) {
+        if (quantidade < 0) {
+            throw new QuantidadeDemandaInvalidaException("A demanda não pode ser negativa!");
+        }
+        if (quantidadeProduzida < 0 || !(tempoTotalProducao >= 0) || ordemChegada < 0) {
+            throw new IllegalArgumentException("Dessa vez não é! A demanda de " + produto.getNome()
+                    + " tem progresso, tempo ou ordem de chegada negativos.");
+        }
+        boolean coerente = switch (status) {
+            case PENDENTE -> quantidadeProduzida == 0 && tempoTotalProducao == 0;
+            case CANCELADA -> quantidadeProduzida < quantidade;
+            case CONCLUIDA -> quantidadeProduzida == quantidade;
+            case EM_PRODUCAO -> false;
+        };
+        if (!coerente) {
+            throw new IllegalArgumentException(String.format(
+                    "Dessa vez não é! A demanda de %s não pode estar %s c/ %d de %d unidades produzidas.",
+                    produto.getNome(), status.getDescricao(), quantidadeProduzida, quantidade));
+        }
+
+        Demanda demanda = new Demanda(produto, quantidade, ordemChegada);
+        demanda.status = status;
+        demanda.quantidadeProduzida = quantidadeProduzida;
+        demanda.tempoTotalProducao = tempoTotalProducao;
+        return demanda;
     }
 
     /**

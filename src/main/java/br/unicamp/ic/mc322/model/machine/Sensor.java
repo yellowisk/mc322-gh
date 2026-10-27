@@ -41,6 +41,29 @@ class Sensor {
     }
 
     /**
+     * Volta o sensor p/ uma calibração salva antes
+     *
+     * @param calibracao calibração salva
+     * @throws IllegalArgumentException se a calibração estiver fora de 0 a 1
+     */
+    void restaurar(double calibracao) {
+        if (!(calibracao >= 0 && calibracao <= 1)) {
+            throw new IllegalArgumentException("Dessa vez não é! A calibração do sensor " + this.id
+                    + " tem que estar entre 0 e 1, mas veio " + calibracao + ".");
+        }
+        this.calibracao = calibracao;
+    }
+
+    /**
+     * Calibração atual
+     *
+     * @return de 0 a 1, 1 é perfeita
+     */
+    double getCalibracao() {
+        return this.calibracao;
+    }
+
+    /**
      * Diz se o sensor ainda está calibrado o suficiente
      *
      * @return true se a calibração está acima do mínimo

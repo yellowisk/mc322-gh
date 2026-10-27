@@ -39,6 +39,15 @@ class ResistenciaDoForno {
     }
 
     /**
+     * Volta a resistência p/ um estado salvo antes
+     *
+     * @param queimada se ela estava queimada
+     */
+    void restaurar(boolean queimada) {
+        this.queimada = queimada;
+    }
+
+    /**
      * Diz se a resistência queimou
      *
      * @return true se estiver queimada

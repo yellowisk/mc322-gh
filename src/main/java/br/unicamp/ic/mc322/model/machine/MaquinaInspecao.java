@@ -118,6 +118,31 @@ public class MaquinaInspecao extends Maquina {
     }
 
     /**
+     * Quais câmeras estão c/ a lente suja p/ salvar o estado da máquina sem expor as câmeras
+     *
+     * @return true p/ cada câmera c/ lente suja, na ordem das câmeras
+     */
+    public List<Boolean> getLentesSujas() {
+        return this.cameras.stream().map(c -> !c.estaFuncionando()).toList();
+    }
+
+    /**
+     * Volta as câmeras p/ um estado salvo antes
+     *
+     * @param lentesSujas se a lente de cada câmera estava suja, na ordem das câmeras
+     * @throws IllegalArgumentException se a quantidade não bater c/ a de câmeras
+     */
+    public void restaurarCameras(List<Boolean> lentesSujas) {
+        if (lentesSujas.size() != this.cameras.size()) {
+            throw new IllegalArgumentException("Dessa vez não é! A máquina tem " + this.cameras.size()
+                    + " câmeras, mas vieram " + lentesSujas.size() + " estados.");
+        }
+        for (int i = 0; i < this.cameras.size(); i++) {
+            this.cameras.get(i).restaurar(lentesSujas.get(i));
+        }
+    }
+
+    /**
      * A máquina só para quando nenhuma câmera enxerga mais
      *
      * @return true se todas as câmeras estiverem c/ a lente suja

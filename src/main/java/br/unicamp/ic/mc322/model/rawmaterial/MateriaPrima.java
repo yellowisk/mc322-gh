@@ -29,11 +29,18 @@ public class MateriaPrima {
      * @param unidade unidade de medida, ex.: "kg"
      * @param quantidadeMinima estoque mínimo, que não pode ser consumido
      * @param preco preço por unidade, em R$
-     * @throws IllegalArgumentException se o estoque inicial ou o mínimo forem negativos
+     * @throws IllegalArgumentException se o estoque inicial ou o mínimo forem negativos, se o preço não for
+     *         positivo ou se o nome ou a unidade estiverem em branco
      */
-    public MateriaPrima(String nome, int quantidadeInicial, String unidade, int quantidadeMinima, float preco) {
-        if (quantidadeInicial < 0 || quantidadeMinima < 0) {
+    public MateriaPrima(String nome, double quantidadeInicial, String unidade, int quantidadeMinima, float preco) {
+        if (!(quantidadeInicial >= 0) || quantidadeMinima < 0) {
             throw new IllegalArgumentException("Cadê a força? Quantidades iniciais e mínimas não podem ser negativas.");
+        }
+        if (!(preco > 0)) {
+            throw new IllegalArgumentException("Cadê a força? O preço da matéria-prima tem que ser positivo.");
+        }
+        if (nome == null || nome.isBlank() || unidade == null || unidade.isBlank()) {
+            throw new IllegalArgumentException("Cadê a força? A matéria-prima precisa de nome e unidade.");
         }
 
         this.id = UUID.randomUUID();

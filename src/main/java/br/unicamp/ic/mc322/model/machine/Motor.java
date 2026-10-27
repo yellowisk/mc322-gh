@@ -42,6 +42,20 @@ class Motor {
     }
 
     /**
+     * Volta o motor p/ uma saúde salva antes
+     *
+     * @param saude saúde salva
+     * @throws IllegalArgumentException se a saúde estiver fora de 0 até {@value #SAUDE_MAXIMA}
+     */
+    void restaurar(int saude) {
+        if (saude < 0 || saude > SAUDE_MAXIMA) {
+            throw new IllegalArgumentException("Dessa vez não é! A saúde do motor tem que estar entre 0 e " + SAUDE_MAXIMA
+                    + ", mas veio " + saude + ".");
+        }
+        this.saude = saude;
+    }
+
+    /**
      * Diz se a saúde está abaixo do limiar crítico
      *
      * @return true se o motor quebrou

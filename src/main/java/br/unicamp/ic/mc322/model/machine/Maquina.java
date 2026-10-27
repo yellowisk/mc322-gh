@@ -188,6 +188,37 @@ public abstract class Maquina implements Auditavel {
         repararPartesEspecificas();
     }
 
+    // === ESTADO SALVO ===
+
+    /**
+     * Volta o motor e os sensores p/ um estado salvo antes. Usado ao carregar uma fábrica, numa máquina
+     * recém-criada c/ a mesma quantidade de sensores
+     *
+     * @param saudeMotor saúde do motor
+     * @param calibracoesSensores calibração de cada sensor, na ordem dos sensores
+     * @throws IllegalArgumentException se a quantidade de calibrações não bater c/ a de sensores ou algum
+     *         valor estiver fora do intervalo da parte
+     */
+    public void restaurarEstado(int saudeMotor, List<Double> calibracoesSensores) {
+        if (calibracoesSensores.size() != this.sensores.size()) {
+            throw new IllegalArgumentException("Dessa vez não é! A máquina tem " + this.sensores.size()
+                    + " sensores, mas vieram " + calibracoesSensores.size() + " calibrações.");
+        }
+        this.motor.restaurar(saudeMotor);
+        for (int i = 0; i < this.sensores.size(); i++) {
+            this.sensores.get(i).restaurar(calibracoesSensores.get(i));
+        }
+    }
+
+    /**
+     * Calibração de cada sensor pra salvar o estado da máquina sem expor os sensores
+     *
+     * @return calibrações de 0 a 1, na ordem dos sensores
+     */
+    public List<Double> getCalibracoesSensores() {
+        return this.sensores.stream().map(Sensor::getCalibracao).toList();
+    }
+
     // === AUDITÁVEL ===
 
     /**

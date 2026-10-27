@@ -84,8 +84,18 @@ public class GerenciadorProducao {
      * @param p o produto a ser adicionado
      */
     public void adicionarNovoProduto(Produto p) {
+        adicionarAoCatalogo(p);
+        registrarDemanda(p, 0);
+    }
+
+    /**
+     * Adiciona o produto ao catálogo sem criar a demanda zerada dele, p/ quando as demandas vêm prontas
+     * (ex.: de um save) por {@link #restaurarDemandas(List)}. Assim nenhuma ordem de chegada é gasta à toa
+     *
+     * @param p modelo do catálogo
+     */
+    public void adicionarAoCatalogo(Produto p) {
         this.produtosDisponiveisFabricacao.add(p);
-        registrarDemanda(p, 0); // inicializa a demanda zerada
     }
 
     /* === DEMANDAS === */
@@ -122,15 +132,15 @@ public class GerenciadorProducao {
         Set<String> produtos = new HashSet<>();
         for (Demanda d : novas) {
             if (getProdutoPeloNome(d.getNomeProduto()) == null) {
-                throw new IllegalArgumentException("Demanda de um produto fora do catálogo: " + d.getNomeProduto());
+                throw new IllegalArgumentException("Dessa vez não é! O produto " + d.getNomeProduto() + " não está no catálogo.");
             }
             if (!produtos.add(d.getNomeProduto().toLowerCase())) {
-                throw new IllegalArgumentException("Mais de uma demanda para o produto " + d.getNomeProduto());
+                throw new IllegalArgumentException("Dessa vez não é! Tem mais de uma demanda para o produto " + d.getNomeProduto() + ".");
             }
         }
         if (produtos.size() != produtosDisponiveisFabricacao.size()) {
-            throw new IllegalArgumentException("Faltam demandas: são " + produtosDisponiveisFabricacao.size()
-                    + " produtos no catálogo e " + produtos.size() + " demandas");
+            throw new IllegalArgumentException("Dessa vez não é! Faltam demandas: são " + produtosDisponiveisFabricacao.size()
+                    + " produtos no catálogo e " + produtos.size() + " demandas.");
         }
         this.demandas = new ArrayList<>(novas);
         atualizarCustoEstimadoTodasDemandas();

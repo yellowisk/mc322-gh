@@ -50,8 +50,8 @@ public abstract class Produto implements Auditavel {
     }
 
     /**
-     * Volta o contador de id pra 1. É chamado depois de criar os modelos do catálogo,
-     * pra primeira unidade fabricada ser a #1
+     * Volta o contador de id pra 1. É chamado pela {@code Planta.ativar()} quando uma fábrica passa a ser
+     * usada, pra primeira unidade fabricada nela ser a #1
      */
     public static void resetarContadorId() {
         proximoId = 1;
