@@ -3,6 +3,7 @@ package br.unicamp.ic.mc322.view;
 import br.unicamp.ic.mc322.exception.OpcaoInvalidaException;
 import br.unicamp.ic.mc322.exception.PlantaException;
 import br.unicamp.ic.mc322.model.scenario.ConfiguracaoCenario;
+import br.unicamp.ic.mc322.persistence.PersistenciaPlanta;
 import br.unicamp.ic.mc322.service.FabricaPlanta;
 import br.unicamp.ic.mc322.service.GerenciadorProducao;
 import br.unicamp.ic.mc322.service.Planta;
@@ -20,6 +21,7 @@ import java.util.Scanner;
  */
 public class Menu {
     private Planta planta; // fábrica em uso: cenário, gerenciador e linha
+    private final PersistenciaPlanta persistencia = new PersistenciaPlanta(); // save em dados/planta.xml
 
     private final Scanner leitor = new Scanner(System.in);
     private String ultimaMensagem; // last mensagem, shows up in the next footer
@@ -42,9 +44,7 @@ public class Menu {
             return;
         }
 
-        planta = FabricaPlanta.criarPadrao(cenario);
-        planta.ativar();
-        montarSubmenus();
+        substituirPlanta(FabricaPlanta.criarPadrao(cenario));
 
         // Menu: lista de submenus
         List<String> listaOpcoes = new ArrayList<>(
@@ -80,6 +80,36 @@ public class Menu {
                 setUltimaMensagem(ConsolePrinter.textoFalha("%s", e.getMessage()));
             }
         }
+    }
+
+    /**
+     * Passa a usar outra fábrica, como uma carregada do save. A fábrica anterior é descartada inteira e
+     * os submenus são recriados p/ trazer o gerenciador da fábrica.<br>
+     *
+     * @param nova fábrica montada e validada
+     */
+    void substituirPlanta(Planta nova) {
+        nova.ativar();
+        this.planta = nova;
+        montarSubmenus();
+    }
+
+    /**
+     * Fábrica em uso
+     *
+     * @return planta atual
+     */
+    Planta getPlanta() {
+        return planta;
+    }
+
+    /**
+     * Onde a fábrica é salva e de onde ela é carregada
+     *
+     * @return persistência do save
+     */
+    PersistenciaPlanta getPersistencia() {
+        return persistencia;
     }
 
     /**
