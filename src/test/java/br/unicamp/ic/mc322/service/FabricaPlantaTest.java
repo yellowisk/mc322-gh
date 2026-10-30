@@ -173,6 +173,6 @@ class FabricaPlantaTest {
 
     /** Uma demanda nova p/ cada produto do catálogo, na ordem do catálogo */
     private static List<Demanda> demandasDoCatalogo() {
-        return FabricaPlanta.criarCatalogo().stream().map(p -> new Demanda(p, 2)).toList();
+        return FabricaPlanta.getCatalogo().stream().map(p -> new Demanda(p, 2)).toList();
     }
 }

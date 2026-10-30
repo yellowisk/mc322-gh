@@ -17,4 +17,15 @@ public abstract class PlantaException extends RuntimeException {
     protected PlantaException(String message) {
         super(message);
     }
+
+    /**
+     * Cria a exceção c/ a mensagem e a exceção que causou o problema, ex.: a {@code IOException} de uma
+     * leitura de arquivo que falhou
+     *
+     * @param message a mensagem que vai aparecer pro usuário
+     * @param cause exceção original
+     */
+    protected PlantaException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

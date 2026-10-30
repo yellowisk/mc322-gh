@@ -40,6 +40,29 @@ class Seladora {
     }
 
     /**
+     * Volta a lâmina p/ um desgaste salvo antes
+     *
+     * @param desgasteLamina desgaste salvo
+     * @throws IllegalArgumentException se o desgaste estiver fora de 0 a 1
+     */
+    void restaurar(double desgasteLamina) {
+        if (!(desgasteLamina >= 0 && desgasteLamina <= 1)) {
+            throw new IllegalArgumentException("Dessa vez não é! O desgaste da lâmina tem que estar entre 0 e 1, mas veio "
+                    + desgasteLamina + ".");
+        }
+        this.desgasteLamina = desgasteLamina;
+    }
+
+    /**
+     * Desgaste atual da lâmina
+     *
+     * @return de 0 (nova) a 1 (gasta)
+     */
+    double getDesgasteLamina() {
+        return this.desgasteLamina;
+    }
+
+    /**
      * Diz se a lâmina gastou de vez
      *
      * @return true se a seladora não consegue mais selar

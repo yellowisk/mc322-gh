@@ -67,6 +67,25 @@ public class MaquinaEmpacotamento extends Maquina {
     }
 
     /**
+     * Desgaste da lâmina da seladora p/ salvar o estado da máquina sem expor a seladora
+     *
+     * @return de 0 (nova) a 1 (gasta)
+     */
+    public double getDesgasteLamina() {
+        return this.seladora.getDesgasteLamina();
+    }
+
+    /**
+     * Volta a seladora p/ um desgaste salvo antes
+     *
+     * @param desgasteLamina desgaste da lâmina
+     * @throws IllegalArgumentException se o desgaste estiver fora de 0 a 1
+     */
+    public void restaurarSeladora(double desgasteLamina) {
+        this.seladora.restaurar(desgasteLamina);
+    }
+
+    /**
      * A máquina para quando a lâmina gasta de vez
      *
      * @return true se a lâmina estiver totalmente gasta

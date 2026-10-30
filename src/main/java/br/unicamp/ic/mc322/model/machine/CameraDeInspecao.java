@@ -36,6 +36,15 @@ class CameraDeInspecao {
     }
 
     /**
+     * Volta a câmera p/ um estado salvo antes
+     *
+     * @param lenteSuja se a lente estava suja
+     */
+    void restaurar(boolean lenteSuja) {
+        this.lenteSuja = lenteSuja;
+    }
+
+    /**
      * Diz se a câmera está enxergando
      *
      * @return true se a lente estiver limpa

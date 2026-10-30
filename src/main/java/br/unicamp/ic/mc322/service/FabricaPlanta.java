@@ -17,6 +17,7 @@ import br.unicamp.ic.mc322.strategy.CatalogoEstrategias;
 import br.unicamp.ic.mc322.strategy.EstrategiaProducao;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Monta fábricas: a fábrica nova de um cenário e a fábrica reconstruída a partir de dados salvos.
@@ -28,6 +29,15 @@ import java.util.List;
 public final class FabricaPlanta {
     /** Nome da única linha de produção */
     public static final String NOME_LINHA = "Linha de Produção Ideal";
+
+    /**
+     * Modelos do catálogo, na ordem do menu. Compartilhados por todas as fábricas
+     */
+    private static final List<Produto> CATALOGO = List.of(
+            new CopoDeVidro("Copo", 0.5),
+            new PoteDeVidro("Pote", 1.2),
+            new KitCopoDeVidro("Kit Copo", 3)
+    );
 
     /** Só tem métodos static, não é p/ instanciar */
     private FabricaPlanta() {
@@ -60,6 +70,7 @@ public final class FabricaPlanta {
 
         GerenciadorProducao gerenciador = criarGerenciador(
                 new MateriaPrima("Vidro", 50, "kg", 5, 1), cenario.getVerba(), linha);
+        CATALOGO.forEach(p -> gerenciador.registrarDemanda(p, 0));
         gerenciador.setEstrategiaAtual(CatalogoEstrategias.padrao());
         return new Planta(cenario, gerenciador, linha);
     }
@@ -81,7 +92,7 @@ public final class FabricaPlanta {
                                 LinhaDeProducao linha, List<Demanda> demandas,
                                 EstrategiaProducao estrategia) {
         if (verba < 0) {
-            throw new IllegalArgumentException("A verba não pode ser negativa: R$ " + verba);
+            throw new IllegalArgumentException("Dessa vez não é! A verba não pode ser negativa: R$ " + verba + ".");
         }
         GerenciadorProducao gerenciador = criarGerenciador(materiaPrima, verba, linha);
         gerenciador.restaurarDemandas(demandas);
@@ -92,18 +103,26 @@ public final class FabricaPlanta {
     /**
      * Modelos do catálogo, na ordem do menu
      *
-     * @return Copo, Pote e Kit Copo
+     * @return Copo, Pote e Kit Copo (lista imutável)
      */
-    static List<Produto> criarCatalogo() {
-        return List.of(
-                new CopoDeVidro("Copo", 0.5),
-                new PoteDeVidro("Pote", 1.2),
-                new KitCopoDeVidro("Kit Copo", 3)
-        );
+    public static List<Produto> getCatalogo() {
+        return CATALOGO;
     }
 
     /**
-     * cria gerenciador c/ o catálogo e a esteira
+     * Procura um modelo do catálogo pelo nome, ex.: p/ reconstruir as demandas salvas num arquivo
+     *
+     * @param nome nome do produto, ex.: "Kit Copo"
+     * @return o modelo, ou vazio se nenhum produto tiver esse nome
+     */
+    public static Optional<Produto> buscarNoCatalogo(String nome) {
+        return CATALOGO.stream()
+                .filter(p -> p.getNome().equalsIgnoreCase(nome))
+                .findFirst();
+    }
+
+    /**
+     * cria gerenciador c/ o catálogo (ainda sem demandas) e a esteira
      *
      * @param materiaPrima estoque de vidro
      * @param verba verba, em R$
@@ -112,7 +131,7 @@ public final class FabricaPlanta {
      */
     private static GerenciadorProducao criarGerenciador(MateriaPrima materiaPrima, float verba, LinhaDeProducao linha) {
         GerenciadorProducao gerenciador = new GerenciadorProducao(materiaPrima, verba, new Relatorio(), linha);
-        criarCatalogo().forEach(gerenciador::adicionarNovoProduto);
+        CATALOGO.forEach(gerenciador::adicionarAoCatalogo);
         gerenciador.adicionarEsteira(new Esteira("Esteira Ligeira", 20));
         return gerenciador;
     }

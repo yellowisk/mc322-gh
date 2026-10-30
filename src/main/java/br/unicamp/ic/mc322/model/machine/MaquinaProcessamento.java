@@ -96,6 +96,31 @@ public class MaquinaProcessamento extends Maquina {
     }
 
     /**
+     * Quais resistências estão queimadas p/ salvar o estado da máquina sem expor o forno
+     *
+     * @return true p/ cada resistência queimada, na ordem das resistências
+     */
+    public List<Boolean> getResistenciasQueimadas() {
+        return this.resistencias.stream().map(ResistenciaDoForno::estaQueimada).toList();
+    }
+
+    /**
+     * Volta as resistências pq um estado salvo antes
+     *
+     * @param queimadas se cada resistência estava queimada, na ordem das resistências
+     * @throws IllegalArgumentException se a quantidade não bater c/ a de resistências
+     */
+    public void restaurarResistencias(List<Boolean> queimadas) {
+        if (queimadas.size() != this.resistencias.size()) {
+            throw new IllegalArgumentException("Dessa vez não é! O forno tem " + this.resistencias.size()
+                    + " resistências, mas vieram " + queimadas.size() + " estados.");
+        }
+        for (int i = 0; i < this.resistencias.size(); i++) {
+            this.resistencias.get(i).restaurar(queimadas.get(i));
+        }
+    }
+
+    /**
      * Confirma se todas as resistências queimaram. O forno só para quando todas
      * as resistências queimam
      *
