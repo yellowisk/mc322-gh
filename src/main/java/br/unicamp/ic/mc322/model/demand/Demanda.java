@@ -44,6 +44,11 @@ public class Demanda {
      * @param ordemChegada ordem de chegada
      */
     private Demanda(Produto produto, int quantidade, long ordemChegada) {
+        if (quantidade <= 0) {
+            throw new IllegalArgumentException("Dessa vez não é! Não se pode criar " +
+                    "demanda com quantidade nula ou negativa.");
+        }
+
         this.nomeProduto = produto.getNome();
         this.quantidade = quantidade;
         this.status = StatusDemanda.PENDENTE;
@@ -249,6 +254,14 @@ public class Demanda {
      * @throws TransicaoDemandaInvalidaException se o status atual não permitir
      */
     public void concluir(int produzidasAgora, double tempoProducaoAgora) {
+        if (tempoProducaoAgora <= 0.0) {
+            throw new IllegalArgumentException("Não foi dessa vez! O tempo de produção não pode ser nulo ou negativo.");
+        }
+
+        if (produzidasAgora < 0) {
+            throw new IllegalArgumentException("Não foi dessa vez! Não é possível produzir quantidades negativas de copos (ainda).");
+        }
+
         transicionarPara(StatusDemanda.CONCLUIDA);
         somarProgresso(produzidasAgora, tempoProducaoAgora);
     }
@@ -261,6 +274,14 @@ public class Demanda {
      * @throws TransicaoDemandaInvalidaException se o status atual não permitir
      */
     public void cancelar(int produzidasAgora, double tempoProducaoAgora) {
+        if (tempoProducaoAgora <= 0.0) {
+            throw new IllegalArgumentException("Não foi dessa vez! O tempo de produção não pode ser nulo ou negativo.");
+        }
+
+        if (produzidasAgora < 0) {
+            throw new IllegalArgumentException("Não foi dessa vez! Não é possível produzir quantidades negativas de copos (ainda).");
+        }
+
         transicionarPara(StatusDemanda.CANCELADA);
         somarProgresso(produzidasAgora, tempoProducaoAgora);
     }
@@ -272,6 +293,14 @@ public class Demanda {
      * @param tempoProducaoAgora tempo gasto na rodada, em segundos
      */
     private void somarProgresso(int produzidasAgora, double tempoProducaoAgora) {
+        if (tempoProducaoAgora <= 0.0) {
+            throw new IllegalArgumentException("Não foi dessa vez! O tempo de produção não pode ser nulo ou negativo.");
+        }
+
+        if (produzidasAgora < 0) {
+            throw new IllegalArgumentException("Não foi dessa vez! Não é possível produzir quantidades negativas de copos (ainda).");
+        }
+
         this.quantidadeProduzida += produzidasAgora;
         this.tempoTotalProducao += tempoProducaoAgora;
     }
