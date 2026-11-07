@@ -126,7 +126,8 @@ public class Menu {
                 new MenuLinha(this, gerenciador, planta.getLinha()),
                 new MenuAuditoria(this, gerenciador, planta.getLinha()),
                 new MenuArmazemMateriaPrima(this, gerenciador),
-                new MenuVelocidade(this, gerenciador)
+                new MenuVelocidade(this, gerenciador),
+                new MenuPersistencia(this, gerenciador)
         );
     }
 

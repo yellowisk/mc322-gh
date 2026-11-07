@@ -44,9 +44,9 @@ public class Demanda {
      * @param ordemChegada ordem de chegada
      */
     private Demanda(Produto produto, int quantidade, long ordemChegada) {
-        if (quantidade <= 0) {
+        if (quantidade < 0) {
             throw new IllegalArgumentException("Dessa vez não é! Não se pode criar " +
-                    "demanda com quantidade nula ou negativa.");
+                    "demanda com quantidade negativa.");
         }
 
         this.nomeProduto = produto.getNome();
