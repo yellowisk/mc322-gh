@@ -59,15 +59,22 @@ O estado da fábrica fica em `dados/planta.xml` e é salvo, carregado e atualiza
 
 ## 2. Explicação da suíte de testes
 
-Os testes usam JUnit 5 e rodam com `./gradlew test` (ou `./gradlew build`). Cada teste confere a saída ou a exceção esperada para entradas válidas, inválidas e nos extremos do que é permitido.
+Os testes usam JUnit 5 e rodam com `./gradlew test` (ou `./gradlew build`). Cada teste confere a saída ou a exceção esperada para entradas válidas, inválidas e nos extremos do que é permitido. Cada teste monta os próprios dados, então nenhum depende da ordem de execução nem de uma execução anterior do programa, e nenhum usa teclado ou menus. Nos testes de produção, a semente do sorteio é fixa e a animação fica desligada.
 
-* **Regras de negócio:** testam a criação dos objetos, o desgaste e o reparo das máquinas e partes, o consumo e a reposição de matéria-prima, as transições de status das demandas e cada estratégia (ordem de chegada, maior demanda e viabilidade). Por exemplo, ao restaurar a calibração de um sensor (permitido de 0.0 a 1.0), 0.0 é aceito, mas -0.1 e 1.01 lançam exceção.
+* **Regras de negócio**, por pacote:
+  - `model.machine` (`MotorTest`, `SensorTest`, um teste por tipo de máquina e `MaquinaRestauracaoTest`): desgaste e reparo das partes, quando a máquina precisa de manutenção e restauração do estado salvo.
+  - `model.demand` (`DemandaTest`, `DemandaRestauracaoTest`): criação, custo e viabilidade, transições de status e restauração.
+  - `model.rawmaterial`, `model.productionline` e `model.scenario`: consumo e reposição de matéria-prima, ligar, reparar e somar os custos da linha, e os cenários disponíveis.
+  - `service` (`GerenciadorProducaoTest`, `FabricaPlantaTest`): a produção de uma demanda do início ao fim (desconto de vidro e verba, armazém, relatório, desgaste dos motores, demanda cancelada que continua de onde parou) e a montagem da fábrica.
+  - `strategy` (`EstrategiasTest`, `CatalogoEstrategiasTest`): qual demanda cada estratégia escolhe.
+
+  Os extremos também são testados. Por exemplo, vidro que deixa o estoque exatamente no mínimo e verba exatamente igual ao custo são suficientes para produzir.
 * **Persistência** (`PersistenciaPlantaTest`):
   - Rodam numa pasta temporária (`@TempDir`), sem tocar no `dados/planta.xml` real.
   - Salvam, carregam e comparam campo a campo duas fábricas: a padrão e uma "alterada", sem nenhum valor padrão (cenário Apocalíptico, partes desgastadas, uma demanda em cada status, estratégia Ferrari).
   - Conferem que salvar de novo substitui o save, que carregar cria objetos novos sem duplicar máquinas ou demandas e que uma demanda nova chega depois das carregadas.
 * **Casos de exceção:** cada erro deve lançar sua exceção específica, nunca uma `Exception` genérica.
-  - **Regras de negócio:** valores negativos, acima do limite e transições de status proibidas.
+  - **Regras de negócio:** valores fora do intervalo (ex.: calibração de sensor -0.1 ou 1.01, quando o permitido é de 0.0 a 1.0), vidro ou verba insuficientes para produzir, máquina quebrada e transições de status proibidas.
   - **Persistência** (`PersistenciaPlantaErrosTest`): a maioria dos testes salva uma fábrica válida, estraga um trecho do XML e confere o tipo da exceção e se a mensagem aponta o erro.
     - Arquivo ausente, vazio ou malformado (não é XML, cortado, sem tag ou atributo, número inválido, versão desconhecida): `ArquivoPersistenciaInexistenteException`, `ArquivoPersistenciaVazioException` ou `ArquivoPersistenciaCorrompidoException`.
     - Dados que quebram regras da fábrica (saúde acima de 100, máquina sem sensores, verba negativa, cenário ou produto desconhecido, demanda "Em Produção"): `DadosPersistidosInvalidosException`.
