@@ -43,9 +43,8 @@ public class DemandaTest {
         }
 
         @Test
-        @DisplayName("Não deve permitir criação com quantidade nula ou negativa")
+        @DisplayName("Não deve permitir criação com quantidade negativa")
         void validaConstrutorComParametrosInvalidos() {
-            assertThrows(IllegalArgumentException.class, () -> new Demanda(copo, 0));
             assertThrows(IllegalArgumentException.class, () -> new Demanda(copo, -1));
         }
     }

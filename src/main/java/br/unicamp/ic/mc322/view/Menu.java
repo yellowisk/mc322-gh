@@ -38,13 +38,20 @@ public class Menu {
     public void iniciar() {
         boolean rodando = true;
 
-        imprimirTelaInicial();
-        ConfiguracaoCenario cenario = escolherCenario();
-        if (cenario == null) {
-            return;
+        MenuTelaInicial telaInicial = new MenuTelaInicial(this);
+        int escolhaInicial = telaInicial.exibir();
+
+        if (escolhaInicial == 0) {
+            return; // Sair
         }
 
-        substituirPlanta(FabricaPlanta.criarPadrao(cenario));
+        if (escolhaInicial == 1) { // Nova planta
+            ConfiguracaoCenario cenario = escolherCenario();
+            if (cenario == null) {
+                return; // Sair
+            }
+            substituirPlanta(FabricaPlanta.criarPadrao(cenario));
+        }
 
         // Menu: lista de submenus
         List<String> listaOpcoes = new ArrayList<>(
@@ -56,7 +63,7 @@ public class Menu {
         String[] opcoes = listaOpcoes.toArray(new String[0]);
 
         /**
-         * Lppp principal
+         * Loop principal
          */
         while (rodando) {
             ConsolePrinter.limparTela();
@@ -70,7 +77,17 @@ public class Menu {
             imprimirRodape();
             int opcao = lerInteiro("Escolha: ");
 
-            if (opcao == 0) break;
+            if (opcao == 0) {
+                // Confirmação
+                int confirma = lerInteiro(" Deseja salvar antes de sair? (1. Sim / 2. Não): ");
+
+                if (confirma == 1) {
+                    persistencia.salvar(getPlanta());
+                    setUltimaMensagem(ConsolePrinter.textoOk("Fábrica salva com sucesso em %s!", persistencia.getArquivo().getFileName()));
+                    return;
+                }
+                break;
+            }
 
             try {
                 validarOpcao(opcao, submenus.size(), "Dessa vez não é! Opção inválida!");
@@ -126,36 +143,9 @@ public class Menu {
                 new MenuLinha(this, gerenciador, planta.getLinha()),
                 new MenuAuditoria(this, gerenciador, planta.getLinha()),
                 new MenuArmazemMateriaPrima(this, gerenciador),
-                new MenuVelocidade(this, gerenciador)
+                new MenuVelocidade(this, gerenciador),
+                new MenuPersistencia(this, gerenciador)
         );
-    }
-
-    /**
-     * Tela inicial
-     */
-    private void imprimirTelaInicial() {
-        ConsolePrinter.limparTela();
-        ConsolePrinter.linha();
-        System.out.println(ConsolePrinter.NEGRITO + ConsolePrinter.LARANJA
-                + ConsolePrinter.centralizar(65, "FÁBRICA IDEAL") + ConsolePrinter.RESET);
-        System.out.println(ConsolePrinter.CINZA
-                + ConsolePrinter.centralizar(65, "\"E, sim, cliente ganhou um balão de presente! :D\"")
-                + ConsolePrinter.RESET);
-        ConsolePrinter.linha();
-        System.out.println();
-        System.out.println("   Bem-vindos à " + ConsolePrinter.LARANJA + "Fábrica Ideal" + ConsolePrinter.RESET + "! Aqui cliente não pediu");
-        System.out.println("   150 kg de vidro e, sim, ganha produtos ótimos de presente!");
-        System.out.println("   Os balões de presente ficam no " + ConsolePrinter.AZUL + "@merc.adinhoideall" + ConsolePrinter.RESET + ", nosso");
-        System.out.println("   fiel cliente!");
-        System.out.println();
-        System.out.println("   " + ConsolePrinter.VERDE + "Desenvolvido por:" + ConsolePrinter.RESET);
-        System.out.println("     • Heitor Almeida    " + ConsolePrinter.CINZA + "RA: 245293" + ConsolePrinter.RESET);
-        System.out.println("     • Glayson Oliveira  " + ConsolePrinter.CINZA + "RA: 281213" + ConsolePrinter.RESET);
-        System.out.println();
-        ConsolePrinter.linha();
-        System.out.println();
-        System.out.println(ConsolePrinter.colorir(ConsolePrinter.AMARELO, "Pressione ENTER para começar..."));
-        lerLinha();
     }
 
     /**
