@@ -41,3 +41,6 @@ build/
 ### Compiled output ###
 bin/
 *.class
+
+### Save files of the factory (Tarefa 6) ###
+dados/
